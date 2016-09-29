@@ -887,6 +887,7 @@ void vgCopyPixels(VGint dx, VGint dy,
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
+
 # <a name="Chapter11"></a><a name="Text"></a> 11 Text
 
 Several classes of applications were considered in order to determining the set of features supported by the OpenVG text rendering API. E-book readers, scalable user interfaces with text-driven menus, and SVG viewers used to display textintensive content rely on high-quality text rendering using well-hinted fonts. For these applications, the use of unhinted outlines, or the use of hardwareaccelerated glyph scaling that does not support hints, would be detrimental to application rendering quality. Gaming applications that use special custom fonts, applications where text is rotated or placed along a path, or SVG viewers where unhinted SVG fonts are specified are less sensitive to the use of unhinted fonts for text rendering and may benefit from hardware-accelerated glyph scaling. These application requirements made it clear that OpenVG must provide a fast, low-level hardware-accelerated API that is capable of supporting both hinted and unhinted vector glyph outlines, as well as glyphs represented as bitmaps.
@@ -917,15 +918,15 @@ When fonts are scaled to a small size, there may not be enough pixels to display
 
 Scalable fonts define glyphs using vector outlines and additional set of data, such as hinting instructions, font and glyph metrics, etc. A typical glyph would be defined as presented in Figure 23 below:
 
-<img src="figures/figure23.png"/>
+<img src="figures/figure23.PNG"/>
 
 The glyph origin is not always located at the glyph boundary. Glyphs from various custom or script fonts may have swashes and ornamental design with the glyph origin located inside the bounding box, as can be seen (see letter 'p') in the following
 
-<img src="figures/figure23a.png"/>
+<img src="figures/figure23a.PNG"/>
 
 The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the “advance width”, or _escapement_ of the previous character (see Figure 24 below).
 
-<img src="figures/figure24.png"/>
+<img src="figures/figure24.PNG"/>
 
 The next glyph origin must be calculated using the escapement for the current glyph. Note that vector defined by two points [glyph_origin, escapement] must be subjected to the same matrix transformation that is applied to a glyph outline when the glyph is scaled. This operation is equivalent to calling the function:
 
@@ -937,13 +938,13 @@ The glyph origin is stored in the `VG_GLYPH_ORIGIN` parameter of the OpenVG stat
 
 In some cases, the text composition requires that glyph layout and positioning be adjusted along the baseline (using kerning) to account for the difference in appearance of different glyphs and to achieve uniform typographic color (optical density) of the text (see Figure 25 below).
 
-<img src="figures/figure25.png"/>
+<img src="figures/figure25.PNG"/>
 
 When two or more language scripts are used in the same text fragment, multiple adjustments for glyph positioning may be required. For example, Latin scripts have lowercase characters that have features descending below the text baseline, while Asian scripts typically have glyphs positioned on the baseline. When combining characters from these two scripts the position of the baseline for Asian characters should be adjusted.
 
 Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the “Nastaliq” style.
 
-<img src="figures/figure26.png"/>
+<img src="figures/figure26.PNG"/>
 
 Therefore, when a text composition involves support for complex scripts, the inter-character spacing between each pair of glyphs in a text string may have to be defined using the _escapement_ for the current glyph [i], and the additional _adjustment_ vector for the pair of glyphs [i, i+1]. The new glyph origin calculation for the glyph [i+1] is equivalent to performing the following operation:
 
@@ -1414,7 +1415,7 @@ void vgConvolve(VGImage dst, VGImage src,
                 VGTilingMode tilingMode)
 ```
 
-<img src="figures/figure27.png"/>
+<img src="figures/figure27.PNG"/>
 
 > ERRORS
 >
