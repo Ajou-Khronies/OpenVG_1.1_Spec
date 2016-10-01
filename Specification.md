@@ -25,7 +25,7 @@ Figure 20: Linear Gradients
 
 <img src="figures/figure21.png"/>
 
-Figure 21: Centered and Non-Centered Radial Gradients
+Figure 21: Centered and Non-Centered Radia:l Gradients
 
 <img src="figures/figure22.png"/>
 
@@ -35,507 +35,7 @@ Figure 22: Color Ramp used for Gradient Examples
 <a name="Pattern_Paint"></a>
 
 Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + ½, y + ½).
-
-Filtering may be used to construct an interpolated pattern value at the sample point,based on the pattern image pixel values. The pattern tiling mode is used to define valuesfor pixel centers in the pattern space that lie outside of the bounds of the pattern.
-
-Interpolation may be performed between multiple pixels of the pattern image to producean antialiased pattern value. The image quality setting at the time of drawing (determinedby the `VG_IMAGE_QUALITY` parameter) is used to control the quality of patterninterpolation. If the image quality is set `toVG_IMAGE_QUALITY_NONANTIALIASED`, nearest-neighbor interpolation (pointsampling) is used. If the image quality is set to `VG_IMAGE_QUALITY_FASTER` or `VG_IMAGE_QUALITY_BETTER`, higher-quality interpolation will be used if available.Interpolation is done in the color space of the image using a premultiplied representation.
-
-#### vgPaintPattern
-<a name="vgPaintPattern"></a>
-
-The `vgPaintPattern` function replaces any previous pattern image defined on thegiven paint object for the given set of paint modes with a new pattern image. Avalue of `VG_INVALID_HANDLE` for the pattern parameter removes the currentpattern image from the paint object.
-
-If the current paint object has its `VG_PAINT_TYPE` parameter set to `VG_PAINT_TYPE_PATTERN`, but no pattern image is set, the paint object behaves as if `VG_PAINT_TYPE` were set to `VG_PAINT_TYPE_COLOR`.
-
-While an image is set as the paint pattern for any paint object, it may not be used as arendering target. Conversely, an image that is currently a rendering target may not be setas a paint pattern.
-
-```c
-void vgPaintPattern(VGPaint paint, VGImage pattern)
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if paint is not a valid paint handle, or is not shared with the current context
-> * if pattern is neither a valid image handle nor equal to `VG_INVALID_HANDLE`, or is not shared with the current context
->
-> `VG_IMAGE_IN_USE_ERROR`
-> * if pattern is currently a rendering targe
-
-### 9.4.1 Pattern Tiling
-<a name="Pattern_Tiling"></a>
-
-Patterns may be extended (tiled) using one of four possible tiling modes, defined by the `VGTilingMode` enumeration.
-
-#### VGTilingMode
-<a name="VGTilingMode"></a>
-
-The `VGTilingMode` enumeration defines possible methods for defining colors forsource pixels that lie outside the bounds of the source image.
-
-The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range.
-
-The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, width– 1)), max(0, min(y, height – 1))).
-
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator ‘a mod b’ returns a value between 0 and(b – 1) such that a = k*b + (a mod b) for some integer k.
-
-The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x’, y’) where:
-
-$$
-x' =
-\begin{cases}
-  & \text{x mod width, if floor(x/width) is even} \\
-  & \text{width - 1 - x mod width, otherwise}
-\end{cases}
-$$
-
-$$
-y' =
-\begin{cases}
-  & \text{y mod height, if floor(y/height) is even} \\
-  & \text{height - 1 - y mod height, otherwise}
-\end{cases}
-$$
-
-```c
-typedef enum {
-  VG_TILE_FILL = 0x1D00,
-  VG_TILE_PAD = 0x1D01,
-  VG_TILE_REPEAT = 0x1D02,
-  VG_TILE_REFLECT = 0x1D03,
-} VGTilingMode;
-```
-
-#### Setting the Pattern Tiling Mode
-
-The pattern tiling mode is set using vgSetParameteri with a paramType argument of `VG_PAINT_PATTERN_TILING_MODE`.
-
-```c
-VGPaint myFillPaint, myStrokePaint;
-VGImage myFillPaintPatternImage, myStrokePaintPatternImage;
-VGTilingMode fill_tilingMode, stroke_tilingMode;
-vgSetParameteri(myFillPaint, VG_PAINT_TYPE,
-VG_PAINT_TYPE_PATTERN);
-vgSetParameteri(myFillPaint, VG_PAINT_PATTERN_TILING_MODE,
-fill_tilingMode);
-vgPaintPattern(myFillPaint, myFillPaintPatternImage);
-vgSetParameteri(myStrokePaint, VG_PAINT_TYPE,
-VG_PAINT_TYPE_PATTERN);
-vgSetParameteri(myStrokePaint, VG_PAINT_PATTERN_TILING_MODE,
-stroke_tilingMode);
-vgPaintPattern(myStrokePaint, myStrokePaintPatternImage);
-```
-
-# 10 Images
-<a name="Chapter10"></a>
-<a name="Images"></a>
-
-Images are rectangular collections of pixels. Image data may be inserted or extracted in avariety of formats with varying bit depths, color spaces, and alpha channel types. Theactual storage format of an image is implementation-dependent, and may be optimizedfor a given device, but must allow pixels to be read and written losslessly. Images may bedrawn to a drawing surface, used to define paint patterns, or operated on directly byimage filter operations.
-
-## 10.1 Image Coordinate Systems
-<a name="Image_Coordinate_Systems"></a>
-
-An image defines a coordinate system in which pixels are indexed using integercoordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the ycoordinate increases vertically from bottom to top. Note that this orientation is consistentwith the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
-
-The “energy” of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + ½, y + ½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers.
-
-## 10.2 Image Formats
-<a name="Image_Formats"></a>
-
-#### VGImageFormat
-<a name="VGImageFormat"></a>
-
-The VGImageFormat enumeration defines the set of supported pixel formats and colorspaces for images:
-
-```c
-typedef enum {
-	/* RGB{A,X} channel ordering */
-	VG_sRGBX_8888 = 0,
-	VG_sRGBA_8888 = 1,
-	VG_sRGBA_8888_PRE = 2,
-	VG_sRGB_565 = 3,
-	VG_sRGBA_5551 = 4,
-	VG_sRGBA_4444 = 5,
-	VG_sL_8 = 6,
-	VG_lRGBX_8888 = 7,
-	VG_lRGBA_8888 = 8,
-	VG_lRGBA_8888_PRE = 9,
-	VG_lL_8 = 10,
-	VG_A_8 = 11,
-	VG_BW_1 = 12,
-	VG_A_1 = 13,
-	VG_A_4 = 14,
-	/* {A,X}RGB channel ordering */
-	VG_sXRGB_8888 = 0 | (1 << 6),
-	VG_sARGB_8888 = 1 | (1 << 6),
-	VG_sARGB_8888_PRE = 2 | (1 << 6),
-	VG_sARGB_1555 = 4 | (1 << 6),
-	VG_sARGB_4444 = 5 | (1 << 6),
-	VG_lXRGB_8888 = 7 | (1 << 6),
-	VG_lARGB_8888 = 8 | (1 << 6),
-	VG_lARGB_8888_PRE = 9 | (1 << 6),
-	/* BGR{A,X} channel ordering */
-	VG_sBGRX_8888 = 0 | (1 << 7),
-	VG_sBGRA_8888 = 1 | (1 << 7),
-	VG_sBGRA_8888_PRE = 2 | (1 << 7),
-	VG_sBGR_565 = 3 | (1 << 7),
-	VG_sBGRA_5551 = 4 | (1 << 7),
-	VG_sBGRA_4444 = 5 | (1 << 7),
-	VG_lBGRX_8888 = 7 | (1 << 7),
-	VG_lBGRA_8888 = 8 | (1 << 7),
-	VG_lBGRA_8888_PRE = 9 | (1 << 7),
-	/* {A,X}BGR channel ordering */
-	VG_sXBGR_8888 = 0 | (1 << 6) | (1 << 7),
-	VG_sABGR_8888 = 1 | (1 << 6) | (1 << 7),
-	VG_sABGR_8888_PRE = 2 | (1 << 6) | (1 << 7),
-	VG_sABGR_1555 = 4 | (1 << 6) | (1 << 7),
-	VG_sABGR_4444 = 5 | (1 << 6) | (1 << 7),
-	VG_lXBGR_8888 = 7 | (1 << 6) | (1 << 7),
-	VG_lABGR_8888 = 8 | (1 << 6) | (1 << 7),
-	VG_lABGR_8888_PRE = 9 | (1 << 6) | (1 << 7)
-} VGImageFormat;
-```
-
-The letter A denotes an alpha (α) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues in premultiplied format.
-
-Bit 6 of the numeric values of the enumeration indicates the position of the alpha channel(or unused byte for formats that do not include alpha). If bit 6 is disabled, the alpha orunused channel appears as the last channel, otherwise it appears as the first channel. Bit 7indicates the ordering of the RGB color channels. If bit 7 is disabled, the color channelsappear in RGB order, otherwise they appear in BGR order.
-
-The VG_A_8 format is treated as though it were VG_lRGBA_8888, withR=G=B=1. Color information is discarded when placing an RGBA value into aVG_A_8 pixel.
-
-Abbreviated names such as lL or sRGBA_PRE are used in this document where theexact number of bits per channel is not relevant, such as when pixel values areconsidered to have been remapped to a [0, 1] range. Such abbreviated names are not anofficial part of the API.
-
-The bits for each color channel are stored within a machine word representing a singlepixel from left to right (MSB to LSB) in the order indicated by the pixel format name.For example, in a pixel with a format of VG_sRGB_565, the bits representing the redchannel may be obtained by shifting right by 11 bits (to remove 6 bits of green and 5 bitsof blue) and masking with the 5-bit wide mask value 0x1f. Note that this definition isindependent of the endianness of the underlying platform as sub-word memory addressesare not involved.
-
-Table 11 summarizes the symbols used in image format names.
-
-Table 12 lists the size of a single pixel for each image format, in terms of bytes and bits.Note that all formats other than VG_BW_1, VG_A_1, and VG_A_4 use a whole numberof bytes per pixel.
-
-Formats having linear-light coding (`VG_lRGBX_8888`, `VG_lRGBA_8888`,`VG_lRGBA_8888_PRE`, and `VG_lL8`) are liable to exhibit banding (or contouring)artifacts when viewed with a contrast ratio greater than about 10:1 [POYN03] and areintended mainly for inputting existing linearly-coded imagery. For high-quality imaging,consider using one of the non-linear, perceptually uniform image formats such asVG_sRGBX_8888, VG_sRGBA_8888, VG_sRGBA_8888_PRE, and VG_sL_8.
-
-|Symbol|Interperetation|
-|-----|-----|
-|A|Alpha channel|
-|R|Red color channel|
-|G|Green color channel|
-|B|Blue color channel|
-|X|Uninterpreted padding byte|
-|L|Grayscale|
-|BW|1-bit Black and White|
-|l|Linear color space|
-|s|Non-linear (sRGB) color space|
-|PRE|Alpha values are premultiplied|
-
-|Format|Bytes Per Pixel|Bits Per Pixel|
-|-----|-----|----|
-|VG_sRGBX_8888|4|32|
-|VG_sRGBA_8888|4|32|
-|VG_sRGBA_8888_PRE|4|32|
-|VG_sRGB_565|2|16|
-|VG_sRGBA_5551|2|16|
-|VG_sRGBA_4444|2|16|
-|VG_sL_8|1|8|
-|VG_lRGBX_8888|4|32|
-|VG_lRGBA_8888|4|32|
-
-|Format|Bytes Per Pixel|Bits Per Pixel|
-|-----|-----|-----|
-|VG_lRGBA_8888_PRE|4|32|
-|VG_lL_8|1|8|
-|VG_A_1|n/a|1|
-|VG_A_4|n/a|4|
-|VG_A_8|1|8|
-|VG_BW_1|n/a|1|
-
-## 10.3 Creating and Destroying Images
-<a name="Creating_and_Destroying_Images"></a>
-
-#### VGImage
-<a name="VGImage"></a>
-
-Images are accessed using opaque handles of type VGImage.
-
-```c
-typedef VGHandle VGImage;
-```
-
-#### VGImageQuality
-<a name="VGImageQuality"></a>
-
-The `VGImageQuality` enumeration defines varying levels of resamplingquality to be used when drawing images.
-
-The `VG_IMAGE_QUALITY_NONANTIALIASED` setting disables resampling;images are drawn using point sampling (also known as nearest-neighborinterpolation) only. `VG_IMAGE_QUALITY_FASTER` enables low-to-mediumquality resampling that does not require extensive additional resource allocation. `VG_IMAGE_QUALITY_BETTER` enables high-quality resampling that may allocateadditional memory for pre-filtering, tables, and the like. Implementations are notrequired to provide three distinct resampling algorithms, but the non-antialiased (pointsampling) mode must be supported.
-
-```c
-typedef enum {
-	VG_IMAGE_QUALITY_NONANTIALIASED = (1 << 0),
-	VG_IMAGE_QUALITY_FASTER = (1 << 1),
-	VG_IMAGE_QUALITY_BETTER = (1 << 2)
-} VGImageQuality;
-```
-
-Use vgSeti with a parameter type of `VG_IMAGE_QUALITY` to set the filter type to beused for image drawing:
-
-```c
-VGImageQuality quality;
-vgSeti(VG_IMAGE_QUALITY, quality);
-```
-
-#### VG_MAX_IMAGE_WIDTH
-<a name="VG_MAX_IMAGE_WIDTH"></a>
-
-The `VG_MAX_IMAGE_WIDTH` read-only parameter contains the largest legal valueof the width parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_WIDTH` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
-
-```c
-VGint imageMaxWidth = vgGeti(VG_MAX_IMAGE_WIDTH);
-```
-
-#### VG_MAX_IMAGE_HEIGHT
-<a name="VG_MAX_IMAGE_HEIGHT"></a>
-
-The `VG_MAX_IMAGE_HEIGHT` read-only parameter contains the largest legal valueof the height parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_HEIGHT` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
-
-```c
-VGint imageMaxHeight = vgGeti(VG_MAX_IMAGE_HEIGHT);
-````
-
-#### VG_MAX_IMAGE_PIXELS
-<a name="VG_MAX_IMAGE_PIXELS"></a>
-
-The `VG_MAX_IMAGE_PIXELS` read-only parameter contains the largest legal valueof the product of the width and height parameters to the vgCreateImage andvgCreateMask functions. All implementations must define `VG_MAX_IMAGE_PIXELS` to be an integer no smaller than 65536. If there is no implementation-defined limit, avalue of VG_MAXINT may be returned. The value may be retrieved by calling vgGeti:
-
-```c
-VGint imageMaxPixels = vgGeti(VG_MAX_IMAGE_PIXELS);
-```
-
-#### VG_MAX_IMAGE_BYTES
-<a name="VG_MAX_IMAGE_BYTES"></a>
-
-The `VG_MAX_IMAGE_BYTES` read-only parameter contains the largest number of bytes that may make up the image data passed to the vgCreateImage function. Allimplementations must define `VG_MAX_IMAGE_BYTES` to be an integer no smaller than65536. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
-
-```c
-VGint imageMaxBytes = vgGeti(VG_MAX_IMAGE_BYTES);
-```
-
-#### vgCreateImage
-<a name="vgCreateImage"></a>
-
-vgCreateImage creates an image with the given width, height, and pixel formatand returns a `VGImage` handle to it. If an error occurs, `VG_INVALID_HANDLE` isreturned. All color and alpha channel values are initially set to zero. The formatparameter must contain a value from the `VGImageFormat` enumeration.
-
-The allowed Quality parameter is a bitwise OR of values from the `VGImageQuality` enumeration, indicating which levels of resampling quality may beused to draw the image. It is always possible to draw an image using the `VG_IMAGE_QUALITY_NONANTIALIASED` quality setting even if it is not explicitlyspecified.
-
-```c
-VGImage vgCreateImage(VGImageFormat format,
-      VGint width, VGint height,
-      VGbitfield allowedQuality)
-```
-
-> **_ERRORS_**
->
-> `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR`
-> * if format is not a valid value from the `VGImageFormat` enumeration
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
-> * if width or height are less than or equal to 0
-> * if width is greater than `VG_MAX_IMAGE_WIDTH`
-> * if height is greater than `VG_MAX_IMAGE_HEIGHT`
-> * if width*height is greater than `VG_MAX_IMAGE_PIXELS`
-> * if width\*height\*(pixel size of format) is greater than
->
-> `VG_MAX_IMAGE_BYTES`
-> * if `allowedQuality` is not a bitwise OR of values from the `VGImageQuality` enumeration
-
-#### vgDestroyImage
-<a name="vgDestoryImage"></a>
-
-The resources associated with an image may be deallocated by callin `vgDestroyImage`. Following the call, the image handle is no longer valid in anycontext that shared it. If the image is currently in use as a rendering target, is theancestor of another image (see `vgChildImage`), is set as a paint pattern image ona VGPaint object, or is set as a glyph an a VGFont object, its definition remainsavailable to those consumers as long as they remain valid, but the handle may nolonger be used. When those uses cease, the image’s resources will automaticallybe deallocated.
-
-```c
-void vgDestroyImage(VGImage image);
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if image is not a valid image handle, or is not shared with the current context
-
-## 10.4 Querying Images
-<a name="Querying_Images"></a>
-
-#### VGImageParamType
-<a name="VGImageParamType"></a>
-
-Values from the `VGImageParamType` enumeration may be used as the paramTypeargument to `vgGetParameter` to query various features of an image. All of theparameters defined by `VGImageParamType` have integer values and are read-only.
-
-```c
-typedef enum {
-  VG_IMAGE_FORMAT = 0x1E00,
-  VG_IMAGE_WIDTH = 0x1E01,
-  VG_IMAGE_HEIGHT = 0x1E02
-} VGImageParamType;
-```
-
-#### Image Format
-<a name="Image_Formats"></a>
-
-The value of the format parameter that was used to define the image may be queriedusing the VG_IMAGE_FORMAT parameter. The returned integral value should becast to the VGImageFormat enumeration:
-
-```c
-VGImage image;
-VGImageFormat imageFormat =
-  (VGImageFormat)vgGetParameteri(image, VG_IMAGE_FORMAT);
-```
-
-#### Image Width
-<a name="Image_Width"></a>
-
-The value of the width parameter that was used to define the image may be queriedusing the `VG_IMAGE_WIDTH` parameter:
-
-```c
-VGImage image;
-VGint imageWidth = vgGetParameteri(image, VG_IMAGE_WIDTH);
-```
-
-#### Image Height
-<a name="Image_Height"></a>
-
-The value of the height parameter that was used to define the image may be queriedusing the `VG_IMAGE_HEIGHT` parameter:
-
-```c
-VGImage image;
-VGint imageHeight = vgGetParameteri(image, VG_IMAGE_HEIGHT);
-```
-
-## 10.5 Reading and Writing Image Pixels
-<a name="Reading_and_Writing_Image_Pixels"></a>
-
-#### vgClearImage
-<a name="vgClearImage"></a>
-
-The `vgClearImage` function fills a given rectangle of an image with the color specifiedby the `VG_CLEAR_COLOR` parameter. The rectangle to be cleared is given by x, y,width, and height, which must define a positive region. The rectangle isclipped to the bounds of the image.
-
-```c
-void vgClearImage(VGImage image,
-VGint x, VGint y, VGint width, VGint height)
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if image is not a valid image handle, or is not shared with the current
->
-> context
-> `VG_IMAGE_IN_USE_ERROR`
-> * if image is currently a rendering target
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
-> * if width or height is less than or equal to 0
-
-#### vgImageSubData
-<a name="vgImageSubData"></a>
-
-The `vgImageSubData` function reads pixel values from memory, performs formatconversion if necessary, and stores the resulting pixels into a rectangular portion of animage.
-
-Pixel values are read starting at the address given by the pointer data; adjacentscanlines are separated by dataStride bytes. Negative or zero values ofdataStride are allowed. The region to be written is given by x, y, width, andheight, which must define a positive region. Pixels that fall outside the boundsof the image are ignored.
-
-Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointer mustbe aligned according to the number of bytes of the pixel format specified bydataFormat, unless dataFormat is equal to VG_BW_1, VG_A_1, or VG_A_4, in which case 1 byte alignment is sufficient. Each pixel is converted into the format ofthe destination image as it is written.
-
-If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 ≤ i < width and 0 ≤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native 16-bitintegral datatype.
-
-If dataFormat is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of thedestination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered tobe at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms ofbytes, not bits.
-
-If dataFormat is equal to VG_A_4, pixel (x + i, y + j) of the destination image istaken from the 4 bits from position (4*(i % 2)) to (4*(i % 2) + 3) within the byte at data+ j*dataStride + floor(i/2). Each scanline must be padded to a multiple of 8 bits.
-
-If dataFormat specifies a premultiplied format (`VG_sRGBA_8888_PRE` or `VG_lRGBA_8888_PRE`), color channel values of a pixel greater than theircorresponding alpha value are clamped to the range [0, alpha].
-
-```c
-void vgImageSubData(VGImage image,
-    const void * data, VGint dataStride,
-    VGImageFormat dataFormat,
-    VGint x, VGint y, VGint width, VGint height)
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if image is not a valid image handle, or is not shared with the current
-> context
->
-> `VG_IMAGE_IN_USE_ERROR`
-> * if image is currently a rendering target
->
-> `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR`
-> * if dataFormat is not a valid value from the VGImageFormat enumeration
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
-> * if width or height is less than or equal to 0
-> * if data is NULL
-> * if data is not properly aligned
-
-#### vgGetImageSubData
-<a name="vgGetImageSubData"></a>
-
-The `vgGetImageSubData` function reads pixel values from a rectangular portion of animage, performs format conversion if necessary, and stores the resulting pixels intomemory.
-
-Pixel values are written starting at the address given by the pointer data; adjacentscanlines are separated by dataStride bytes. Negative or zero values ofdataStride are allowed. The region to be read is given by x, y, width, andheight, which must define a positive region. Pixels that fall outside the boundsof the image are ignored.
-
-Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. If dataFormatspecifies a premultiplied format (`VG_sRGBA_8888_PRE` or `VG_lRGBA_8888_PRE`),color channel values of a pixel that are greater than their corresponding alpha value areclamped to the range [0, alpha]. The data pointer alignment and the pixel layout inmemory are as described in the **vgImageSubData** section.
-
-```c
-void vgGetImageSubData(VGImage image,
-    void * data, VGint dataStride,
-    VGImageFormat dataFormat,
-    VGint x, VGint y, VGint width, VGint height)
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if image is not a valid image handle, or is not shared with the current
->
-> `VG_IMAGE_IN_USE_ERROR`
-> * if image is currently a rendering target
->
-> `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR`
-> * if dataFormat is not a valid value from the VGImageFormat enumeration
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
-> * if width or height is less than or equal to 0
-> * if data is NULL
-> * if data is not properly aligned
-
-## 10.6 Child Images
-<a name="Child_Images"></a>
-
-A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parent’s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected inall other images to which it is related.
-
-A child image remains valid even following a call to `vgDestroyImage` on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
-
-A child image may not be used as a rendering target. A parent image may not be used asa rendering target until all the child images derived from it have been destroyed.
-
-#### vgChildImage
-<a name="vgChildImage"></a>
-
-The `vgChildImage` function returns a new `VGImage` handle that refers to a portion ofthe parent image. The region is given by the intersection of the bounds of the parentimage with the rectangle beginning at pixel (x, y) with dimensions `width` and `height`, which must define a positive region contained entirely within `parent`.
-
-```c
-VGImage vgChildImage(VGImage parent,
-VGint x, VGint y, VGint width, VGint height)
-```
-
-> **_ERRORS_**
->
-> `VG_BAD_HANDLE_ERROR`
-> * if parent is not a valid image handle, or is not shared with the current context
->
-> `VG_IMAGE_IN_USE_ERROR`
-> * if parent is currently a rendering target
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
-> * if x is less than 0 or greater than or equal to the parent width
-> * if y is less than 0 or greater than or equal to the parent height
-> * if width or height is less than or equal to 0
-> * if x + width is greater than the parent width
-> * if y + height is greater than the parent height
-
+Filtering may be used to construct an interpolated pattern value at the sample point,based on the pattern image pixel values. The pattern tiling mode is used to define valuesfor pixel centers in the pattern space that lie outside of the bounds of the pattern. Interpolation may be performed between multiple pixels of the pattern image to producean antialiased pattern value. The image quality setting at the time of drawing (determinedby the `VG_IMAGE_QUALITY` parameter) is used to control the quality of patterninterpolation. If the image quality is set `toVG_IMAGE_QUALITY_NONANTIALIASED`, nearest-neighbor interpolation (pointsampling) is used. If the image quality is set to `VG_IMAGE_QUALITY_FASTER` or `VG_IMAGE_QUALITY_BETTER`, higher-quality interpolation will be used if available.Interpolation is done in the color space of the image using a premultiplied representation. #### vgPaintPattern <a name="vgPaintPattern"></a> The `vgPaintPattern` function replaces any previous pattern image defined on thegiven paint object for the given set of paint modes with a new pattern image. Avalue of `VG_INVALID_HANDLE` for the pattern parameter removes the currentpattern image from the paint object. If the current paint object has its `VG_PAINT_TYPE` parameter set to `VG_PAINT_TYPE_PATTERN`, but no pattern image is set, the paint object behaves as if `VG_PAINT_TYPE` were set to `VG_PAINT_TYPE_COLOR`. While an image is set as the paint pattern for any paint object, it may not be used as arendering target. Conversely, an image that is currently a rendering target may not be setas a paint pattern. ```c void vgPaintPattern(VGPaint paint, VGImage pattern) ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if paint is not a valid paint handle, or is not shared with the current context > * if pattern is neither a valid image handle nor equal to `VG_INVALID_HANDLE`, or is not shared with the current context > > `VG_IMAGE_IN_USE_ERROR` > * if pattern is currently a rendering targe ### 9.4.1 Pattern Tiling <a name="Pattern_Tiling"></a> Patterns may be extended (tiled) using one of four possible tiling modes, defined by the `VGTilingMode` enumeration. #### VGTilingMode <a name="VGTilingMode"></a> The `VGTilingMode` enumeration defines possible methods for defining colors forsource pixels that lie outside the bounds of the source image. The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range. The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, width– 1)), max(0, min(y, height – 1))). The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator ‘a mod b’ returns a value between 0 and(b – 1) such that a = k*b + (a mod b) for some integer k. The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x’, y’) where: $$ x' = \begin{cases} & \text{x mod width, if floor(x/width) is even} \\ & \text{width - 1 - x mod width, otherwise} \end{cases} $$ $$ y' = \begin{cases} & \text{y mod height, if floor(y/height) is even} \\ & \text{height - 1 - y mod height, otherwise} \end{cases} $$ ```c typedef enum { VG_TILE_FILL = 0x1D00, VG_TILE_PAD = 0x1D01, VG_TILE_REPEAT = 0x1D02, VG_TILE_REFLECT = 0x1D03, } VGTilingMode; ``` #### Setting the Pattern Tiling Mode The pattern tiling mode is set using vgSetParameteri with a paramType argument of `VG_PAINT_PATTERN_TILING_MODE`. ```c VGPaint myFillPaint, myStrokePaint; VGImage myFillPaintPatternImage, myStrokePaintPatternImage; VGTilingMode fill_tilingMode, stroke_tilingMode; vgSetParameteri(myFillPaint, VG_PAINT_TYPE, VG_PAINT_TYPE_PATTERN); vgSetParameteri(myFillPaint, VG_PAINT_PATTERN_TILING_MODE, fill_tilingMode); vgPaintPattern(myFillPaint, myFillPaintPatternImage); vgSetParameteri(myStrokePaint, VG_PAINT_TYPE, VG_PAINT_TYPE_PATTERN); vgSetParameteri(myStrokePaint, VG_PAINT_PATTERN_TILING_MODE, stroke_tilingMode); vgPaintPattern(myStrokePaint, myStrokePaintPatternImage); ``` # 10 Images <a name="Chapter10"></a> <a name="Images"></a> Images are rectangular collections of pixels. Image data may be inserted or extracted in avariety of formats with varying bit depths, color spaces, and alpha channel types. Theactual storage format of an image is implementation-dependent, and may be optimizedfor a given device, but must allow pixels to be read and written losslessly. Images may bedrawn to a drawing surface, used to define paint patterns, or operated on directly byimage filter operations. ## 10.1 Image Coordinate Systems <a name="Image_Coordinate_Systems"></a> An image defines a coordinate system in which pixels are indexed using integercoordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the ycoordinate increases vertically from bottom to top. Note that this orientation is consistentwith the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems. The “energy” of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + ½, y + ½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers. ## 10.2 Image Formats <a name="Image_Formats"></a> #### VGImageFormat <a name="VGImageFormat"></a> The VGImageFormat enumeration defines the set of supported pixel formats and colorspaces for images: ```c typedef enum { /* RGB{A,X} channel ordering */ VG_sRGBX_8888 = 0, VG_sRGBA_8888 = 1, VG_sRGBA_8888_PRE = 2, VG_sRGB_565 = 3, VG_sRGBA_5551 = 4, VG_sRGBA_4444 = 5, VG_sL_8 = 6, VG_lRGBX_8888 = 7, VG_lRGBA_8888 = 8, VG_lRGBA_8888_PRE = 9, VG_lL_8 = 10, VG_A_8 = 11, VG_BW_1 = 12, VG_A_1 = 13, VG_A_4 = 14, /* {A,X}RGB channel ordering */ VG_sXRGB_8888 = 0 | (1 << 6), VG_sARGB_8888 = 1 | (1 << 6), VG_sARGB_8888_PRE = 2 | (1 << 6), VG_sARGB_1555 = 4 | (1 << 6), VG_sARGB_4444 = 5 | (1 << 6), VG_lXRGB_8888 = 7 | (1 << 6), VG_lARGB_8888 = 8 | (1 << 6), VG_lARGB_8888_PRE = 9 | (1 << 6), /* BGR{A,X} channel ordering */ VG_sBGRX_8888 = 0 | (1 << 7), VG_sBGRA_8888 = 1 | (1 << 7), VG_sBGRA_8888_PRE = 2 | (1 << 7), VG_sBGR_565 = 3 | (1 << 7), VG_sBGRA_5551 = 4 | (1 << 7), VG_sBGRA_4444 = 5 | (1 << 7), VG_lBGRX_8888 = 7 | (1 << 7), VG_lBGRA_8888 = 8 | (1 << 7), VG_lBGRA_8888_PRE = 9 | (1 << 7), /* {A,X}BGR channel ordering */ VG_sXBGR_8888 = 0 | (1 << 6) | (1 << 7), VG_sABGR_8888 = 1 | (1 << 6) | (1 << 7), VG_sABGR_8888_PRE = 2 | (1 << 6) | (1 << 7), VG_sABGR_1555 = 4 | (1 << 6) | (1 << 7), VG_sABGR_4444 = 5 | (1 << 6) | (1 << 7), VG_lXBGR_8888 = 7 | (1 << 6) | (1 << 7), VG_lABGR_8888 = 8 | (1 << 6) | (1 << 7), VG_lABGR_8888_PRE = 9 | (1 << 6) | (1 << 7) } VGImageFormat; ``` The letter A denotes an alpha (α) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues in premultiplied format. Bit 6 of the numeric values of the enumeration indicates the position of the alpha channel(or unused byte for formats that do not include alpha). If bit 6 is disabled, the alpha orunused channel appears as the last channel, otherwise it appears as the first channel. Bit 7indicates the ordering of the RGB color channels. If bit 7 is disabled, the color channelsappear in RGB order, otherwise they appear in BGR order. The VG_A_8 format is treated as though it were VG_lRGBA_8888, withR=G=B=1. Color information is discarded when placing an RGBA value into aVG_A_8 pixel. Abbreviated names such as lL or sRGBA_PRE are used in this document where theexact number of bits per channel is not relevant, such as when pixel values areconsidered to have been remapped to a [0, 1] range. Such abbreviated names are not anofficial part of the API. The bits for each color channel are stored within a machine word representing a singlepixel from left to right (MSB to LSB) in the order indicated by the pixel format name.For example, in a pixel with a format of VG_sRGB_565, the bits representing the redchannel may be obtained by shifting right by 11 bits (to remove 6 bits of green and 5 bitsof blue) and masking with the 5-bit wide mask value 0x1f. Note that this definition isindependent of the endianness of the underlying platform as sub-word memory addressesare not involved. Table 11 summarizes the symbols used in image format names. Table 12 lists the size of a single pixel for each image format, in terms of bytes and bits.Note that all formats other than VG_BW_1, VG_A_1, and VG_A_4 use a whole numberof bytes per pixel. Formats having linear-light coding (`VG_lRGBX_8888`, `VG_lRGBA_8888`,`VG_lRGBA_8888_PRE`, and `VG_lL8`) are liable to exhibit banding (or contouring)artifacts when viewed with a contrast ratio greater than about 10:1 [POYN03] and areintended mainly for inputting existing linearly-coded imagery. For high-quality imaging,consider using one of the non-linear, perceptually uniform image formats such asVG_sRGBX_8888, VG_sRGBA_8888, VG_sRGBA_8888_PRE, and VG_sL_8. |Symbol|Interperetation| |-----|-----| |A|Alpha channel| |R|Red color channel| |G|Green color channel| |B|Blue color channel| |X|Uninterpreted padding byte| |L|Grayscale| |BW|1-bit Black and White| |l|Linear color space| |s|Non-linear (sRGB) color space| |PRE|Alpha values are premultiplied| |Format|Bytes Per Pixel|Bits Per Pixel| |-----|-----|----| |VG_sRGBX_8888|4|32| |VG_sRGBA_8888|4|32| |VG_sRGBA_8888_PRE|4|32| |VG_sRGB_565|2|16| |VG_sRGBA_5551|2|16| |VG_sRGBA_4444|2|16| |VG_sL_8|1|8| |VG_lRGBX_8888|4|32| |VG_lRGBA_8888|4|32| |Format|Bytes Per Pixel|Bits Per Pixel| |-----|-----|-----| |VG_lRGBA_8888_PRE|4|32| |VG_lL_8|1|8| |VG_A_1|n/a|1| |VG_A_4|n/a|4| |VG_A_8|1|8| |VG_BW_1|n/a|1| ## 10.3 Creating and Destroying Images <a name="Creating_and_Destroying_Images"></a> #### VGImage <a name="VGImage"></a> Images are accessed using opaque handles of type VGImage. ```c typedef VGHandle VGImage; ``` #### VGImageQuality <a name="VGImageQuality"></a> The `VGImageQuality` enumeration defines varying levels of resamplingquality to be used when drawing images. The `VG_IMAGE_QUALITY_NONANTIALIASED` setting disables resampling;images are drawn using point sampling (also known as nearest-neighborinterpolation) only. `VG_IMAGE_QUALITY_FASTER` enables low-to-mediumquality resampling that does not require extensive additional resource allocation. `VG_IMAGE_QUALITY_BETTER` enables high-quality resampling that may allocateadditional memory for pre-filtering, tables, and the like. Implementations are notrequired to provide three distinct resampling algorithms, but the non-antialiased (pointsampling) mode must be supported. ```c typedef enum { VG_IMAGE_QUALITY_NONANTIALIASED = (1 << 0), VG_IMAGE_QUALITY_FASTER = (1 << 1), VG_IMAGE_QUALITY_BETTER = (1 << 2) } VGImageQuality; ``` Use vgSeti with a parameter type of `VG_IMAGE_QUALITY` to set the filter type to beused for image drawing: ```c VGImageQuality quality; vgSeti(VG_IMAGE_QUALITY, quality); ``` #### VG_MAX_IMAGE_WIDTH <a name="VG_MAX_IMAGE_WIDTH"></a> The `VG_MAX_IMAGE_WIDTH` read-only parameter contains the largest legal valueof the width parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_WIDTH` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti: ```c VGint imageMaxWidth = vgGeti(VG_MAX_IMAGE_WIDTH); ``` #### VG_MAX_IMAGE_HEIGHT <a name="VG_MAX_IMAGE_HEIGHT"></a> The `VG_MAX_IMAGE_HEIGHT` read-only parameter contains the largest legal valueof the height parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_HEIGHT` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti: ```c VGint imageMaxHeight = vgGeti(VG_MAX_IMAGE_HEIGHT); ```` #### VG_MAX_IMAGE_PIXELS <a name="VG_MAX_IMAGE_PIXELS"></a> The `VG_MAX_IMAGE_PIXELS` read-only parameter contains the largest legal valueof the product of the width and height parameters to the vgCreateImage andvgCreateMask functions. All implementations must define `VG_MAX_IMAGE_PIXELS` to be an integer no smaller than 65536. If there is no implementation-defined limit, avalue of VG_MAXINT may be returned. The value may be retrieved by calling vgGeti: ```c VGint imageMaxPixels = vgGeti(VG_MAX_IMAGE_PIXELS); ``` #### VG_MAX_IMAGE_BYTES <a name="VG_MAX_IMAGE_BYTES"></a> The `VG_MAX_IMAGE_BYTES` read-only parameter contains the largest number of bytes that may make up the image data passed to the vgCreateImage function. Allimplementations must define `VG_MAX_IMAGE_BYTES` to be an integer no smaller than65536. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti: ```c VGint imageMaxBytes = vgGeti(VG_MAX_IMAGE_BYTES); ``` #### vgCreateImage <a name="vgCreateImage"></a> vgCreateImage creates an image with the given width, height, and pixel formatand returns a `VGImage` handle to it. If an error occurs, `VG_INVALID_HANDLE` isreturned. All color and alpha channel values are initially set to zero. The formatparameter must contain a value from the `VGImageFormat` enumeration. The allowed Quality parameter is a bitwise OR of values from the `VGImageQuality` enumeration, indicating which levels of resampling quality may beused to draw the image. It is always possible to draw an image using the `VG_IMAGE_QUALITY_NONANTIALIASED` quality setting even if it is not explicitlyspecified. ```c VGImage vgCreateImage(VGImageFormat format, VGint width, VGint height, VGbitfield allowedQuality) ``` > **_ERRORS_** > > `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR` > * if format is not a valid value from the `VGImageFormat` enumeration > > `VG_ILLEGAL_ARGUMENT_ERROR` > * if width or height are less than or equal to 0 > * if width is greater than `VG_MAX_IMAGE_WIDTH` > * if height is greater than `VG_MAX_IMAGE_HEIGHT` > * if width*height is greater than `VG_MAX_IMAGE_PIXELS` > * if width\*height\*(pixel size of format) is greater than > > `VG_MAX_IMAGE_BYTES` > * if `allowedQuality` is not a bitwise OR of values from the `VGImageQuality` enumeration #### vgDestroyImage <a name="vgDestoryImage"></a> The resources associated with an image may be deallocated by callin `vgDestroyImage`. Following the call, the image handle is no longer valid in anycontext that shared it. If the image is currently in use as a rendering target, is theancestor of another image (see `vgChildImage`), is set as a paint pattern image ona VGPaint object, or is set as a glyph an a VGFont object, its definition remainsavailable to those consumers as long as they remain valid, but the handle may nolonger be used. When those uses cease, the image’s resources will automaticallybe deallocated. ```c void vgDestroyImage(VGImage image); ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if image is not a valid image handle, or is not shared with the current context ## 10.4 Querying Images <a name="Querying_Images"></a> #### VGImageParamType <a name="VGImageParamType"></a> Values from the `VGImageParamType` enumeration may be used as the paramTypeargument to `vgGetParameter` to query various features of an image. All of theparameters defined by `VGImageParamType` have integer values and are read-only. ```c typedef enum { VG_IMAGE_FORMAT = 0x1E00, VG_IMAGE_WIDTH = 0x1E01, VG_IMAGE_HEIGHT = 0x1E02 } VGImageParamType; ``` #### Image Format <a name="Image_Formats"></a> The value of the format parameter that was used to define the image may be queriedusing the VG_IMAGE_FORMAT parameter. The returned integral value should becast to the VGImageFormat enumeration: ```c VGImage image; VGImageFormat imageFormat = (VGImageFormat)vgGetParameteri(image, VG_IMAGE_FORMAT); ``` #### Image Width <a name="Image_Width"></a> The value of the width parameter that was used to define the image may be queriedusing the `VG_IMAGE_WIDTH` parameter: ```c VGImage image; VGint imageWidth = vgGetParameteri(image, VG_IMAGE_WIDTH); ``` #### Image Height <a name="Image_Height"></a> The value of the height parameter that was used to define the image may be queriedusing the `VG_IMAGE_HEIGHT` parameter: ```c VGImage image; VGint imageHeight = vgGetParameteri(image, VG_IMAGE_HEIGHT); ``` ## 10.5 Reading and Writing Image Pixels <a name="Reading_and_Writing_Image_Pixels"></a> #### vgClearImage <a name="vgClearImage"></a> The `vgClearImage` function fills a given rectangle of an image with the color specifiedby the `VG_CLEAR_COLOR` parameter. The rectangle to be cleared is given by x, y,width, and height, which must define a positive region. The rectangle isclipped to the bounds of the image. ```c void vgClearImage(VGImage image, VGint x, VGint y, VGint width, VGint height) ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if image is not a valid image handle, or is not shared with the current > > context > `VG_IMAGE_IN_USE_ERROR` > * if image is currently a rendering target > > `VG_ILLEGAL_ARGUMENT_ERROR` > * if width or height is less than or equal to 0 #### vgImageSubData <a name="vgImageSubData"></a> The `vgImageSubData` function reads pixel values from memory, performs formatconversion if necessary, and stores the resulting pixels into a rectangular portion of animage. Pixel values are read starting at the address given by the pointer data; adjacentscanlines are separated by dataStride bytes. Negative or zero values ofdataStride are allowed. The region to be written is given by x, y, width, andheight, which must define a positive region. Pixels that fall outside the boundsof the image are ignored. Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointer mustbe aligned according to the number of bytes of the pixel format specified bydataFormat, unless dataFormat is equal to VG_BW_1, VG_A_1, or VG_A_4, in which case 1 byte alignment is sufficient. Each pixel is converted into the format ofthe destination image as it is written. If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 ≤ i < width and 0 ≤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native 16-bitintegral datatype. If dataFormat is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of thedestination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered tobe at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms ofbytes, not bits. If dataFormat is equal to VG_A_4, pixel (x + i, y + j) of the destination image istaken from the 4 bits from position (4*(i % 2)) to (4*(i % 2) + 3) within the byte at data+ j*dataStride + floor(i/2). Each scanline must be padded to a multiple of 8 bits. If dataFormat specifies a premultiplied format (`VG_sRGBA_8888_PRE` or `VG_lRGBA_8888_PRE`), color channel values of a pixel greater than theircorresponding alpha value are clamped to the range [0, alpha]. ```c void vgImageSubData(VGImage image, const void * data, VGint dataStride, VGImageFormat dataFormat, VGint x, VGint y, VGint width, VGint height) ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if image is not a valid image handle, or is not shared with the current > context > > `VG_IMAGE_IN_USE_ERROR` > * if image is currently a rendering target > > `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR` > * if dataFormat is not a valid value from the VGImageFormat enumeration > > `VG_ILLEGAL_ARGUMENT_ERROR` > * if width or height is less than or equal to 0 > * if data is NULL > * if data is not properly aligned #### vgGetImageSubData <a name="vgGetImageSubData"></a> The `vgGetImageSubData` function reads pixel values from a rectangular portion of animage, performs format conversion if necessary, and stores the resulting pixels intomemory. Pixel values are written starting at the address given by the pointer data; adjacentscanlines are separated by dataStride bytes. Negative or zero values ofdataStride are allowed. The region to be read is given by x, y, width, andheight, which must define a positive region. Pixels that fall outside the boundsof the image are ignored. Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. If dataFormatspecifies a premultiplied format (`VG_sRGBA_8888_PRE` or `VG_lRGBA_8888_PRE`),color channel values of a pixel that are greater than their corresponding alpha value areclamped to the range [0, alpha]. The data pointer alignment and the pixel layout inmemory are as described in the **vgImageSubData** section. ```c void vgGetImageSubData(VGImage image, void * data, VGint dataStride, VGImageFormat dataFormat, VGint x, VGint y, VGint width, VGint height) ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if image is not a valid image handle, or is not shared with the current > > `VG_IMAGE_IN_USE_ERROR` > * if image is currently a rendering target > > `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR` > * if dataFormat is not a valid value from the VGImageFormat enumeration > > `VG_ILLEGAL_ARGUMENT_ERROR` > * if width or height is less than or equal to 0 > * if data is NULL > * if data is not properly aligned ## 10.6 Child Images <a name="Child_Images"></a> A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parent’s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected inall other images to which it is related. A child image remains valid even following a call to `vgDestroyImage` on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed. A child image may not be used as a rendering target. A parent image may not be used asa rendering target until all the child images derived from it have been destroyed. #### vgChildImage <a name="vgChildImage"></a> The `vgChildImage` function returns a new `VGImage` handle that refers to a portion ofthe parent image. The region is given by the intersection of the bounds of the parentimage with the rectangle beginning at pixel (x, y) with dimensions `width` and `height`, which must define a positive region contained entirely within `parent`. ```c VGImage vgChildImage(VGImage parent, VGint x, VGint y, VGint width, VGint height) ``` > **_ERRORS_** > > `VG_BAD_HANDLE_ERROR` > * if parent is not a valid image handle, or is not shared with the current context > > `VG_IMAGE_IN_USE_ERROR` > * if parent is currently a rendering target > > `VG_ILLEGAL_ARGUMENT_ERROR` > * if x is less than 0 or greater than or equal to the parent width > * if y is less than 0 or greater than or equal to the parent height > * if width or height is less than or equal to 0 > * if x + width is greater than the parent width > * if y + height is greater than the parent height
 `vgGetParent` The vgGetParent function returns the closest valid ancestor (i.e., one that has not beenthe target of a `vgDestroyImage` call) of the given image. If image has no ancestors,image is returned. The following pseudocode sequence illustrates this behavior.
 
 ```c
@@ -1770,3 +1270,145 @@ _Table 17 : Query Key Enumeration Types_
 > * if `key` is not one of the values from the `VGHardwareQueryType`
 enumeration
 > * if `setting` is not one of the values from the enumeration associated with key
+
+#  15 Extending the API
+OpenVG is designed to be extended using an extension mechanism modeled after that of OpenGL and OpenGL ES. An extension may define new state elements, new datatypes, new values for existing parameter types, and new functions. Use of these features may alter the operation of the rendering pipeline. However, an extension must have no effect on programs that do not enable any of its features.
+## 15.1 Extension Naming Conventions
+An OpenVG extension is named by a string of the form `OVG`_\_type_name_, where _type_ is either the string `EXT` or a vendor-specific string and _name_ is a name assigned by the extension author. A letter `X` added to the end of type indicates that the extension is experimental.
+Values (e.g., enumerated values or preprocessor `#defines`) defined by an extension carry the suffix _\_type_. Functions and datatypes carry the suffix _type_ without a separating underscore.
+The `openvg.h` header file will define a preprocessor macro with the name `OVG`_\_type_name_ and a value of 1 for each supported extension.
+## 15.2 The Extension Registry
+Khronos, or its designee, will maintain a publicly-accessible registry of extensions. This registry will contain, for each extension, at least the following information:
+* The name of the extension in the form `OVG`_\_type_name_
+* An email address of a contact person
+* A list of dependencies on other extensions
+* A statement on the IP status of the extension
+* An overview of the scope and semantics of the extension
+* New functions defined by the extension
+* New datatypes defined by the extension
+* New values to be added to existing enumerated datatypes
+* Additions and changes to the OpenVG specification
+* New errors generated by functions affected by the extension
+* New state defined by the extension
+* Authorship information and revision history
+
+## 15.3 Using Extensions
+Extensions may be detected statically, by means of preprocessor symbols, or dynamically, by means of the **vgGetString** function. Extension functions may be included in application code statically by placing appropriate “#ifdef” directives around functions that require the presence of a particular extension, and may also be accessed dynamically through function pointers returned by **eglGetProcAddress** or by other platform-specific means.
+
+### 15.3.1 Accessing Extensions Statically
+The extensions defined by a given platform are defined in the `openvg.h` header file, or in header files automatically included by `openvg.h`. In order to write applications that run on platforms with and without a given extension, conditional compilation based on the presence of the extension’s preprocessor macro may be used:
+``````C
+#ifdef OVG_EXT_my_extension
+  vgMyExtensionFuncEXT(...);
+#endif
+``````
+
+### 15.3.2 Accessing Extensions Dynamically
+OpenVG contains a mechanism for applications to access information about the runtime platform, and to access extensions that may not have been present when the application was compiled.
+
+#### VGStringID
+``````
+typedef enum {
+  VG_VENDOR = 0x2300,
+  VG_RENDERER = 0x2301,
+  VG_VERSION = 0x2302,
+  VG_EXTENSIONS = 0x2303
+} VGStringID;
+``````
+
+#### vgGetString
+
+The **vgGetString** function returns information about the OpenVG implementation, including extension information. The values returned may vary according to the display (e.g., the `EGLDisplay` when using EGL) associated with the current context. If no context is current, **vgGetString** returns NULL.
+The combination of `VG_VENDOR` and `VG_RENDERER` may be used together as a platform identifier by applications that wish to recognize a particular platform and adjust their algorithms based on prior knowledge of platform bugs and performance characteristics .
+If `name` is `VG_VENDOR`, the name of company responsible for this OpenVG implementation is returned. This name does not change from release to release.
+If `name` is `VG_RENDERER`, the name of the renderer is returned. This name is typically specific to a particular configuration of a hardware platform, and does not change from release to release.
+If `name` is `VG_VERSION`, the version number of the specification implemented by the renderer is returned as a string in the form _major_number.minor_number_. For this specification, “1.1” is returned.
+If `name` is `VG_EXTENSIONS`, a space-separated list of supported extensions to OpenVG is returned.
+For other values of name, `NULL` is returned.
+``````
+const VGubyte * vgGetString(VGStringID name)
+``````
+
+#### eglGetProcAddress
+Functions defined by an extension may be accessed by means of a function pointer obtained from the EGL function `eglGetProcAddress`. If EGL is not present, the platform may define an alternate method of obtaining extension function pointers.
+
+## 15.4 Creating Extensions
+Any vendor may define a vendor-specific extension. Each vendor should apply to Khronos to obtain a vendor string and any numerical token values required by the extension.
+An OpenVG extension may be deemed a shared extension if two or more vendors agree in good faith to ship an extension, or the Khronos OpenVG working group determines that it is in the best interest of its members that the extension be shared. A shared extension may be adopted (with appropriate naming changes) into a subsequent release of the OpenVG specification.
+
+# 16 API Conformance
+All OpenVG implementations are required to pass a conformance test suite. The exact
+details of the conformance testing process are available in a separate document. This
+chapter outlines the OpenVG conformance test philosophy and provides information that
+may be useful in order to ensure conformant implementations.
+
+## 16.1 Conformance Test Principles
+The OpenVG specification attempts to strike a balance between the needs of
+implementers and application developers. While application developers desire a stable
+platform that delivers predictable results, they also wish to avoid reduced performance
+due to an excessively strict API definition. By allowing some flexibility in how the API
+is implemented, implementations may be optimized for a wide variety of platforms with
+varying price, performance, and power characteristics. The purpose of conformance
+testing is to ensure that implementations with different internal approaches produce
+similar results.
+
+### 16.1.1 Window System Independence
+Because OpenVG does not mandate a specific window system or display management
+API, the conformance test suite will isolate all display dependencies in a module that
+may be customized for each platform. An EGL-based implementation of this module will
+be provided, but implementers are free to replace this implementation with one that is
+specific to their platform.
+
+### 16.1.2 Antialiasing Algorithm Independence
+It is anticipated that a wide variety of antialiasing approaches will be used in the
+marketplace. Low-cost antialiasing remains a research topic, and new algorithms
+continue to emerge. The conformance suite must allow for this variation, while not
+allowing differences in antialiasing to cover up inadequacies in other portions of the
+implementation such as matrix transformation or curve subdivision.
+
+### 16.1.3 On-Device and Off-Device Testing
+Certain conformance tests require only a small memory footprint, and may be run
+directly on the target device. Other tests operate by generating an image, which must be
+copied off-device. A desktop tool is used to compare the generated images against a set
+of reference images.
+
+## 16.2 Types of Conformance Tests
+Conformance tests fall into several classes, outlined below.
+
+### 16.2.1 Pipeline Tests
+A set of tests will be provided that attempt to isolate each pipeline stage by means of
+suitable parameter settings. These tests will provide assurance that each stage is
+functioning correctly.
+
+### 16.2.2 Self-Consistency Tests
+Certain portions of the API are required to produce exact results. For example, setting
+and retrieving API state, image, paint, and path parameters, setting and retrieving matrix
+values; error generation; and pixel copies are defined to have exact results. The
+conformance suite will provide strict checking for these behaviors.
+
+### 16.2.3 Matrix Tests
+The conformance suite will exercise various matrix operations and compare the results
+against double-precision values. The comparison threshold will be set to exclude
+implementations with insufficient internal precision.
+
+### 16.2.4 Interior/Exterior Tests
+Although antialiasing may have varying effects on shape boundaries, the portions of the
+interior and exterior of shapes that are more than 1 ½ pixels from a geometric boundary
+should not be affected by that boundary. If a shape is drawn using color paint, a set of
+known interior and exterior pixels may be tested for equality with the paint color.
+
+### 16.2.5 Positional Invariance
+Drawing should not depend on absolute screen coordinates, except for minor differences
+due to spatially-variant sampling and dither patterns when copying to the screen. The
+conformance suite will include tests that verify the positional independence of drawing.
+
+### 16.2.6 Image Comparison Tests
+To allow for controlled variation, the conformance suite will provide a set of rendering
+code fragments, along with reference images that have been generated using a highquality
+implementation. Implementation-generated images will be compared to these
+reference images using a fuzzy comparison system. This approach is intended to allow
+for small differences in the accuracy of geometry and color processing and antialiasing,
+while rejecting larger differences that are considered visually unacceptable. The
+comparison threshold will be determined by generating images with a variety of
+acceptable and unacceptable differences and comparing them against the reference
+image.
