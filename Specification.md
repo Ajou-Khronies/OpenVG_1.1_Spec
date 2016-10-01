@@ -670,24 +670,30 @@ Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` pain
 In terms of the blending functions α(αsrc, αdst) and c(csrc, cdst, αsrc, αdst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
 
 $$
-\alpha_{tmp} = \alpha(\alpha_{image}*\alpha_{paint}, \alpha_{dst})\\
-R_{dst} \leftarrow c(R_{paint}, R_{dst}, R_{image}*\alpha_{image}*\alpha_{paint}, \alpha_{dst}) / \alpha_{tmp}\\
-G_{dst} \leftarrow c(G_{paint}, G_{dst}, G_{image}*\alpha_{image}*\alpha_{paint}, \alpha_{dst}) / \alpha_{tmp}\\
-B_{dst} \leftarrow c(B_{paint}, B_{dst}, B_{image}*\alpha_{image}*\alpha_{paint}, \alpha_{dst}) / \alpha_{tmp}\\
-\alpha_{dst} \leftarrow \alpha_{tmp}\\
+a_{tmp} = a*(a_{image}*a_{paint},a_{dst})
+$$$$
+R_{dst} \leftarrow c*(R_{paint},R_{dst},R_{image}*a_{image}*a_{paint}*a_{dst})/a_{tmp}
+$$$$
+G_{dst} \leftarrow c*(G_{paint},G_{dst},G_{image}*a_{image}*a_{paint}*a_{dst})/a_{tmp}
+$$$$
+B_{dst} \leftarrow c*(B_{paint},B_{dst},B_{image}*a_{image}*a_{paint}*a_{dst})/a_{tmp}
+$$$$
+a_{dst} \leftarrow a_{tmp}
 $$
 
-
-For example, if Porter-Duff “Src **over** Dst” blending is enabled (see Section 13.3), thedestination alpha and color values are computed as:
+For example, if Porter-Duff “Src **over** Dst” blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
-\alpha_{tmp} = (\alpha_{image}*\alpha_{paint} + \alpha_{dst}*(1 – \alpha_{image}*\alpha_{paint}))\\
-R_{dst} ← (\alpha_{image}*\alpha_{paint} *R_{image}*R_{paint} + \alpha_{dst}*R_{dst}*(1 – \alpha_{image}*\alpha_{paint} *R_{image})) / \alpha_{tmp}\\
-G_{dst} ← (\alpha_{image}*\alpha_{paint} *G_{image}*G_{paint} + \alpha_{dst}*G_{dst}*(1 – \alpha_{image}*\alpha_{paint} *G_{image})) / \alpha_{tmp}\\
+a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
+$$$$
+R_{dst} \leftarrow (a_{image}*a_{paint}*R_{image}*R_{paint}+a_{dst}*R_{dst}*(1-a_{image}*a_{paint}*R_{image}))/a_{tmp}
+$$$$
+G_{dst} \leftarrow (a_{image}*a_{paint}*G_{image}*G_{paint}+a_{dst}*G_{dst}*(1-a_{image}*a_{paint}*G_{image}))/a_{tmp}
+$$$$
+B_{dst} \leftarrow (a_{image}*a_{paint}*B_{image}*B_{paint}+a_{dst}*B_{dst}*(1-a_{image}*a_{paint}*B_{image}))/a_{tmp}
 $$
 
-
-If the drawing surface has a luminance-only format, the pixels of the image being drawnare each converted to luminance format using formula (3) of section 3.4.2 prior toapplying the stencil equations. In terms of the blending functions α(αsrc, αdst) andc(csrc, cdst, αsrc, αdst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
+If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions α(αsrc, αdst) andc(csrc, cdst, αsrc, αdst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
 
 수식
 
@@ -883,7 +889,7 @@ void vgCopyPixels(VGint dx, VGint dy,
 ```
 
 > **_ERRORS_**
-> 
+>
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
@@ -1280,7 +1286,7 @@ $$
   R_{dst} \newline
   G_{dst} \newline
   B_{dst} \newline
-  \alpha_{dst} 
+  \alpha_{dst}
   \end{matrix}
 \right] =
 \left[
@@ -1288,15 +1294,15 @@ $$
   m_{00} & m_{01} & m_{02} & m_{03} \newline
   m_{10} & m_{11} & m_{12} & m_{13} \newline
   m_{20} & m_{21} & m_{22} & m_{23} \newline
-  m_{30} & m_{31} & m_{32} & m_{33} 
-  \end{matrix}  
+  m_{30} & m_{31} & m_{32} & m_{33}
+  \end{matrix}
 \right] \cdot
 \left[
   \begin{matrix}
   R_{src} \newline
   G_{src} \newline
   B_{src} \newline
-  \alpha_{src} 
+  \alpha_{src}
   \end{matrix}
 \right] +
 \left[
@@ -1304,7 +1310,7 @@ $$
   m_{04} \newline
   m_{14} \newline
   m_{24} \newline
-  m_{34} 
+  m_{34}
   \end{matrix}
 \right]
 $$$$
@@ -1663,13 +1669,13 @@ Porter-Duff blending defines an alpha value $\alpha (\alpha_{src}, \alpha_{dst})
 
 Porter-Duff blending modes are derived from the assumption that each additional primitive being drawn is uncorrelated with previous ones. That is, if a previously drawn primitive $p$ occupies a fraction $f_p$ of a pixel, and a new primitive $q$ occupies a fraction $f_q$, Porter-Duff blending assumes that a fraction $f_p * f_q$ of the pixel will be occupied by both primitives, a fraction $f_p - f_p * f_q = f_p(1 - f_q)$ will be occupied by $p$ only, and a fraction $f_q - f_p * f_q = f_q(1 - f_p)$ will be occupied by $q$ only. A total fraction of $f_p + f_q - f_p * f_q$ of the pixel is occupied by the union of the primitives.
 
-**_Blend Mode_**    | $F_{src}$          |  $F_{dst}$            
-  :-------------:   |  :-------------:   |  :-------------:   
-Src                 | $1$                |  $0$               
-Src **over** Dst    | $1$                |  $1 - \alpha_{src}$        
-Dst **over** Src    | $1 - \alpha_{dst}$ |  $1$               
-Src **in** Dst      | $\alpha_{dst}$     |  $0$               
-Dst **in** Src      | $0$                |  $\alpha_{src}$            
+**_Blend Mode_**    | $F_{src}$          |  $F_{dst}$
+  :-------------:   |  :-------------:   |  :-------------:
+Src                 | $1$                |  $0$
+Src **over** Dst    | $1$                |  $1 - \alpha_{src}$
+Dst **over** Src    | $1 - \alpha_{dst}$ |  $1$
+Src **in** Dst      | $\alpha_{dst}$     |  $0$
+Dst **in** Src      | $0$                |  $\alpha_{src}$
 _Table 15: Porter-Duff Blending Modes_
 
 ## <a name="Chapter13.4"></a><a name="Additional_Blending_Modes"></a> _13.4 Additional Blending Modes_
@@ -1683,7 +1689,7 @@ A number of additional blending modes are available. These modes are a subset of
 
 The new destination alpha value for the blending modes defined in this section is always equal to $\alpha (\alpha_{src}, \alpha_{dst})=\alpha_{src}+\alpha_{dst}*(1-\alpha_{src})$, as for Porter-Duff "Src **over** Dst" blending. The formulas for each additional blending mode are shown in Table 16. The right-hand column contains the pre-multiplied output values, that is, the products of the new color value $c(c_{src}, c_{dst}, \alpha_{src}, \alpha_{dst})$ and alpha value $\alpha(\alpha_{src}, \alpha_{dst})$. The source and destination color values $c_{src}$ and $c_{dst}$ are given in non-premultiplied form.
 
-**Blend Type**          | $c'(c_{src}, c_{dst}, \alpha_{src}, \alpha_{dst})$     
+**Blend Type**          | $c'(c_{src}, c_{dst}, \alpha_{src}, \alpha_{dst})$
  :--------------------- | :--------------------------------------
  `VG_BLEND_MULTIPLY`    | $\alpha_{src} * c_{src} * (1 -\ alpha_{dst}) + \alpha_{dst} * c_{dst} * (1 - \alpha_{src}) + \alpha_{src} * c_{src} * \alpha_{dst} * c_{dst}$
  `VG_BLEND_SCREEN`      | $\alpha_{src} * c_{src} + \alpha_{dst} * c_{dst} - \alpha_{src} * c_{src} * \alpha_{dst} * c_{dst}$
