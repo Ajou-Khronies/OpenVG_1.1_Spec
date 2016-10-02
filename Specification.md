@@ -1,6 +1,953 @@
-$$v'_{repeat} = v−|v|$$
+---
+layout: "post"
+title: "p70"
+date: "2016-09-26 22:20"
+writer: "JungHyeon Kim"
+---
+In this section, we define the standard data format for paths that may be used to definesequences of various types of path segments. Extensions may define other path data formats.
 
-In reflect mode, the offset value v is mapped to a new value v´ that is guaranteed to liebetween 0 and 1. Following this mapping, the color is defined as for pad mode:
+
+#### VG_PATH_FORMAT_STANDARD
+<a name="VG_PATH_FORMAT_STANDARD"></a>
+
+The `VG_PATH_FORMAT_STANDARD `macro defines a constant to be used as an argument to **vgCreatePath** to indicate that path data are stored using the standard format. As this API is revised, the lower 16 bits of version number may increase. Each version of OpenVG will accept formats defined in all prior specification versions with which it is backwards-compatible.
+
+Extensions wishing to define additional path formats may register for format identifiers that will differ in their upper 16 bits;the lower 16 bits may be used by the extension vendor for versioning purposes.
+
+```
+#define VG_PATH_FORMAT_STANDARD 0;
+```
+
+### 8.5.1 Path Segment Command Side Effects
+<a name="Path Segment Command Side Effects"></a>
+
+In order to define the semantics of each segment command type, we define three reference points (all are initially (0, 0)):
+
+• *(sx, sy)*: the beginning of the current subpath,*i*.*e*., the position of the last ``MOVE_TO`` segment.
+
+• $(ox, oy)$: the last point of the previous segment.
+
+• $(px, py)$: the last internal control point of the previous segment, if the segment was a (regular or smooth) quadratic or cubic Bézier, or else the last point of the previous segment.
+
+Figure 6 illustrates the locations of these points at the end of a sequence of segment commands ``{ `MOVE_TO`, LINE_TO, CUBIC_TO }``.
+
+<img src="OpenVG_1.1_Spec/figures/Figure 6.PNG"/>
+
+*Figure 6: Segment Reference Points*
+
+We define points *(x0, y0)*, *(x1, y1)*, and *(x2, y2)* in the discussion below as absolute coordinates. For segments defined using relative coordinates, *(x0, y0)*, etc., are defined as the incoming coordinate values added to $(ox, oy)$. Ellipse rh, rv, and rot parameters are unaffected by the use of relative coordinates. Each segment (except for `MOVE_TO` segments) begins at the point $(ox, oy)$ defined by the previous segment.
+
+A path consists of a sequence of subpaths. As path segment commands are encountered, each segment is appended to the current subpath. The current subpath is ended by a `MOVE_TO` or `CLOSE_PATH` segment, and a new current subpath is begun. The end of the path data also ends the current subpath.
+
+### 8.5.2 Segment Commands
+<a name="Segment Commands"></a>
+
+The following table describes each segment command type along with its prefix, the number of specified coordinates and parameters it requires, the numerical value of the segment command, the formulas for any implicit coordinates, and the side effects of the segment command on the points $(ox, oy)$, *(sx, sy)*, and $(px, py)$ and on the termination of the current subpath.
+
+_**Type**_ | _**VGPathSegment**_ | _**Coordinates**_ | _**Value**_ | _**Implicit Points**_ | _**Side Effects**_
+---- | ------------- | ----------- | ----- | --------------- | ------------
+Close Path| `CLOSE_PATH` | *none* | 0 | | *(px,py)=(ox,oy)=(sx,sy)* End current subpath
+Move|`MOVE_TO`|*x0,y0*|2||*(sx,sy)=(px,py)=(ox,oy)=(x0,y0)* End current subpath
+Line|`LINE_TO`|*x0,y0*|4||*(px,py)=(ox,oy)=(x0,y0)*
+Horiz Line|`HLINE_TO`|*x0*|6|*y0=oy*|*(px,py)=(x0,oy) ox=x0*
+Vertical Line|`VLINE_TO`|*y0*|8|*x0=ox*|*(px,py)=(ox,y0) oy=y0*
+Quadratic|`QUAD_TO`|*x0,y0,x1,y1*|10||*(px,py)=(x0,y0) (ox,oy)=(x1,y1)*
+Cubic|`CUBIC_TO`|*x0,y0,x1,y1,x2,y2*|12||*(px,py)=(x1,y1) (ox,oy)=(x2,y2)*
+G1 Smooth Quad|`SQUAD_TO`|*x1,y1*|14|*(x0,y0)=(2*ox-px,2*oy-py)*|*(px,py)= (2*ox-px, 2*oy-py) (ox,oy)=(x1,y1)*
+G1 Smooth Cubic|`SCUBIC_TO`|*x1,y1,x2,y2*|16|*(x0,y0)=(2*ox-px,2*oy-py)*|*(px,py)=(x1,y1) (ox,oy)=(x2,y2)*
+Small CCW Arc|`SCCWARC_TO|*rh,rv,rot,x0,y0*|18||*(px,py)=(ox,oy)=(x0,y0)*
+Small CW Arc|`SCWARC_TO|*rh,rv,rot,x0,y0*|20||*(px,py)=(ox,oy)=(x0,y0)*
+Large CCW|`LCCWARC_TO|*rh,rv,rot,x0,y0*|22||*(px,py)=(ox,oy)=(x0,y0)*
+Arc|||||
+Large CW Arc|`LCWARC_TO`|*rh,rv,rot,x0,y0*|24||*(px,py)=(ox,oy)=(x0,y0)*
+Reserved|Reserved||26,28,30||
+
+*Table 6: Path Segment Commands*
+
+Each segment type may be defined using either absolute or relative coordinates. A relative coordinate $(x, y)$ is added to $(ox, oy)$ to obtain the corresponding absolute coordinate $(ox + x, oy + y)$. Relative coordinates are converted to absolute coordinates immediately as each segment is encountered during rendering.
+
+The `HLINE_TO` and `VLINE_TO` segment types are provided in order to avoid the need for an SVG viewing application (for example) to perform its own relative to absolute conversions when parsing path data.
+
+In SVG, the behavior of smooth quadratic and cubic segments differs slightly from the behavior defined above. If a smooth quadratic segment does not follow a quadratic segment, or a smooth cubic segment does not follow a cubic segment, the initial control point $(x0, y0)$ is placed at $(ox, oy)$ instead of being computed as the reflection of $(px, py)$.This behavior may be emulated by converting an SVG smooth segment into a regular segment with all of its control points specified when the preceding segment is of a different degree.
+
+Note that the coordinates of a path are defined even if the path begins with a segment type other than `MOVE_TO` (including `HLINE_TO`, `VLINE_TO`, or relative segment types) since the coordinates are based on the initial values of $(ox, oy)$, $(sx, sy)$, and *(px, py)* which are each defined as (0, 0).
+
+### 8.5.3 Coordinate Data Formats
+<a name="Coordinate Data Formats"></a>
+
+Coordinate and parameter data (henceforth called simply coordinate data) may be expressed in the set of formats shown in Table 7 below. Multi-byte coordinate data (*i*.*e*., `S_16`, `S_32` and F datatypes) are represented in application memory using the native byte order (endianness) of the platform. Implementations may quantize incoming data in the `S_32` and F formats to a lesser number of bits, provided at least 16 bits of precision are maintained.
+
+Judicious use of smooth curve segments and 8- and 16-bit datatypes can result in substantial memory savings for common path data, such as font glyphs. Using smaller datatypes also conserves bus bandwidth when transferring paths from application memory to OpenVG.
+
+_**Datatype**_|`VG_PATH_DATATYPE` _**Suffix**_|_**bytes**_|_**Value**_
+--------------|-------------------------------|-----------|-----------
+8-bit signed integer|S_8|1|0
+16-bit signed integer|S_16|2|1
+32-bit signed integer|S_32|4|2
+IEEE 754 floating-point|F|4|3
+
+*Table 7: Path Coordinate Datatypes*
+
+#### VGPathDatatype
+<a name="VGPathDatatype"></a>
+
+The `VGPathDatatype` enumeration defines values describing the possible numerical datatypes for path coordinate data.
+
+```
+typedef enum {
+VG_PATH_DATATYPE_S_8 = 0,
+VG_PATH_DATATYPE_S_16 = 1,
+VG_PATH_DATATYPE_S_32 = 2,
+VG_PATH_DATATYPE_F = 3
+} VGPathDatatype;
+```
+
+###8.5.4 Segment Type Marker Definitions
+
+Segment type markers are defined as 8-bit integers, with the leading 3 bits reserved for future use, the next 4 bits containing the segment command type, and the least significant bit indicating absolute vs. relative coordinates (0 for absolute, 1 for relative). The reserved bits must be set to 0.
+
+For the `CLOSE_PATH` segment command, the value of the Abs/Rel bit is ignored.
+
+<img src="OpenVG_1.1_Spec/figures/Figure 7.PNG"/>
+
+*Figure 7: Segment Type Marker Layout*
+
+#### VGPathAbsRel
+<a name=" VGPathAbsRel"></a>
+
+The `VGPathAbsRel` enumeration defines values indicating absolute (`VG_ABSOLUTE`) and relative (`VG_RELATIVE`) values.
+
+```
+typedef enum {
+VG_ABSOLUTE = 0,
+VG_RELATIVE = 1
+} VGPathAbsRel;
+```
+
+#### VGPathSegment
+<a name="VGPathSegment"></a>
+
+The `VGPathSegment` enumeration defines values for each segment command type. The values are pre-shifted by 1 bit to allow them to be combined easily with values from `VGPathAbsRel`.
+
+```
+typedef enum {
+VG_CLOSE_PATH = ( 0 << 1),
+VG_MOVE_TO = ( 1 << 1),
+VG_LINE_TO = ( 2 << 1),
+VG_HLINE_TO = ( 3 << 1),
+VG_VLINE_TO = ( 4 << 1),
+VG_QUAD_TO = ( 5 << 1),
+VG_CUBIC_TO = ( 6 << 1),
+VG_SQUAD_TO = ( 7 << 1),
+VG_SCUBIC_TO = ( 8 << 1),
+VG_SCCWARC_TO = ( 9 << 1),
+VG_SCWARC_TO = (10 << 1),
+VG_LCCWARC_TO = (11 << 1),
+VG_LCWARC_TO = (12 << 1)
+} VGPathSegment;
+```
+#### VGPathCommand
+<a name="VGPathCommand"></a>
+
+The `VGPathCommand` enumeration defines combined values for each segment command type and absolute/relative value. The values are shifted left by one bit and ORed bitwise (*i*.*e*., using the C | operator) with the appropriate value from `VGPathAbsRel` to obtain a complete segment command value.
+
+```
+typedef enum {
+VG_MOVE_TO_ABS = VG_MOVE_TO | VG_ABSOLUTE,
+VG_MOVE_TO_REL = VG_MOVE_TO | VG_RELATIVE,
+VG_LINE_TO_ABS = VG_LINE_TO | VG_ABSOLUTE,
+VG_LINE_TO_REL = VG_LINE_TO | VG_RELATIVE,
+VG_HLINE_TO_ABS = VG_HLINE_TO | VG_ABSOLUTE,
+VG_HLINE_TO_REL = VG_HLINE_TO | VG_RELATIVE,
+VG_VLINE_TO_ABS = VG_VLINE_TO | VG_ABSOLUTE,
+VG_VLINE_TO_REL = VG_VLINE_TO | VG_RELATIVE,
+VG_QUAD_TO_ABS = VG_QUAD_TO | VG_ABSOLUTE,
+VG_QUAD_TO_REL = VG_QUAD_TO | VG_RELATIVE,
+VG_CUBIC_TO_ABS = VG_CUBIC_TO | VG_ABSOLUTE,
+VG_CUBIC_TO_REL = VG_CUBIC_TO | VG_RELATIVE,
+VG_SQUAD_TO_ABS = VG_SQUAD_TO | VG_ABSOLUTE,
+VG_SQUAD_TO_REL = VG_SQUAD_TO | VG_RELATIVE,
+VG_SCUBIC_TO_ABS = VG_SCUBIC_TO | VG_ABSOLUTE,
+VG_SCUBIC_TO_REL = VG_SCUBIC_TO | VG_RELATIVE,
+VG_SCCWARC_TO_ABS = VG_SCCWARC_TO | VG_ABSOLUTE,
+VG_SCCWARC_TO_REL = VG_SCCWARC_TO | VG_RELATIVE,
+VG_SCWARC_TO_ABS = VG_SCWARC_TO | VG_ABSOLUTE,
+VG_SCWARC_TO_REL = VG_SCWARC_TO | VG_RELATIVE,
+VG_LCCWARC_TO_ABS = VG_LCCWARC_TO | VG_ABSOLUTE,
+VG_LCCWARC_TO_REL = VG_LCCWARC_TO | VG_RELATIVE,
+VG_LCWARC_TO_ABS = VG_LCWARC_TO | VG_ABSOLUTE,
+VG_LCWARC_TO_REL = VG_LCWARC_TO | VG_RELATIVE
+} VGPathCommand;
+
+```
+
+### 8.5.5 Path Example
+<a name="Path Example"></a>
+
+The following code example shows how to traverse path data stored in application memory using the standard representation. A byte is read containing a segment command, and the segment command type and relative/absolute flag are extracted by application-defined `SEGMENT_COMMAND` and `SEGMENT_ABS_REL` macros. The number of coordinates and number of bytes per coordinate (for the given data format) are also determined using lookup tables. Finally, the relevant portion of the path data stream representing the current segment is copied into a temporary buffer and used as an argument to a user-defined **processSegment** function that may perform further processing.
+
+```
+#define PATH_MAX_COORDS 6 /* Maximum number of coordinates/command */
+#define PATH_MAX_BYTES 4 /* Bytes in largest data type */
+#define SEGMENT_COMMAND(command) /* Extract segment type */ \
+((command) & 0x1e)
+#define SEGMENT_ABS_REL(command) /* Extract absolute/relative bit */ \
+((command) & 0x1)
+/* Number of coordinates for each command */
+static const VGint numCoords[] = {0,2,2,1,1,4,6,2,4,5,5,5,5};
+/* Number of bytes for each datatype */
+static const VGint numBytes[] = {1,2,4,4};
+/* User-defined function to process a single segment */
+extern void
+processSegment(VGPathSegment command, VGPathAbsRel absRel,
+VGPathDatatype datatype,
+void * segmentData);
+/* Process a path in the standard format, one segment at a time. */
+void
+processPath(const VGubyte * pathSegments, const void * pathData,
+int numSegments, VGPathDatatype datatype)
+{
+VGubyte segmentType, segmentData[PATH_MAX_COORDS*PATH_MAX_BYTES];
+VGint segIdx = 0, dataIdx = 0;
+VGint command, absRel, numBytes;
+while (segIdx < numSegments) {
+segmentType = pathSegments[segIdx++];
+command = SEGMENT_COMMAND(segmentType);
+absRel = SEGMENT_ABS_REL(segmentType);
+numBytes = numCoords[command]*numBytes[datatype];
+/* Copy segment data for further processing */
+memcpy(segmentData, &pathData[dataIdx], numBytes);
+/* Process command */
+processSegment(command, absRel, datatype, (void *) segmentData);
+dataIdx += numBytes;
+}
+}
+```
+
+## 8.6 Path Operations
+<a name="Path Operations"></a>
+
+In addition to filling or stroking a path, the API allows the following basic operations on paths:
+
+• Create a path with a given set of capabilities (**vgCreatePath**)
+
+• Remove data from a path (**vgClearPath**)
+
+• Deallocate a path (**vgDestroyPath**)
+
+• Query path information (**using vgGetParameter**)
+
+• Query the set of capabilities for a path (**vgGetPathCapabilities**)
+
+• Reduce the set of capabilities for a path (**vgRemovePathCapabilities**)
+
+• Append data from one path onto another (**vgAppendPath**)
+
+• Append data onto a path (**vgAppendPathData**)
+
+• Modify coordinates stored in a path (**vgModifyPathCoords**)
+
+• Transform a path (**vgTransformPath**)
+
+• Interpolate between two paths (**vgInterpolatePath**)
+
+• Determine the geometrical length of a path (**vgPathLength**)
+
+• Get position and tangent information for a point at a given geometric distance
+along path (**vgPointAlongPath**)
+
+• Get an axis-aligned bounding box for a path (**vgPathBounds**,
+**vgTransformedPathBounds**)
+
+Higher-level geometric primitives are defined in the optional `VGU` utility library (see
+Section 17):
+
+• Append a line to a path (**vguLine**)
+
+• Append a polyline (connected sequence of line segments) or polygon to a
+path (**vguPolygon**)
+
+• Append a rectangle to a path (**vguRect**)
+
+• Append a round-cornered rectangle to a path (**vguRoundRect**)
+
+• Append an ellipse to a path (**vguEllipse**)
+
+• Append a circular arc to a path (**vguArc**)
+
+### 8.6.1 Storage of Paths
+<a name="Storage of Paths"></a>
+
+OpenVG stores path data internally to the implementation. Paths are referenced via opaque VGPath handles. Applications may initialize paths using the memory representation defined above or other representations defined by extensions. It is possible for an implementation to store path data in hardware-accelerated memory. Implementations may also make use of their own internal representation of path segments. The intent is for applications to be able to define a set of paths, for example one for each glyph in the current typeface, and to be able to re-render each previously defined path with maximum efficiency.
+
+#### VGPath
+<a name="VGPath"></a>
+
+`VGPath` represents an opaque handle to a path.
+
+```
+typedef VGHandle VGPath;
+```
+
+### 8.6.2 Creating and Destroying Paths
+<a name="Creating and Destroying Paths"></a>
+
+Paths are created and destroyed using the **vgCreatePath** and **vgDestroyPath** functions. During the lifetime of a path, an application may indicate which path operations it plans to perform using path capability flags defined by the `VGPathCapabilities` enumeration.
+
+#### _**VGPathCapabilities**_
+<a name="VGPathCapabilities"></a>
+
+The `VGPathCapabilities` enumeration defines a set of constants specifying which operations may be performed on a given path object. At the time a path is defined, the application specifies which operations it wishes to be able to perform on the path. Over time, the application may disable previously enabled capabilities, but it may not reenable capabilities once they have been disabled. This feature allows OpenVG implementations to make use of internal path representations that may not support all path operations, possibly resulting in higher performance on paths where those operations will not be performed.
+
+The capability bits and the functionality they allow are described below:
+
+• `VG_PATH_CAPABILITY_APPEND_FROM` – use path as the 'srcPath' argument to **vgAppendPath**
+
+• `VG_PATH_CAPABILITY_APPEND_TO` – use path as the 'dstPath' argument to **vgAppendPath** and **vgAppendPathData**
+
+• `VG_PATH_CAPABILITY_MODIFY` – use path as the 'dstPath' argument to **vgModifyPathCoords**
+
+•`VG_PATH_CAPABILITY_TRANSFORM_FROM` – use path as the 'srcPath argument to **vgTransformPath**
+
+• `VG_PATH_CAPABILITY_TRANSFORM_TO` – use path as the 'dstPath' argument to **vgTransformPath**
+
+• `VG_PATH_CAPABILITY_INTERPOLATE_FROM` – use path as the `startPath` or `endPath` argument to **vgInterpolatePath**
+
+• `VG_PATH_CAPABILITY_INTERPOLATE_TO` – use path as the `dstPath` argument to **vgInterpolatePath**
+
+• `VG_PATH_CAPABILITY_PATH_LENGTH` – use path as the `path` argument to **vgPathLength**
+
+• `VG_PATH_CAPABILITY_POINT_ALONG_PATH` – use path as the `path` argument to **vgPointAlongPath**
+
+• `VG_PATH_CAPABILITY_TANGENT_ALONG_PATH` – use path as the `path` argument to **vgPointAlongPath** with non-`NULL tangentX` and `tangentY` arguments
+
+• `VG_PATH_CAPABILITY_PATH_BOUNDS` – use path as the `path` argument to **vgPathBounds**
+
+• `VG_PATH_CAPABILITY_PATH_TRANSFORMED_BOUNDS` – use path as the `path` argument to **vgPathTransformedBounds**
+
+• `VG_PATH_CAPABILITY_ALL` – a bitwise OR of all the defined path capabilities
+
+```
+typedef enum {
+VG_PATH_CAPABILITY_APPEND_FROM = (1 << 0),
+VG_PATH_CAPABILITY_APPEND_TO = (1 << 1),
+VG_PATH_CAPABILITY_MODIFY = (1 << 2),
+VG_PATH_CAPABILITY_TRANSFORM_FROM = (1 << 3),
+VG_PATH_CAPABILITY_TRANSFORM_TO = (1 << 4),
+VG_PATH_CAPABILITY_INTERPOLATE_FROM = (1 << 5),
+VG_PATH_CAPABILITY_INTERPOLATE_TO = (1 << 6),
+VG_PATH_CAPABILITY_PATH_LENGTH = (1 << 7),
+VG_PATH_CAPABILITY_POINT_ALONG_PATH = (1 << 8),
+VG_PATH_CAPABILITY_TANGENT_ALONG_PATH = (1 << 9),
+VG_PATH_CAPABILITY_PATH_BOUNDS = (1 << 10),
+VG_PATH_CAPABILITY_PATH_TRANSFORMED_BOUNDS = (1 << 11),
+VG_PATH_CAPABILITY_ALL = (1 << 12) - 1
+} VGPathCapabilities;
+```
+
+It is legal to call **vgCreatePath**, **vgClearPath**, and **vgDestroyPath** regardless of the current setting of the path’s capability bits, as these functions discard the existing path definition.
+
+#### vgCreatePath
+<a name="vgCreatePath"></a>
+
+**vgCreatePath** creates a new path that is ready to accept segment data and returns a `VGPath` handle to it. The path data will be formatted in the format given by `pathFormat`, typically `VG_PATH_FORMAT_STANDARD`. The `datatype` parameter contains a value from the `VGPathDatatype` enumeration indicating the datatype that will be used for coordinate data. The `capabilities` argument is a bitwise OR of the desired `VGPathCapabilities` values. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect. If an error occurs, `VG_INVALID_HANDLE` is returned.
+
+
+The `scale` and `bias` parameters are used to interpret each coordinate of the path data; an incoming coordinate value *v* will be interpreted as the value *(scale*v* + *bias*). `scale` must not equal 0. The datatype, scale, and bias together define a valid coordinate data range for the path; segment commands that attempt to place a coordinate in the path that is outside this range will overflow silently, resulting in an undefined coordinate value. Functions that query a path containing such values, such as **vgPathLength** and **vgPointAlongPath**, also return undefined results.
+
+The `segmentCapacityHint` parameter provides a hint as to the total number of segments that will eventually be stored in the path. The `coordCapacityHint` parameter provides a hint as to the total number of specified coordinates (as defined in the “Coordinates” column of Table 6) that will eventually be stored in the path. A value less than or equal to 0 for either hint indicates that the capacity is unknown. The path storage space will in any case grow as needed, regardless of the hint values. However, supplying hints may improve performance by reducing the need to allocate additional space as the path grows. Implementations should allow applications to append segments and coordinates up to the stated capacity in small batches without degrading performance due to excessive memory reallocation.
+
+```
+VGPath vgCreatePath(VGint pathFormat,
+VGPathDatatype datatype,
+VGfloat scale, VGfloat bias,
+VGint segmentCapacityHint,
+VGint coordCapacityHint,
+VGbitfield capabilities)
+```
+
+> **_ERRORS_**
+>
+> `VG_UNSUPPORTED_PATH_FORMAT_ERROR`
+> * if `pathFormat` is not a supported format `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if `datatype` is not a valid value from the `VGPathDatatype` enumeration
+> * if `scale` is equal to 0
+
+#### vgClearPath
+<a name="vgClearPath"></a>
+
+**vgClearPath** removes all segment command and coordinate data associated with a path. The handle continues to be valid for use in the future, and the path format and datatype retain their existing values. The `capabilities` argument is a bitwise OR of the desired VGPathCapabilities values. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect. Using **vgClearPath** may be more efficient than destroying and re-creating a path for short-lived paths.
+
+```
+void vgClearPath(VGPath path, VGbitfield capabilities)
+```
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context
+
+#### vgDestroyPath
+<a name=" vgDestroyPath"></a>
+
+**vgDestroyPath** releases any resources associated with `path`, and makes the handle invalid in all contexts that shared it.
+
+```
+void vgDestroyPath(VGPath path)
+```
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context
+
+### 8.6.3 Path Queries
+<a name="Path Queries"></a>
+
+#### VGPathParamType
+<a name="VGPathParamType"></a>
+
+Values from the `VGPathParamType` enumeration may be used as the `paramType` argument to **vgGetParameter** to query various features of a path. All of the parameters defined by `VGPathParamType` are read-only. Table 8 shows the datatypes for each parameter type.
+
+```
+typedef enum {
+VG_PATH_FORMAT = 0x1600,
+VG_PATH_DATATYPE = 0x1601,
+VG_PATH_SCALE = 0x1602,
+VG_PATH_BIAS = 0x1603,
+VG_PATH_NUM_SEGMENTS = 0x1604,
+VG_PATH_NUM_COORDS = 0x1605
+} VGPathParamType;
+```
+
+_**Parameter**_ | _**Datatype**_
+--------------- | --------------
+VG_PATH_FORMAT|VGint
+VG_PATH_DATATYPE|VGint
+VG_PATH_SCALE|VGfloat
+VG_PATH_BIAS|VGfloat
+VG_PATH_NUM_SEGMENTS|VGint
+VG_PATH_NUM_COORDS|VGint
+
+*Table 8: VGPathParamType Datatypes*
+
+#### Path Format
+<a name="Path Format"></a>
+
+The command format of a path is queried as an integer value using the `VG_PATH_FORMAT` parameter:
+
+```
+VGPath path;
+VGint pathFormat = vgGetParameteri(path, VG_PATH_FORMAT);
+```
+
+
+#### Path Datatype
+<a name="Path Datatypet"></a>
+
+The coordinate datatype of a path is queried as an integer value using the `VG_PATH_DATATYPE` parameter. The returned integral value should be cast to the `VGPathDatatype` enumeration:
+
+```
+GPath path;
+VGPathDatatype pathDatatype =
+(VGPathDatatype)vgGetParameteri(path, VG_PATH_DATATYPE);
+```
+
+#### Path Scale
+<a name="Path Scale"></a>
+
+The scale factor of the path is queried as a floating-point value using the `VG_PATH_SCALE` parameter:
+```
+VGPath path;
+VGfloat pathScale = vgGetParameterf(path, VG_PATH_SCALE);
+```
+#### Path Bias
+<a name="Path Bias"></a>
+
+The bias of the path is queried as a floating-point value using the `VG_PATH_BIAS` parameter:
+
+```
+VGPath path;
+VGfloat pathBias = vgGetParameterf(path, VG_PATH_BIAS);
+```
+
+#### Number of Segments
+<a name="Number of Segments"></a>
+
+The number of segments stored in the path is queried as an integer value using the `VG_PATH_NUM_SEGMENTS` parameter:
+```
+VGPath path;
+VGint pathNumSegments = vgGetParameteri(path, VG_PATH_NUM_SEGMENTS);
+```
+#### Number of Coordinates
+<a name="Number of Coordinates"></a>
+
+The total number of specified coordinates (*i*.*e*., those defined in the “Coordinates” column of Table 6) stored in the path is queried as an integer value using the `VG_PATH_NUM_COORDS` parameter:
+```
+VGPath path;
+VGint pathNumCoords = vgGetParameteri(path, VG_PATH_NUM_COORDS);
+```
+
+### 8.6.4 Querying and Modifying Path Capabilities
+<a name="Querying and Modifying Path Capabilities"></a>
+
+#### vgGetPathCapabilities
+<a name="vgGetPathCapabilities"></a>
+
+The **vgGetPathCapabilities** function returns the current capabilities of the `path`, as a bitwise OR of `VGPathCapabilities` constants. If an error occurs, 0 is returned.
+
+```
+VGbitfield vgGetPathCapabilities(VGPath path)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context
+
+#### vgRemovePathCapabilities
+<a name="vgRemovePathCapabilities"></a>
+
+The **vgRemovePathCapabilities** function requests the set of capabilities specified in the `capabilities` argument to be disabled for the given `path`. The `capabilities` argument is a bitwise OR of the `VGPathCapabilities` values whose removal is requested. Attempting to remove a capability that is already disabled has no effect. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect.
+
+
+An implementation may choose to ignore the request to remove a particular capability if no significant performance improvement would result. In this case, **vgGetPathCapabilities** will continue to report the capability as enabled.
+```
+void vgRemovePathCapabilities(VGPath path, VGbitfield capabilities)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context
+
+### 8.6.5 Copying Data Between Paths
+<a name="Copying Data Between Paths"></a>
+
+#### vgAppendPath
+<a name="vgAppendPath"></a>
+
+**vgAppendPath** appends a copy of all path segments from `srcPath` onto the end of the existing data in `dstPath`. It is legal for `srcPath` and `dstPath` to be handles to the same path object, in which case the contents of the path are duplicated. If `srcPath` and `dstPath` are handles to distinct path objects, the contents of srcPath will not be affected by the call.
+
+The `VG_PATH_CAPABILITY_APPEND_FROM` capability must be enabled for `srcPath`, and the `VG_PATH_CAPABILITY_APPEND_TO` capability must be enabled for `dstPath`.
+
+
+If the scale and bias of `dstPath` define a narrower range than that of `srcPath`, overflow may occur silently.
+```
+void vgAppendPath(VGPath dstPath, VGPath srcPath)
+```
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if either `dstPath` or `srcPath` is not a valid path handle, or is not shared with the current context
+> `VG_PATH_CAPABILITY_ERROR`
+> if `VG_PATH_CAPABILITY_APPEND_FROM` is not enabled for srcPath
+> if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for dstPath
+
+### 8.6.6 Appending Data to a Path
+<a name=" Appending Data to a Path"></a>
+
+#### vgAppendPathData
+<a name="vgAppendPathData"></a>
+
+**vgAppendPathData** appends data taken from `pathData` to the given path `dstPath`. The data are formatted using the path format of `dstPath` (as returned by querying the path’s `VG_PATH_FORMAT` parameter using **vgGetParameteri**). The `numSegments` parameter gives the total number of entries in the `pathSegments` array, and must be greater than 0. Legal values for the **pathSegments** array are the values from the `VGPathCommand` enumeration as well as `VG_CLOSE_PATH` and (`VG_CLOSE_PATH` | `VG_RELATIVE`) (which are synonymous).
+
+The `pathData` pointer must be aligned on a 1-, 2-, or 4-byte boundary (as defined in the “Bytes” column of Table 7) depending on the size of the coordinate datatype (as returned by querying the path’s `VG_PATH_DATATYPE` parameter using **vgGetParameteri**). The `VG_PATH_CAPABILITY_APPEND_TO` capability must be enabled for `path`.
+
+Each incoming coordinate value, regardless of datatype, is transformed by the scale
+factor and bias of the path.
+
+```
+void vgAppendPathData(VGPath dstPath,
+VGint numSegments,
+const VGubyte * pathSegments,
+const void * pathData)
+```
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `dstPath` is not a valid path handle, or is not shared with the current context
+> `VG_PATH_CAPABILITY_ERROR`
+> * if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for dstPath `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if `pathSegments` or `pathData` is `NULL`
+> * if `pathData` is not properly aligned
+> * if `numSegments` is less than or equal to 0
+> * if `pathSegments` contains an illegal command
+
+### 8.6.7 Modifying Path Data
+<a name=" Modifying Path Data"></a>
+
+Coordinate data in an existing path may be modified, for example to create animation
+effects. Implementations should choose an internal representation for paths that have the `VG_PATH_CAPABILITY_MODIFY` capability enabled that allows for efficient modification of the coordinate data.
+
+#### vgModifyPathCoords
+<a name="vgModifyPathCoords"></a>
+
+**vgModifyPathCoords** modifies the coordinate data for a contiguous range of segments of `dstPath`, starting at `startIndex` (where 0 is the index of the first path segment) and having length `numSegments`. The data in `pathData` must be formatted in exactly the same manner as the original coordinate data for the given segment range, unless the path has been transformed using **vgTransformPath** or interpolated using **vgInterpolatePath**. In these cases, the path will have been subject to the segment promotion rules specified in those functions.
+
+The `pathData` pointer must be aligned on a 1-, 2-, or 4-byte boundary
+depending on the size of the coordinate datatype (as returned by querying the
+path’s `VG_PATH_DATATYPE` parameter using **vgGetParameteri**). The
+`VG_PATH_CAPABILITY_MODIFY` capability must be enabled for path
+
+Each incoming coordinate value, regardless of datatype, is transformed by the
+scale factor and bias of the path.
+```
+void vgModifyPathCoords(VGPath dstPath,
+VGint startIndex, VGint numSegments,
+const void * pathData)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `dstPath` is not a valid path handle, or is not shared with the current context
+> `VG_PATH_CAPABILITY_ERROR`
+> * if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for dstPath `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if `pathData` is `NULL`
+> * if `pathData` is not properly aligned
+> * if `startIndex` is less than 0
+> * if `numSegments` is less than or equal to 0
+> * if `startIndex + numSegments` is greater than the number of segments in the path
+
+### 8.6.8 Transforming a Path
+<a name="Transforming a Path"></a>
+
+#### vgTransformPath
+<a name="vgTransformPath"></a>
+
+**vgTransformPath** appends a transformed copy of `srcPath` to the current contents of
+dstPath. The appended path is equivalent to the results of applying the current pathuser-
+to-surface transformation (`VG_MATRIX_PATH_USER_TO_
+SURFACE`) to `srcPath`.
+
+It is legal for `srcPath` and `dstPath` to be handles to the same path object, in
+which case the transformed path will be appended to the existing path. If
+`srcPath` and `dstPath` are handles to distinct path objects, the contents of
+`srcPath` will not be affected by the call.
+
+All `HLINE_TO_*` and `VLINE_TO_*` segments present in `srcPath` are implicitly
+converted to `LINE_TO_*` segments prior to applying the transformation. The original
+copies of these segments in `srcPath` remain unchanged.
+
+
+Any `*ARC_TO` segments are transformed, but the endpoint parametrization of the
+resulting arc segments are implementation-dependent. The results of calling
+**vgInterpolatePath** on a transformed path that contains such segments are undefined.
+
+
+The `VG_PATH_CAPABILITY_TRANSFORM_FROM` capability must be enabled for
+`srcPath`, and the` VG_PATH_CAPABILITY_TRANSFORM_TO` capability must be
+enabled for `dstPath`.
+
+Overflow may occur silently if coordinates are transformed outside the datatype range of
+dstPath.
+```
+void vgTransformPath(VGPath dstPath, VGPath srcPath)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if either `dstPath` or `srcPath` is not a valid path handle, or is not shared with the current context
+> `VG_PATH_CAPABILITY_ERROR`
+> * if `VG_PATH_CAPABILITY_TRANSFORM_FROM` is not enabled for srcPath
+> * if `VG_PATH_CAPABILITY_TRANSFORM_TO` is not enabled for dstPath
+
+### 8.6.9 Interpolating Between Paths
+<a name="Interpolating Between Paths"></a>
+
+Interpolation takes two compatible paths, in a sense described below, and defines a new
+path that interpolates between them by a parameter `amount`. When `amount` is equal to
+0, the result is equivalent to the first path; when `amount` is equal to 1, the result is
+equivalent to the second path. Values between 0 and 1 produce paths that smoothly
+interpolate between the two extremes. Values outside the [0, 1] range produce
+extrapolated paths. Conceptually, interpolation occurs as follows. First, the two path
+parameters are copied and the copies are normalized by:
+
+• Converting all coordinates to floating-point format, applying the path scale and bias
+parameters
+
+• Converting all relative segments to absolute form
+
+• Converting `{H,V}LINE_TO_* `segments to `LINE_TO form`
+
+• Converting `(S)QUAD_TO_*/SCUBIC_TO_*` segments to `CUBIC_TO` form
+
+• Retaining all `*ARC_TO_*` and `CLOSE_PATH` segments
+
+If, following normalization, both paths have the same sequence of segment types
+(treating all forms of arc as the same), interpolation proceeds by linearly interpolating
+between each corresponding pair of segment parameters in the normalized paths. If the
+starting arc type differs from the final arc type, the starting arc type is used for values of
+amount less than 0.5, and the final arc type is used for values greater than or equal to
+0.5. Finally, the coordinates are converted to the data type of the destination.
+
+#### vgInterpolatePath
+<a name="vgInterpolatePath"></a>
+
+The **vgInterpolatePath** function appends a path, defined by interpolation (or
+extrapolation) between the paths `startPath` and `endPath` by the given `amount`, to
+the path `dstPath`. It returns `VG_TRUE` if interpolation was successful (*i*.*e*., the paths
+had compatible segment types after normalization), and `VG_FALSE` otherwise. If
+interpolation is unsuccessful, `dstPath` is left unchanged.
+
+
+It is legal for `dstPath` to be a handle to the same path object as either
+`startPath` or `endPath` or both, in which case the contents of the source path
+or paths referenced by `dstPath` will have the interpolated path appended. If
+`dstPath` is not the a handle to the same path object as either `startPath` or
+`endPath`, the contents of `startPath` and `endPath` will not be affected by the
+call.
+
+Overflow may occur silently if the datatype of `dstPath` has insufficient range to store
+an interpolated coordinate value.
+
+The `VG_PATH_CAPABILITY_INTERPOLATE_FROM` capability must be enabled
+for both of `startPath` and `endPath`, and the `INTERPOLATE_TO` capability
+must be enabled for `dstPath`.
+
+```
+VGboolean vgInterpolatePath(VGPath dstPath,
+VGPath startPath,
+VGPath endPath,
+VGfloat amount)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if any of `dstPath`, `startPath`, or `endPath` is not a valid path handle, or is not shared with the current context
+> `VG_PATH_CAPABILITY_ERROR`
+> * if `VG_PATH_CAPABILITY_PATH_INTERPOLATE_TO` is not enabled for dstPath
+> * if `VG_PATH_CAPABILITY_PATH_INTERPOLATE_FROM` is not enabled for `startPath` or `endPath`
+
+### 8.6.10 Length of a Path
+<a name="Length of a Path"></a>
+
+An approximation to the geometric length of a portion of a path may be obtained by
+calling the **vgPathLength** function. `MOVE_TO` segments and implicit path closures (see
+Section 8.7.1) do not contribute to the path length. `CLOSE_PATH` segments have the
+same length as a `LINE_TO` segment with the same endpoints.
+
+#### vgPathLength
+<a name="vgPathLength"></a>
+
+The **vgPathLength** function returns the length of a given portion of a path in the user
+coordinate system (that is, in the path’s own coordinate system, disregarding any matrix
+settings). Only the subpath consisting of the `numSegments` path segments beginning
+with `startSegment` (where the initial path segment has index 0) is used. If an
+error occurs, -1.0f is returned.
+The `VG_PATH_CAPABILITY_PATH_LENGTH` capability must be enabled for `path`.
+
+```
+VGfloat vgPathLength(VGPath path,
+VGint startSegment, VGint numSegments);
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context `VG_PATH_CAPABILITY_ERROR`
+> if `VG_PATH_CAPABILITY_PATH_LENGTH` is not enabled for `path VG_ILLEGAL_ARGUMENT_ERROR`
+> * if startSegment is less than 0 or greater than the index of the final path segment
+> * if `numSegments` is less than or equal to 0
+> * if `(startSegment + numSegments – 1)` is greater than the index of the final path segment
+
+### 8.6.11 Position and Tangent Along a Path
+<a name="Position and Tangent Along a Path"></a>
+
+Some path operations, such as the placement and orientation of text along a path, require
+the computation of a set of points along a path as well as a normal (perpendicular) vector
+at each point. The **vgPointAlongPath** function provides points along the path as well
+as normalized tangent vectors (from which normals may easily be derived).
+
+#### The Tangents of a Path Segment
+<a name="The Tangents of a Path Segment"></a>
+
+The tangent at a given point along a path is defined as a vector pointing in the same
+direction as the path at that point. The tangent at any point of a line segment is parallel to
+the line segment; the tangent at any point along a Bézier curve or elliptical arc segment
+may be defined using the derivatives of the parametric equations *x(t)* and *y(t)* that define
+the curve. The incoming tangent at a point is defined using the direction in which the
+curve is “traveling” prior to arriving at the point; the outgoing tangent is defined using
+the direction the curve is traveling as it leaves the point. The incoming and outgoing
+tangents may differ at a vertex joining different curve segments, or at a sharp “cusp” in a
+curve.
+
+
+If a point along a path segment has no tangent defined, for example where a path
+segment has collapsed to a single point, the following algorithm is used to define
+incoming and outgoing tangents at the point. Search backwards until a segment is found
+with a tangent defined at its end point, or the start of the current path is reached; if a
+tangent is found, use it as the incoming tangent. Search forwards until a segment is found
+with a tangent defined at its starting point, or the end of the current path is reached; if a
+tangent is found, use it as the outgoing tangent. If these searches produce exactly one
+defined tangent, that tangent is used as both the incoming and outgoing tangent. If the
+searches produced no defined tangent, the incoming and outgoing tangents are both
+assigned the value (1, 0). Tangent vectors are normalized to have unit length.
+
+#### vgPointAlongPath
+<a name="vgPointAlongPath"></a>
+
+The **vgPointAlongPath** function returns the point lying a given distance along a given
+portion of a path and the unit-length tangent vector at that point. Only the subpath
+consisting of the `numSegments` path segments beginning with `startSegment`
+(where the initial path segment has index 0) is used. For the remainder of this
+section we refer only to this subpath when discussing paths.
+If `distance` is less than or equal to 0, the starting point of the path is used. If
+`distance` is greater than or equal to the path length (*i*.*e*., the value returned by
+**vgPathLength** when called with the same `startSegment` and `numSegments`
+parameters), the visual ending point of the path is used.
+Intermediate values return the $(x, y)$ coordinates and tangent vector of the point at the
+given distance along the path. Because it is not possible in general to compute exact
+distances along a path, an implementation is not required to use exact
+computation even for segments where such computation would be possible. For
+example, the path:
+
+`MOVE_TO 0, 0; LINE_TO 10, 0 // draw a line of length 10`
+
+`MOVE_TO 10, 10 // create a discontinuity`
+
+`LINE_TO 10, 20 // draw a line of length 10`
+
+may return either (10, 0) or (10, 10) (or points nearby) as the point at distance
+10.0. Implementations are not required to compute distances exactly, as long as
+they satisfy the constraint that as `distance` increases monotonically the
+returned point and tangent move forward monotonically along the path.
+
+Where the implementation is able to determine that the point being queried
+lies exactly at a discontinuity or cusp, the incoming point and tangent should be
+returned. In the example above, returning the pre-discontinuity point (10, 0) and
+incoming tangent (1, 0) is preferred to returning the post-discontinuity point (10,10) and outgoing tangent (0, 1).
+
+The `VG_PATH_CAPABILITY_POINT_ALONG_PATH` capability must be enabled for
+path.
+
+If the reference arguments x and y are both non-`NULL`, and the
+`VG_PATH_CAPABILITY_POINT_ALONG_PATH` capability is enabled for `path`, the
+point $(x, y)$ is returned in *x* and *y*. Otherwise the variables referenced by *x* and *y* are not
+written.
+
+If the reference arguments `tangentX` and `tangentY` are both non-`NULL`, and the
+`VG_PATH_CAPABILITY_TANGENT_ALONG_PATH` capability is enabled for `path`,
+the geometric tangent vector at the point $(x, y)$ is returned in `tangentX` and
+`tangentY`. Otherwise the variables referenced by `tangentX` and `tangentY` are not
+written.
+
+Where the incoming tangent is defined, **vgPointAlongPath** returns it. Where only the
+outgoing tangent is defined, the outgoing tangent is returned.
+
+The points returned by **vgPointAlongPath** are not guaranteed to match the path as
+rendered; some deviation is to be expected.
+
+```
+void vgPointAlongPath(VGPath path,
+VGint startSegment, VGint numSegments,
+VGfloat distance,
+VGfloat * x, VGfloat * y,
+VGfloat * tangentX, VGfloat * tangentY)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context `VG_PATH_CAPABILITY_ERROR`
+> * If x and y are both non-`NULL`, and the `VG_PATH_CAPABILITY_POINT_ALONG_PATH` is not enabled for `path`
+> * If `tangentX` and `tangentY` are both non-`NULL`, and the `VG_PATH_CAPABILITY_TANGENT_ALONG_PATH` capability is not enabled for `path`
+>
+> `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if startSegment is less than 0 or greater than the index of the final path segment
+> * if `numSegments` is less than or equal to 0
+> * if (startSegment + numSegments – 1) is less than 0 or greater than the index of the final path segment
+> * if x, y, tangentX or tangentY is not properly aligned
+
+### 8.6.12 Querying the Bounding Box of a Path
+<a name="Querying the Bounding Box of a Path"></a>
+
+To draw complex scenes efficiently, it is important to avoid drawing objects that do not appear in the region being drawn. A simple way to determine whether an object may be visible is to determine whether its *bounding box* – an axis-aligned rectangle that is guaranteed to contain the entire object – intersects the drawn region. The **vgPathBounds** and **vgPathTransformedBounds** functions provide bounding box information.
+
+Two types of bounding boxes may be obtained for a path. The first, obtained by calling **vgPathBounds**, returns a tight axis-aligned bounding box for the area contained within the path in its own coordinate system. The second, obtained by calling **vgPathTransformedBounds**, returns an axis-aligned bounding box for the path as it will appear when drawn on the drawing surface (*i*.*e*., following application of the current path-user-to-surface transform). The latter function does not guarantee to bound the shape tightly, but still may provide tighter bounds than those obtained by transforming the result of **vgPathBounds**, at a lower cost.
+
+
+The bounding box of a path is defined to contain all points along the path, including isolated points created by `MOVE_TO` segments. The fill rule has no effect on the determination of the bounding box. If the path is to be stroked, the application must adjust the bounding box to take the stroking parameters into account. Note that Miter joins in particular may extend far outside the bounding box.
+
+#### vgPathBounds
+<a name="vgPathBounds"></a>
+
+The **vgPathBounds** function returns an axis-aligned bounding box that tightly bounds the interior of the given path. Stroking parameters are ignored. If path is empty, `minX` and `minY` are set to 0 and `width` and `height` are set to -1. If `path` contains a single point, `minX` and `minY` are set to the coordinates of the point and `width` and `height` are set to 0.
+
+The `VG_PATH_CAPABILITY_PATH_BOUNDS` capability must be enabled for path
+
+```
+void vgPathBounds(VGPath path,
+VGfloat * minX, VGfloat * minY,
+VGfloat * width, VGfloat * height)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context `VG_PATH_CAPABILITY_ERROR`
+> * if minX, minY, width, or height is `NULL`
+> * if minX, minY, width, or height is not properly aligned `VG_PATH_CAPABILITY_ERROR`
+> if `VG_PATH_CAPABILITY_PATH_BOUNDS` is not enabled for path
+
+
+#### vgPathTransformedBounds
+<a name="vgPathTransformedBounds"></a>
+
+The **vgPathTransformedBounds** function returns an axis-aligned bounding box that is guaranteed to enclose the geometry of the given `path` following transformation by the current path-user-to-surface transform. The returned bounding box is not guaranteed to fit tightly around the path geometry. If `path` is empty, `minX` and `minY` are set to 0 and `width` and `height` are set to -1. If `path` contains a single point, `minX` and `minY` are set to the coordinates of the point and `width` and `height` are set to 0.
+
+The `VG_PATH_CAPABILITY_PATH_BOUNDS` capability must be enabled for
+path.
+
+```
+void vgPathBounds(VGPath path,
+VGfloat * minX, VGfloat * minY,
+VGfloat * width, VGfloat * height)
+```
+
+> **_ERRORS_**
+>
+>`VG_BAD_HANDLE_ERROR`
+> * if `path` is not a valid path handle, or is not shared with the current context `VG_PATH_CAPABILITY_ERROR`
+> * if minX, minY, width, or height is `NULL`
+> * if minX, minY, width, or height is not properly aligned `VG_PATH_CAPABILITY_ERROR`
+> if `VG_PATH_CAPABILITY_PATH_TRANSFORMED_BOUNDS` is not enabled for path
+
+## 8.7 Interpretation of Paths
+<a name="Interpretation of Paths"></a>
+
+The interpretation of a path, composed of a sequence of one or more subpaths, depends on whether it is to be stroked or filled. For stroked paths, each subpath has stroking parameters applied to it separately, with the dash phase at the end of each subpath used at the beginning of the next subpath. This process results in a set of stroked shapes. The union of these shapes then defines the outline path to be filled. For filled paths, the interior of the path (as defined below) is filled.
+
+### 8.7.1 Filling Paths
+<a name="Filling Paths"></a>
+A simple, non-self-intersecting closed path divides the plane into two regions, a bounded *inside* region and an unbounded *outside* region. Note that knowing the orientation of the outermost path (*i*.*e*., clockwise or counter-clockwise) is not necessary to differentiate between the inside and outside regions.
+
+A path that self-intersects, or that has multiple overlapping subpaths, requires additional information in order to define the inside region. Two rules that provide different definitions for the area enclosed by such paths, known as the non-zero and even/odd fill rules, are supported by OpenVG. To determine whether any point in the plane is contained in the inside region, imagine drawing a line from that point out to infinity in any direction such that the line does not cross any vertex of the path. For each edge that is crossed by the line, add 1 to the counter if the edge crosses from left to right, as seen by an observer walking along the line towards infinity, and subtract 1 if the edge crosses from right to left. In this way, each region of the plane will receive an integer value.
+
+The non-zero fill rule says that the point is inside the shape if the resulting sum is not equal to 0. The even/odd rule says that the point is inside the shape if the resulting sum is odd, regardless of sign (*e*.*g*., -7 is odd, 0 is even). Consider the star-shaped path shown in Figure 8 below, indicated with solid lines. The orientation of the lines making up the path is indicated with arrows. An imaginary line to infinity starting in the central region of the star is shown as a dashed line pointing to the right. Two edges of the star cross the line to infinity going left to right, indicated by the downward-pointing arrows. The central region therefore has a count of +2. According to the even/odd rule, it is outside the path, whereas according to the non-zero rule it is inside. Implementations must be able to deal with paths having up to 255 crossings along any line. The behavior of more complex paths is undefined.
+
+<img src="OpenVG_1.1_Spec/figures/Figure 8.PNG"/>
+
+*Figure 8: Even/Odd Fill Rule*
+
+#### Creating Holes in Paths
+<a name="Creating Holes in Paths"></a>
+
+The fill rule is applied with respect to all subpaths simultaneously during filling. Thus, one subpath may be used to create a hole inside an enclosing subpath by defining the two subpaths with opposing orientations (clockwise versus counter-clockwise). Note that the orientation of extremely small paths may depend on the numerical precision of the internal representation of points. Care should be taken to avoid the use of paths that have nearly collapsed to a line or a point.
+
+The relative orientation of subpaths, along with the fill rule, determines whether overlapping subpaths will result in holes, as shown in Figure 9 below.
+
+||_**Even/Old Fil Rule**_|_**Non-Zero Fill Rule**_|
+|-|-------|-------|
+|_**Same Orientation**_|<img src="OpenVG_1.1_Spec/figures/Figure 9-1.PNG"/>|<img src="OpenVG_1.1_Spec/figures/Figure 9-2.PNG"/>|
+|_**Opposing Orientation**_|<img src="OpenVG_1.1_Spec/figures/Figure 9-3.PNG"/>|<img src="OpenVG_1.1_Spec/figures/Figure 9-4.PNG"/>|
+
+
+
+$$v'_{repeat} = vâˆ’|v|$$
+
+In reflect mode, the offset value v is mapped to a new value vÂ´ that is guaranteed to liebetween 0 and 1. Following this mapping, the color is defined as for pad mode:
 
 $$
 v'_{reflect} =
@@ -34,7 +981,7 @@ Figure 22: Color Ramp used for Gradient Examples
 ## 9.4 Pattern Paint
 <a name="Pattern_Paint"></a>
 
-Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + ½, y + ½).
+Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + Â½, y + Â½).
 
 Filtering may be used to construct an interpolated pattern value at the sample point,based on the pattern image pixel values. The pattern tiling mode is used to define valuesfor pixel centers in the pattern space that lie outside of the bounds of the pattern.
 
@@ -74,11 +1021,11 @@ The `VGTilingMode` enumeration defines possible methods for defining colors fors
 
 The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range.
 
-The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, width– 1)), max(0, min(y, height – 1))).
+The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, widthâ€“ 1)), max(0, min(y, height â€“ 1))).
 
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator ‘a mod b’ returns a value between 0 and(b – 1) such that a = k*b + (a mod b) for some integer k.
+The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator â€˜a mod bâ€™ returns a value between 0 and(b â€“ 1) such that a = k*b + (a mod b) for some integer k.
 
-The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x’, y’) where:
+The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(xâ€™, yâ€™) where:
 
 $$
 x' =
@@ -136,7 +1083,7 @@ Images are rectangular collections of pixels. Image data may be inserted or extr
 
 An image defines a coordinate system in which pixels are indexed using integercoordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the ycoordinate increases vertically from bottom to top. Note that this orientation is consistentwith the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
-The “energy” of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + ½, y + ½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers.
+The â€œenergyâ€ of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + Â½, y + Â½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers.
 
 ## 10.2 Image Formats
 <a name="Image_Formats"></a>
@@ -195,7 +1142,7 @@ typedef enum {
 } VGImageFormat;
 ```
 
-The letter A denotes an alpha (α) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues i...(line truncated)...
+The letter A denotes an alpha (Î±) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues i...(line truncated)...
 
 Bit 6 of the numeric values of the enumeration indicates the position of the alpha channel(or unused byte for formats that do not include alpha). If bit 6 is disabled, the alpha orunused channel appears as the last channel, otherwise it appears as the first channel. Bit 7indicates the ordering of the RGB color channels. If bit 7 is disabled, the color channelsappear in RGB order, otherwise they appear in BGR order.
 
@@ -438,7 +1385,7 @@ Pixel values are read starting at the address given by the pointer data; adjacen
 
 Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointer mustbe aligned according to the number of bytes of the pixel format specified bydataFormat, unless dataFormat is equal to VG_BW_1, VG_A_1, or VG_A_4, in which case 1 byte alignment is sufficient. Each pixel is converted into the format ofthe destination image as it is written.
 
-If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 ≤ i < width and 0 ≤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native ...(line truncated)...
+If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 â‰¤ i < width and 0 â‰¤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native ...(line truncated)...
 
 If dataFormat is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of thedestination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered tobe at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms ofbytes, not bits.
 
@@ -505,7 +1452,7 @@ void vgGetImageSubData(VGImage image,
 ## 10.6 Child Images
 <a name="Child_Images"></a>
 
-A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parent’s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respe...(line truncated)...
+A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parentâ€™s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respe...(line truncated)...
 
 A child image remains valid even following a call to `vgDestroyImage` on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
 
@@ -542,7 +1489,7 @@ VGImage vgGetParent(VGImage image)
 #### vgCopyImage
 <a name="vgCopyImage"></a>
 
-Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
+Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
 If the dither flag is equal to `VG_TRUE`, an implementation-dependent ditheringalgorithm may be applied. This may be useful when copying into a destinationimage with a smaller color bit depth than that of the source image. Implementations should choose an algorithm that will provide good resultswhen the output images are displayed as successive frames in an animation.
 
@@ -593,7 +1540,7 @@ vgSeti(VG_IMAGE_MODE, drawImageMode);
 #### vgDrawImage
 <a name="vgDrawImage"></a>
 
-An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + ½, py + ½) is mapped to the point (Ti)(px + ½, py+ ½). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
+An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + Â½, py + Â½) is mapped to the point (Ti)(px + Â½, py+ Â½). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
 
 Interpolation is done in the color space of the image. Image color values are processed inpremultiplied alpha format during interpolation. Color channel values are clamped to therange [0, alpha] before interpolation.
 
@@ -601,7 +1548,7 @@ When a projective transformation is used (i.e., the bottom row of the image-user
 
 When a projective transformation is used, the value of the `VG_IMAGE_MODE` parameteris ignored and the behavior of `VG_DRAW_IMAGE_NORMAL` is substituted. This avoidsthe need to generate paint pixels in perspective.
 
-The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1½ pixels for filtering purposes.
+The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1Â½ pixels for filtering purposes.
 
 Clipping, masking, and scissoring are applied in the same manner as with `vgDrawPath`.To limit drawing to a subregion of the image, create a child image using `vgChildImage`.
 
@@ -641,7 +1588,7 @@ When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_STENCIL`, theimage b
 
 Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` paintmode) occurs at each pixel. The interpolated image and paint color and alpha values arecombined at each pixel as follows. Each image color channel value is multiplied by itscorresponding alpha value (if the image has an alpha channel) and by the paint alphavalue to produce an alpha value associated with that color channel. The current blending equation (see Section 13) is applied separately for each destination color channel, usingthe alpha value computed above as the source alpha value for the blend; the paint colorvalue is used as input to the color transform stage, the output of which is used as thesource color value for blending
 
-In terms of the blending functions α(αsrc, αdst) and c(csrc, cdst, αsrc, αdst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
+In terms of the blending functions Î±(Î±src, Î±dst) and c(csrc, cdst, Î±src, Î±dst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
 
 $$
 a_{tmp} = a*(a_{image}*a_{paint},a_{dst})
@@ -655,7 +1602,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff “Src **over** Dst” blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff â€œSrc **over** Dstâ€ blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
@@ -667,9 +1614,9 @@ $$$$
 B_{dst} \leftarrow (a_{image}*a_{paint}*B_{image}*B_{paint}+a_{dst}*B_{dst}*(1-a_{image}*a_{paint}*B_{image}))/a_{tmp}
 $$
 
-If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions α(αsrc, αdst) andc(csrc, cdst, αsrc, αdst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
+If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions Î±(Î±src, Î±dst) andc(csrc, cdst, Î±src, Î±dst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
 
-수식
+ìˆ˜ì‹
 
 10.9 Reading and Writing Drawing Surface Pixels
 <a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
@@ -693,7 +1640,7 @@ Table 13: Pixel Copy Functions
 #### vgSetPixels
 <a name="vgSetPixels"></a>
 
-The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
+The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
 
 ```c
 void vgSetPixels(VGint dx, VGint dy,
@@ -772,7 +1719,7 @@ vgDestroyImage(image);
 #### vgGetPixels
 <a name="vgGetPixels"></a>
 
-The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
+The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
 
 ```c
 void vgGetPixels(VGImage dst, VGint dx, VGint dy,
@@ -854,7 +1801,7 @@ vgDestroyImage(image);
 
 The `vgCopyPixels` function copies pixels from one region of the drawing surface toanother. Copies between overlapping regions are allowed and always produce consistentresults identical to copying the entire source region to a scratch buffer followed bycopying the scratch buffer into the destination region.
 
-The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 ≤ i < width$ and $0 ≤ j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
+The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 â‰¤ i < width$ and $0 â‰¤ j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
 
 ```c
 void vgCopyPixels(VGint dx, VGint dy,
@@ -890,9 +1837,9 @@ OpenVG can assist applications in text composition by hardware-accelerating glyp
 
 ## <a name="Chapter11.2"></a><a name="Font_Terminology"></a> _11.2 Font Terminology_
 
-In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term “character” refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet – a Latin character, Chinese character, etc.) while the term “glyph” refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
+In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term â€œcharacterâ€ refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet â€“ a Latin character, Chinese character, etc.) while the term â€œglyphâ€ refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
 
-When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data – a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
+When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data â€“ a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
 
 ## <a name="Chapter11.3"></a><a name="Glyph_Positioning_and_Text_Layout"></a> _11.3 Glyph Positioning and Text Layout_
 
@@ -904,7 +1851,7 @@ The glyph origin is not always located at the glyph boundary. Glyphs from variou
 
 <img src="figures/figure23a.PNG"/>
 
-The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the “advance width”, or _escapement_ of the previous character (see Figure 24 below).
+The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the â€œadvance widthâ€, or _escapement_ of the previous character (see Figure 24 below).
 
 <img src="figures/figure24.PNG"/>
 
@@ -922,7 +1869,7 @@ In some cases, the text composition requires that glyph layout and positioning b
 
 When two or more language scripts are used in the same text fragment, multiple adjustments for glyph positioning may be required. For example, Latin scripts have lowercase characters that have features descending below the text baseline, while Asian scripts typically have glyphs positioned on the baseline. When combining characters from these two scripts the position of the baseline for Asian characters should be adjusted.
 
-Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the “Nastaliq” style.
+Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the â€œNastaliqâ€ style.
 
 <img src="figures/figure26.PNG"/>
 
@@ -953,12 +1900,12 @@ Glyphs in a VGFont are identified by a glyph index, which is an arbitrary number
 
 - _Unicode character codes_
 
-When a `VGFont` is created as a subset that supports only simple language scripts (_e.g._, Latin, with simple one-to-one character-toglyph mapping), the character code values may be used as glyph indices. This eliminates the need for an additional mapping table and simplifies text rendering – a text string may be passed directly as an argument (as an array of glyph indices) to OpenVG API call
+When a `VGFont` is created as a subset that supports only simple language scripts (_e.g._, Latin, with simple one-to-one character-toglyph mapping), the character code values may be used as glyph indices. This eliminates the need for an additional mapping table and simplifies text rendering â€“ a text string may be passed directly as an argument (as an array of glyph indices) to OpenVG API call
 for text rendering.
 
 - _Native font glyph indices_
 
-OpenVG applications may re-use native glyph indices from an original TrueType or OpenType font when `VGFont` object is created – this simplifies text composition and layout decisions by re-using OpenType/TrueType layout and character-to-glyph mapping tables (and any platform-supplied text composition engine).
+OpenVG applications may re-use native glyph indices from an original TrueType or OpenType font when `VGFont` object is created â€“ this simplifies text composition and layout decisions by re-using OpenType/TrueType layout and character-to-glyph mapping tables (and any platform-supplied text composition engine).
 
 - _Application-defined (custom) glyph indices_
 
@@ -1029,7 +1976,7 @@ Implementations may improve the quality of text rendering by applying optional a
 
 It is recommended that when a path object defines the original unhinted glyph outline, the `scale` parameter of the path object should be set to a value of 1/units-per-EM to achieve the effective size of 1 pixel per EM. This allows path data to be independent of the design unit metrics and original font format, and simplifies affine transformations applied to a glyph. For example, applying an affine transform with the matrix elements $sx = sy = 12$ would result in scaling the glyph to 12 pixels (or 12 units in the surface coordinate system). Both the `glyphOrigin` and `escapement` values are scaled identically.
 
-Original font glyphs that are vector outlines are designed in a deviceindependent coordinate system (design units). The scale of the design coordinates is determined by the EM size (defined as “units-per-EM”) – a number that represents the distance between two adjacent, non-adjusted
+Original font glyphs that are vector outlines are designed in a deviceindependent coordinate system (design units). The scale of the design coordinates is determined by the EM size (defined as â€œunits-per-EMâ€) â€“ a number that represents the distance between two adjacent, non-adjusted
 baselines of text.
 
 If a path object defines a scaled and hinted glyph outline, its `scale` parameter should be set to 1. Since the process of scaling and hinting of original glyph outlines is based on fitting the outline contour's control points to the pixel grid of the destination surface, applying affine transformations to a path (other than translations mapped to the pixel grid in surface coordinate system) may reduce glyph legibility and should be avoided as much as possible.
@@ -1053,14 +2000,14 @@ void vgSetGlyphToPath(VGFont font,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 >
-> – if `path` is not a valid font handle or `VG_INVALID_HANDLE`, or is not shared
+> â€“ if `path` is not a valid font handle or `VG_INVALID_HANDLE`, or is not shared
 with the current context
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
+> â€“ if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
 aligned
 
 #### <a name="vgSetGlyphToImage"></a> _vgSetGlyphToImage_
@@ -1078,18 +2025,18 @@ void vgSetGlyphToImage(VGFont font,
 > ERRORS
 >
 > `VG_BAD_HANDLE_ERROR`
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 >
-> – if `image` is not a valid font handle or `VG_INVALID_HANDLE`, or is not
+> â€“ if `image` is not a valid font handle or `VG_INVALID_HANDLE`, or is not
 shared with the current context
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
-> – if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
+> â€“ if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
 aligned
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if `image` is currently a rendering target
+> â€“ if `image` is currently a rendering target
 
 #### <a name="vgClearGlyph"></a> _vgClearGlyph_
 
@@ -1103,10 +2050,10 @@ void vgClearGlyph (VGFont font, VGuint glyphIndex);
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `glyphIndex` is not defined for the `font`
+> â€“ if `glyphIndex` is not defined for the `font`
 
 ### <a name="Chapter11.4.5"></a><a name="Font_Sharing"></a> _11.4.5 Font Sharing_
 
@@ -1127,7 +2074,7 @@ In order to avoid additional complexity associated with character-to-glyph mappi
 
 ## <a name="Chapter11.5"></a><a name="Text_Layout_and_Rendering"></a> _11.5 Text Layout and Rendering_
 
-OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to “snap” glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
+OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to â€œsnapâ€ glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
 
 #### <a name="vgDrawGlyph"></a> _vgDrawGlyph_
 
@@ -1149,12 +2096,12 @@ void vgDrawGlyph(VGFont font, VGuint glyphIndex,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if font is not a valid font handle, or is not shared with the current context
+> â€“ if font is not a valid font handle, or is not shared with the current context
 `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `glyphIndex` has not been defined for a given font object
+> â€“ if `glyphIndex` has not been defined for a given font object
 >
-> – if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode`
+> â€“ if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode`
 enumeration, or 0
 
 #### <a name="vgDrawGlyphs"></a> _vgDrawGlyphs_
@@ -1183,20 +2130,20 @@ void vgDrawGlyphs(VGFont font,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if font is not a valid font handle, or is not shared with the current context
+> â€“ if font is not a valid font handle, or is not shared with the current context
 VG_ILLEGAL_ARGUMENT_ERROR
 >
-> – if glyphCount is zero or a negative value
+> â€“ if glyphCount is zero or a negative value
 >
-> – if the pointer to the glyphIndices array is NULL or is not properly
+> â€“ if the pointer to the glyphIndices array is NULL or is not properly
 aligned
 >
-> – if a pointer to either of the adjustments_x or adjustments_y arrays are
+> â€“ if a pointer to either of the adjustments_x or adjustments_y arrays are
 non-NULL and are not properly aligned
 >
-> – if any of the glyphIndices has not been defined in a given font object
+> â€“ if any of the glyphIndices has not been defined in a given font object
 >
-> – if paintModes is not a valid bitwise OR of values from the VGPaintMode
+> â€“ if paintModes is not a valid bitwise OR of values from the VGPaintMode
 enumeration, or 0
 
 # <a name="Chapter12"></a><a name="Image Filters"></a> 12 Image Filters
@@ -1212,7 +2159,7 @@ The source pixels are converted to one of `sRGBA`, `sRGBA_PRE`, `lRGBA`, or `lRG
 1. Source color and alpha values are scaled linearly to lie in a [0, 1] range. The exact precision of the internal representation is implementation-dependent.
 2. If the source image has premultiplied alpha, the alpha values are divided out of each source color channel, and stored for later use. If the source image has no alpha channel, an alpha value of 1 is added to each pixel.
 3. If the source pixel is in a grayscale format (`lL` or `sL`), it is converted to an RGB format (`lRGB` or `sRGB`, respectively) by replication.
-4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`→`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`→`sRGBA`).
+4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`â†’`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`â†’`sRGBA`).
 5. If the `VG_FILTER_FORMAT_PREMULTIPLIED` parameter is equal to `VG_TRUE`, each source color channel is multiplied by the corresponding alpha value. Otherwise, the color channels are left undisturbed.
 
 An implementation may collapse steps algebraically; for example, if no conversion is to take place in step 4, the division and multiplication by alpha in steps 2 and 5 may be implemented as a no-op.
@@ -1328,20 +2275,20 @@ void vgColorMatrix(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-– if either `dst` or `src` is not a valid image handle, or is not shared with the
+â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either dst or src is currently a rendering target
+> â€“ if either dst or src is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `matrix` is NULL
+> â€“ if `matrix` is NULL
 >
-> – if `matrix` is not properly aligned
+> â€“ if `matrix` is not properly aligned
 
 ## <a name="Chapter12.4"></a><a name="Convolution"></a> _12.4 Convolution_
 
@@ -1381,7 +2328,7 @@ $$
 s(\sum_{0\le i\lt w}\sum_{0\le j\lt h} k_{(w-i-1),(h-j-1)}p(x+i-shiftX,y+j-shiftY))+b,
 $$
 
-where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w–i–1, h–j–1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w – 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
+where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(wâ€“iâ€“1, hâ€“jâ€“1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w â€“ 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
 
 The operation is applied to all channels (color and alpha) independently. Version 1.1
 
@@ -1401,26 +2348,26 @@ void vgConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> â€“ if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_KERNEL_SIZE`
 >
-> – if `kernel` is NULL
+> â€“ if `kernel` is NULL
 >
-> – if `kernel` is not properly aligned
+> â€“ if `kernel` is not properly aligned
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgSeparableConvolve"></a> _vgSeparableConvolve_
@@ -1433,7 +2380,7 @@ The output pixel $(x, y)$ is defined as:
 
 
 
-where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w–i–1)$ and $(h–j–1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
+where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(wâ€“iâ€“1)$ and $(hâ€“jâ€“1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
 
 ```c
 void vgSeparableConvolve(VGImage dst, VGImage src,
@@ -1450,26 +2397,26 @@ void vgSeparableConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> â€“ if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_SEPARABLE_KERNEL_SIZE`
 >
-> – if `kernelX` or `kernelY` is NULL
+> â€“ if `kernelX` or `kernelY` is NULL
 >
-> – if `kernelX` or `kernelY` is not properly aligned
+> â€“ if `kernelX` or `kernelY` is not properly aligned
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgGaussianBlur"></a> _vgGaussianBlur_
@@ -1501,22 +2448,22 @@ void vgGaussianBlur(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
+> â€“ if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
 >
 > than `VG_MAX_GAUSSIAN_STD_DEVIATION`
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 ## <a name="Chapter12.5"></a><a name="Lookup Tables"></a> _12.5 Lookup Tables_
@@ -1543,18 +2490,18 @@ void vgLookup(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if any pointer parameter is NULL
+> â€“ if any pointer parameter is NULL
 
 #### <a name="vgLookupSingle"></a> _vgLookupSingle_
 
@@ -1576,24 +2523,24 @@ void vgLookupSingle(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
+> â€“ if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
 `VG_GREEN`, `VG_BLUE` or `VG_ALPHA` from the `VGImageChannel`
 enumeration
 >
-> – if `lookupTable` is NULL
+> â€“ if `lookupTable` is NULL
 >
-> – if `lookupTable` is not properly aligned
+> â€“ if `lookupTable` is not properly aligned
 
 # <a name="13_Color_Transformation_and_Blending"></a> 13 Color Transformation and Blending
 
@@ -1656,10 +2603,10 @@ _Table 15: Porter-Duff Blending Modes_
 
 A number of additional blending modes are available. These modes are a subset of the SVG image blending modes. Note that the SVG "Normal" blending mode is equivalent to the Porter-Duff "Src **over** Dst" mode described above. The additional blend modes have the following effects:
 
-- `VG_BLEND_MULTIPLY` – Multiply the source and destination colors together, producing the effect of placing a transparent filter over a background. A black source pixel forces the destination to black, while a white source pixel leaves the destination unchanged. If all alpha values are 1, this reduces to multiplying the source and destination color values.
-- `VG_BLEND_SCREEN` – The opposite of multiplication, producing the effect of projecting a slide over a background. A black source pixel leaves the destination unchanged, while a white source pixel forces the destination to white. If all alpha values are 1, this reduces to adding the source and destination color values, and subtracting their product.
-- `VG_BLEND_DARKEN` – Compute (Src **over** Dst) and (Dst **over** Src) and take the smaller (darker) value for each channel. If all alpha values are 1, this reduces to choosing the smaller value for each color channel.
-- `VG_BLEND_LIGHTEN` – Compute (Src **over** Dst) and (Dst **over** Src) and take the larger (lighter) value for each channel. If all alpha values are 1, this reduces to choosing the larger value for each color channel.
+- `VG_BLEND_MULTIPLY` â€“ Multiply the source and destination colors together, producing the effect of placing a transparent filter over a background. A black source pixel forces the destination to black, while a white source pixel leaves the destination unchanged. If all alpha values are 1, this reduces to multiplying the source and destination color values.
+- `VG_BLEND_SCREEN` â€“ The opposite of multiplication, producing the effect of projecting a slide over a background. A black source pixel leaves the destination unchanged, while a white source pixel forces the destination to white. If all alpha values are 1, this reduces to adding the source and destination color values, and subtracting their product.
+- `VG_BLEND_DARKEN` â€“ Compute (Src **over** Dst) and (Dst **over** Src) and take the smaller (darker) value for each channel. If all alpha values are 1, this reduces to choosing the smaller value for each color channel.
+- `VG_BLEND_LIGHTEN` â€“ Compute (Src **over** Dst) and (Dst **over** Src) and take the larger (lighter) value for each channel. If all alpha values are 1, this reduces to choosing the larger value for each color channel.
 
 The new destination alpha value for the blending modes defined in this section is always equal to $\alpha (\alpha_{src}, \alpha_{dst})=\alpha_{src}+\alpha_{dst}*(1-\alpha_{src})$, as for Porter-Duff "Src **over** Dst" blending. The formulas for each additional blending mode are shown in Table 16. The right-hand column contains the pre-multiplied output values, that is, the products of the new color value $c(c_{src}, c_{dst}, \alpha_{src}, \alpha_{dst})$ and alpha value $\alpha(\alpha_{src}, \alpha_{dst})$. The source and destination color values $c_{src}$ and $c_{dst}$ are given in non-premultiplied form.
 
@@ -1767,10 +2714,10 @@ Khronos, or its designee, will maintain a publicly-accessible registry of extens
 * Authorship information and revision history
 
 ## 15.3 Using Extensions
-Extensions may be detected statically, by means of preprocessor symbols, or dynamically, by means of the **vgGetString** function. Extension functions may be included in application code statically by placing appropriate “#ifdef” directives around functions that require the presence of a particular extension, and may also be accessed dynamically through function pointers returned by **eglGetProcAddress** or by other platform-specific means.
+Extensions may be detected statically, by means of preprocessor symbols, or dynamically, by means of the **vgGetString** function. Extension functions may be included in application code statically by placing appropriate â€œ#ifdefâ€ directives around functions that require the presence of a particular extension, and may also be accessed dynamically through function pointers returned by **eglGetProcAddress** or by other platform-specific means.
 
 ### 15.3.1 Accessing Extensions Statically
-The extensions defined by a given platform are defined in the `openvg.h` header file, or in header files automatically included by `openvg.h`. In order to write applications that run on platforms with and without a given extension, conditional compilation based on the presence of the extension’s preprocessor macro may be used:
+The extensions defined by a given platform are defined in the `openvg.h` header file, or in header files automatically included by `openvg.h`. In order to write applications that run on platforms with and without a given extension, conditional compilation based on the presence of the extensionâ€™s preprocessor macro may be used:
 ``````C
 #ifdef OVG_EXT_my_extension
   vgMyExtensionFuncEXT(...);
@@ -1796,7 +2743,7 @@ The **vgGetString** function returns information about the OpenVG implementation
 The combination of `VG_VENDOR` and `VG_RENDERER` may be used together as a platform identifier by applications that wish to recognize a particular platform and adjust their algorithms based on prior knowledge of platform bugs and performance characteristics .
 If `name` is `VG_VENDOR`, the name of company responsible for this OpenVG implementation is returned. This name does not change from release to release.
 If `name` is `VG_RENDERER`, the name of the renderer is returned. This name is typically specific to a particular configuration of a hardware platform, and does not change from release to release.
-If `name` is `VG_VERSION`, the version number of the specification implemented by the renderer is returned as a string in the form _major_number.minor_number_. For this specification, “1.1” is returned.
+If `name` is `VG_VERSION`, the version number of the specification implemented by the renderer is returned as a string in the form _major_number.minor_number_. For this specification, â€œ1.1â€ is returned.
 If `name` is `VG_EXTENSIONS`, a space-separated list of supported extensions to OpenVG is returned.
 For other values of name, `NULL` is returned.
 ``````
@@ -1838,7 +2785,7 @@ Certain portions of the API are required to produce exact results. For example, 
 The conformance suite will exercise various matrix operations and compare the results against double-precision values. The comparison threshold will be set to exclude implementations with insufficient internal precision.
 
 ### 16.2.4 Interior/Exterior Tests
-Although antialiasing may have varying effects on shape boundaries, the portions of the interior and exterior of shapes that are more than 1 ½ pixels from a geometric boundary should not be affected by that boundary. If a shape is drawn using color paint, a set of known interior and exterior pixels may be tested for equality with the paint color.
+Although antialiasing may have varying effects on shape boundaries, the portions of the interior and exterior of shapes that are more than 1 Â½ pixels from a geometric boundary should not be affected by that boundary. If a shape is drawn using color paint, a set of known interior and exterior pixels may be tested for equality with the paint color.
 
 ### 16.2.5 Positional Invariance
 Drawing should not depend on absolute screen coordinates, except for minor differences due to spatially-variant sampling and dither patterns when copying to the screen. The conformance suite will include tests that verify the positional independence of drawing.
@@ -1876,7 +2823,7 @@ typedef enum {
 
 ## 17.1 Higher-level Geometric Primitives
 
-The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, Bézier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
+The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, BÃ©zier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
 
 ### 17.1.1 Lines
 
@@ -1970,13 +2917,13 @@ The **vguRoundRect** function appends an axis-aligned round-cornered rectangle w
 ROUNDRECT(x, y, w, h, arcWidth, arcHeight):
 
 MOVE_TO_ABS (x + arcWidth/2), y
-HLINE_TO_REL width – arcWidth
+HLINE_TO_REL width â€“ arcWidth
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, arcWidth/2, arcHeight/2
-VLINE_TO_REL height – arcHeight
+VLINE_TO_REL height â€“ arcHeight
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, -arcWidth/2, arcHeight/2
-HLINE_TO_REL -(width – arcWidth)
+HLINE_TO_REL -(width â€“ arcWidth)
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, -arcWidth/2, -arcHeight/2
-VLINE_TO_REL -(height – arcHeight)
+VLINE_TO_REL -(height â€“ arcHeight)
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, arcWidth/2, -arcHeight/2
 CLOSE_PATH
 ``````
@@ -1985,11 +2932,11 @@ If `arcWidth` is less than 0, it is clamped to 0. If `arcWidth` is greater than 
 
 > **ERRORS**
 > `VGU_BAD_HANDLE_ERROR`
-> – if `path` is not a valid path handle, or is not shared with the current context
+> â€“ if `path` is not a valid path handle, or is not shared with the current context
 > `VGU_PATH_CAPABILITY_ERROR`
-> – if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
+> â€“ if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
-> – if `width` or `height` is less than or equal to 0
+> â€“ if `width` or `height` is less than or equal to 0
 
 
 <img src="figures/figure28.png"/>
@@ -2017,20 +2964,20 @@ VGUErrorCode vguEllipse(VGPath path, VGfloat cx, VGfloat cy,
 
 > **ERRORS**
 > `VGU_BAD_HANDLE_ERROR`
-> – if `path` is not a valid path handle, or is not shared with the current context
+> â€“ if `path` is not a valid path handle, or is not shared with the current context
 > `VGU_PATH_CAPABILITY_ERROR`
-> – if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
+> â€“ if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
-> – if `width` or `height` is less than or equal to 0
+> â€“ if `width` or `height` is less than or equal to 0
 
 ### 17.1.6 Arcs
 
 #### VGUArcType
 
 The `VGUArcType` enumeration defines three values to control the style of arcs drawn by the **vguArc** function:
-`VGU_ARC_OPEN` – arc segment only
-`VGU_ARC_CHORD` – arc, plus line between arc endpoints
-`VGU_ARC_PIE` – arc, plus lines from each endpoint to the ellipse center.
+`VGU_ARC_OPEN` â€“ arc segment only
+`VGU_ARC_CHORD` â€“ arc, plus line between arc endpoints
+`VGU_ARC_PIE` â€“ arc, plus lines from each endpoint to the ellipse center.
 
 <img src="figures/figure29.png"/>
 _Figure 29: `VGUArcType` Value_
@@ -2053,7 +3000,7 @@ if (angleExtent > 0) {
   SCCWARC_TO_ABS w/2, h/2, 0, x+cos(last)*w/2, y+sin(last)*h/2
 }
 else {
-  angle = startAngle – 180
+  angle = startAngle â€“ 180
   while (angle > last) {
     SCWARC_TO_ABS w/2, h/2, 0, x+cos(angle)*w/2, y+sin(angle)*h/2
     angle -= 180
@@ -2073,11 +3020,11 @@ VGUErrorCode vguArc(VGPath path, VGfloat x, VGfloat y, VGfloat width, VGfloat he
 
 > **ERRORS**
 > `VGU_BAD_HANDLE_ERROR`
-> – if `path` is not a valid path handle, or is not shared with the current context  `VGU_PATH_CAPABILITY_ERROR`
-> – if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
+> â€“ if `path` is not a valid path handle, or is not shared with the current context  `VGU_PATH_CAPABILITY_ERROR`
+> â€“ if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for `path`
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
-> – if `width` or `height` is less than or equal to 0
-> – if `arcType` is not one of the values from the `VGUArcType` enumeration
+> â€“ if `width` or `height` is less than or equal to 0
+> â€“ if `arcType` is not one of the values from the `VGUArcType` enumeration
 
 
 <img src="figures/figure30.png"/>
@@ -2105,10 +3052,10 @@ VGUErrorCode vguComputeWarpQuadToSquare(VGfloat sx0, VGfloat sy0,
 
 > **ERRORS**
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
-> – if `matrix` is NULL
-> – if `matrix` is not properly aligned
+> â€“ if `matrix` is NULL
+> â€“ if `matrix` is not properly aligned
 > `VGU_BAD_WARP_ERROR`
-> – if no non-degenerate transformation satisfies the constraints
+> â€“ if no non-degenerate transformation satisfies the constraints
 
 #### vguComputeWarpSquareToQuad
 The **vguComputeWarpSquareToQuad** function sets the entries of matrix to a
@@ -2142,10 +3089,10 @@ VGUErrorCode vguComputeWarpQuadToQuad(VGfloat dx0, VGfloat dy0,
 
 > **ERRORS**
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
-> – if `matrix` is NULL
-> – if `matrix` is not properly aligned
+> â€“ if `matrix` is NULL
+> â€“ if `matrix` is not properly aligned
 > `VGU_BAD_WARP_ERROR`
-> – if no non-degenerate transformation satisfies the constraints
+> â€“ if no non-degenerate transformation satisfies the constraints
 
 # Appendix A MATRIX math
 ??? TO DO EDIT
@@ -2163,7 +3110,7 @@ This section defines minimal C language header files for the type definitions an
 * *
 * Sample implementation of openvg.h, version 1.1 *
 * *
-* Copyright © 2008 The Khronos Group Inc. *
+* Copyright Â© 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
@@ -2847,7 +3794,7 @@ VG_API_CALL const VGubyte * VG_APIENTRY
 * *
 * Sample implementation of vgu.h, version 1.1 *
 * *
-* Copyright © 2008 The Khronos Group Inc. *
+* Copyright Â© 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
@@ -2962,11 +3909,11 @@ Version
 **ADOB06a** Adobe Systems Incorporated: PDF Reference (sixth edition): http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference.pdf
 **ADOB06b** Adobe Systems Incorporated, Flash Developer Center: http://www.adobe.com/devnet/flash
 **FvDFH95** Foley J., A. van Dam, S. Feiner and J. Hughes, Computer Graphics: Principles and Practice (second edition), Addison-Wesley, Reading, MA, 1995.
-**HECK89** Heckbert, Paul, Fundamentals of Texture Mapping and Image Warping, Master’s thesis, UCB/CSD 89/516, CS Division, U.C. Berkeley, June 1989.
+**HECK89** Heckbert, Paul, Fundamentals of Texture Mapping and Image Warping, Masterâ€™s thesis, UCB/CSD 89/516, CS Division, U.C. Berkeley, June 1989.
 **ITU90** Recommendation ITU-R BT.709, Basic Parameter Values for the HDTV Standard for the Studio and for International Programme Exchange (1990), ITU, Geneva, Switzerland.
-**PORT84** Porter, T. and T. Duff, “Compositing Digital Images,” Computer Graphics 18(3):253-259 (proc. SIGGRAPH 1984), July 1984.
+**PORT84** Porter, T. and T. Duff, â€œCompositing Digital Images,â€ Computer Graphics 18(3):253-259 (proc. SIGGRAPH 1984), July 1984.
 **POYN03** Poynton, Charles, Digital Video and HDTV Algorithms and Interfaces, Morgan Kaufmann, San Francisco, 2003.
-**sRGB99** IEC 61966-2-1, Multimedia systems and equipment — Colour measurement and management — Part 2-1: Default RGB colour space — sRGB: http://www.w3.org/Graphics/Color/sRGB.html
+**sRGB99** IEC 61966-2-1, Multimedia systems and equipment â€” Colour measurement and management â€” Part 2-1: Default RGB colour space â€” sRGB: http://www.w3.org/Graphics/Color/sRGB.html
 **SUN04** Sun Microsystems, Inc., Java 2D API Home Page: http://java.sun.com/products/java-media/2D
 **SVGF05** W3C Recommendation, Scalable Vector Graphics (SVG) Full 1.2 Specification: http://www.w3.org/TR/SVG12
 **SVGT06** W3C Recommendation, Scalable Vector Graphics (SVG) Tiny 1.2 Specification: http://www.w3.org/TR/SVGMobile12
@@ -2978,48 +3925,48 @@ Version
 Version 1.1 ratified December 2008
 
 Changes from version 1.0.1 to version 1.1 (by section number):
-* 3.4 – intermediate pipeline values are clamped
-* 3.5 – add `VGFontParamType` types
-* 3.6 – add `VGFont` handle type
-* 5.2.1 – add `VG_GLYPH_ORIGIN` and `VG_MATRIX_GLYPH_USER_TO_SURFACE`
-* 6.6 – add `VG_MATRIX_GLYPH_USER_TO_SURFACE` to `VGMatrixMode`
-* 7.2 – add Mask and Mask Layer functions and datatypes
-* 9 – glyphs use the glyph-user-to-surface transformation
-* 10.2 – add `VG_A_1` and `VG_A_4` image formats
-* 11 – add Text chapter, renumber following chapters
-* 12.4 – lower minimum value for `VG_MAX_GAUSSIAN_ST_DEVIATION`
+* 3.4 â€“ intermediate pipeline values are clamped
+* 3.5 â€“ add `VGFontParamType` types
+* 3.6 â€“ add `VGFont` handle type
+* 5.2.1 â€“ add `VG_GLYPH_ORIGIN` and `VG_MATRIX_GLYPH_USER_TO_SURFACE`
+* 6.6 â€“ add `VG_MATRIX_GLYPH_USER_TO_SURFACE` to `VGMatrixMode`
+* 7.2 â€“ add Mask and Mask Layer functions and datatypes
+* 9 â€“ glyphs use the glyph-user-to-surface transformation
+* 10.2 â€“ add `VG_A_1` and `VG_A_4` image formats
+* 11 â€“ add Text chapter, renumber following chapters
+* 12.4 â€“ lower minimum value for `VG_MAX_GAUSSIAN_ST_DEVIATION`
 * 2.8, 13.1 add Color Transformation pipeline stage
 
 Version 1.0.1 ratified January 2007
 
 Changes from version 1.0 to version 1.0.1 (by section number):
-* 3.2 – clarification: `VGboolean` is an enumeration
-* 3.4.1 – provide further explanation of linear pixel formats
-* 5.2 – new behavior: restrict values of count parameter in vgGet/Set*v, vgGet/SetParameter*v; describe error behavior of getters
-* 5.2.1 – change default value of `VG_FILTER_FORMAT_LINEAR` and `VG_RENDERING_QUALITY`; add `VG_SCREEN_LAYOUT` parameter; add `VG_STROKE_DASH_PHASE_RESET` parameter
-* 6.2 – define behavior of `VG_SCREEN_LAYOUT` parameter
+* 3.2 â€“ clarification: `VGboolean` is an enumeration
+* 3.4.1 â€“ provide further explanation of linear pixel formats
+* 5.2 â€“ new behavior: restrict values of count parameter in vgGet/Set*v, vgGet/SetParameter*v; describe error behavior of getters
+* 5.2.1 â€“ change default value of `VG_FILTER_FORMAT_LINEAR` and `VG_RENDERING_QUALITY`; add `VG_SCREEN_LAYOUT` parameter; add `VG_STROKE_DASH_PHASE_RESET` parameter
+* 6.2 â€“ define behavior of `VG_SCREEN_LAYOUT` parameter
 * 8.3.4-5 clarify join behavior for smooth segments following line segments
-* 8.4 – change behavior of elliptical arcs with one radius equal to 0
-* 8.5 – typo: `VG_PATH_FORMAT_STANDARD` is passed to vgCreatePath, not vgAppendPathData
-* 8.5.2 – clarification: conversion of path segments from relative to absolute form takes place during rendering
-* 8.6.7-8– new behavior: vgTransformPath and vgInterpolatePath promote HLINE and VLINE segments to general (2- coordinate) form; the parameterization of transformed elliptical arc segments is undefined
-* 8.6.11 – clarification: normalization of tangents; approximate computation of path length
-* 8.7.1 – clarification: implicit closure takes place during rendering
-* 8.7.3 – clarification: definition and illustration of the miter length
-* 8.7.4 – clarification: stroke generation takes place in user coordinates.
-* 8.7.4-5– Add new behavior controlled by `VG_STROKE_DASH_PHASE_RESET`
-* 9 – paint coordinates must be evaluated within 1/8 of a pixel; clarify source of user transform Tu
-* 9.3.3 – add `VG_PAINT_COLOR_RAMP_PREMULTIPLIED` flag to control whether gradient colors are interpolated in premultiplied form
-* 9.3.3 – new behavior: count must be a multiple of 5 in vgSetParameter for color ramp stops (see 5.2); simplify description of rules for repeat and reflect pad modes
-* 10.2 – add new values to `VGImageFormat` enumeration
-* 10.5 – clarification: vgImageSubData clamps premultiplied color values to their corresponding alpha values
-* 10.8 – clarify behavior of `VG_DRAW_IMAGE_NORMAL` when the source has an alpha channel; new behavior: when a projective transformation is enabled, vgDrawImage always uses `VG_DRAW_IMAGE_NORMAL` mode; clarify behavior when a linear source image is used in `VG_DRAW_IMAGE_MULTIPLY` mode
-* 10.9.1 – clarification: vgWritePixels clamps premultiplied color values to their corresponding alpha values
-* 12.4 – clarification: input color values are clamped at 1
-* 14.3.2 – clarify display dependency of vgGetString
-* 14.3.2 – vgGetString(`VG_VERSION`) returns the specification version.
-* 16.1.6 – typo: error in vguArc pseudo-code
-* 18 – remove enumerated values `VG_PATH_DATATYPE_INVALID` and `VG_IMAGE_FORMAT_INVALID` Version 1.0 ratified August 2005
+* 8.4 â€“ change behavior of elliptical arcs with one radius equal to 0
+* 8.5 â€“ typo: `VG_PATH_FORMAT_STANDARD` is passed to vgCreatePath, not vgAppendPathData
+* 8.5.2 â€“ clarification: conversion of path segments from relative to absolute form takes place during rendering
+* 8.6.7-8â€“ new behavior: vgTransformPath and vgInterpolatePath promote HLINE and VLINE segments to general (2- coordinate) form; the parameterization of transformed elliptical arc segments is undefined
+* 8.6.11 â€“ clarification: normalization of tangents; approximate computation of path length
+* 8.7.1 â€“ clarification: implicit closure takes place during rendering
+* 8.7.3 â€“ clarification: definition and illustration of the miter length
+* 8.7.4 â€“ clarification: stroke generation takes place in user coordinates.
+* 8.7.4-5â€“ Add new behavior controlled by `VG_STROKE_DASH_PHASE_RESET`
+* 9 â€“ paint coordinates must be evaluated within 1/8 of a pixel; clarify source of user transform Tu
+* 9.3.3 â€“ add `VG_PAINT_COLOR_RAMP_PREMULTIPLIED` flag to control whether gradient colors are interpolated in premultiplied form
+* 9.3.3 â€“ new behavior: count must be a multiple of 5 in vgSetParameter for color ramp stops (see 5.2); simplify description of rules for repeat and reflect pad modes
+* 10.2 â€“ add new values to `VGImageFormat` enumeration
+* 10.5 â€“ clarification: vgImageSubData clamps premultiplied color values to their corresponding alpha values
+* 10.8 â€“ clarify behavior of `VG_DRAW_IMAGE_NORMAL` when the source has an alpha channel; new behavior: when a projective transformation is enabled, vgDrawImage always uses `VG_DRAW_IMAGE_NORMAL` mode; clarify behavior when a linear source image is used in `VG_DRAW_IMAGE_MULTIPLY` mode
+* 10.9.1 â€“ clarification: vgWritePixels clamps premultiplied color values to their corresponding alpha values
+* 12.4 â€“ clarification: input color values are clamped at 1
+* 14.3.2 â€“ clarify display dependency of vgGetString
+* 14.3.2 â€“ vgGetString(`VG_VERSION`) returns the specification version.
+* 16.1.6 â€“ typo: error in vguArc pseudo-code
+* 18 â€“ remove enumerated values `VG_PATH_DATATYPE_INVALID` and `VG_IMAGE_FORMAT_INVALID` Version 1.0 ratified August 2005
 
 # 22 Acknowledgments
 
@@ -3027,33 +3974,33 @@ This specification and the accompanying conformance test suite were developed by
 Khronos OpenVG working group:
 * Andrzej Mamona, AMD, Chair
 * Daniel Rice, Google, Specification Editor
-* Koichi Mori (森 浩一), Nokia, Past Chair
+* Koichi Mori (æ£® æµ©ä¸€), Nokia, Past Chair
 * Neil Trevett, NVIDIA, Past Chair
 * Tomi Aarnio, Nokia
 * Jay Abbott, Tao Group
 * Mike Agar, ALT Software
 * Mathias Agopian, PalmSource
-* Christofer Åkersten, Ikivo
-* Espen Åmodt, ARM
+* Christofer Ã…kersten, Ikivo
+* Espen Ã…modt, ARM
 * Ola Andersson, Ikivo
 * Michael Antonov, Scaleform
-* Rémi Arnaud, SONY
+* RÃ©mi Arnaud, SONY
 * Ben Bowman, Imagination Technologies
 * Mark Callow, HI Corporation
 * Chris Campbell, Sun Microsystems
-* Tolga Çapın, Nokia
-* TK Chan (陳鼎鍵), AMD
+* Tolga Ã‡apÄ±n, Nokia
+* TK Chan (é™³é¼Žéµ), AMD
 * Suresh Chitturi, Nokia
-* Hang-Shin Cho (조 항신), LG Electronics
+* Hang-Shin Cho (ì¡° í•­ì‹ ), LG Electronics
 * Angus Dorbie, Qualcomm
 * Sean Ellis, Superscape
 * Jerry Evans, Sun Microsystems
 * Simon Fenney, Imagination Technologies
 * Chris Grimm, AMD
-* Masaki Hamada (濱田 雅樹), Mitsubishi Electric
-* Antti Hätälä, NVIDIA
+* Masaki Hamada (æ¿±ç”° é›…æ¨¹), Mitsubishi Electric
+* Antti HÃ¤tÃ¤lÃ¤, NVIDIA
 * Frode Heggelund, ARM
-* Toshiki Hijjri (樋尻 利紀), Panasonic
+* Toshiki Hijjri (æ¨‹å°» åˆ©ç´€), Panasonic
 * Harri Holopainen, NVIDIA
 * Brendan Iribe, Scaleform
 * Rakesh Jain, NVIDIA
@@ -3063,20 +4010,20 @@ Khronos OpenVG working group:
 * Tero Karras, NVIDIA
 * Sila Kayo, Nokia
 * Petri Kero, NVIDIA
-* San-Soo Kim (김 산수), Wow4M
-* Sung-Jae Kim (김 성재), Wow4M
-* Woo-Seon Kim (김 우섭), LG Electronics
-* Yong-Moo Kim (김 용무), LG Electronics
-* Keisuke Kiri (桐井 敬祐), DMP
+* San-Soo Kim (ê¹€ ì‚°ìˆ˜), Wow4M
+* Sung-Jae Kim (ê¹€ ì„±ìž¬), Wow4M
+* Woo-Seon Kim (ê¹€ ìš°ì„­), LG Electronics
+* Yong-Moo Kim (ê¹€ ìš©ë¬´), LG Electronics
+* Keisuke Kiri (æ¡äº• æ•¬ç¥), DMP
 * Kimball, ETRI
 * Claude Knaus, Esmertec
 * Marko Laiho, AMD
-* Hwanyong Lee (이 환용), HUONE
-* Junyoung Lee (이 준영), HUONE
-* Keechang Lee (이 기창), Samsung
+* Hwanyong Lee (ì´ í™˜ìš©), HUONE
+* Junyoung Lee (ì´ ì¤€ì˜), HUONE
+* Keechang Lee (ì´ ê¸°ì°½), Samsung
 * Jon Leech, EGL Specification Editor
 * Vladimir Levantovsky, Monotype Imaging
-* Jitaek Lim (임 지택), Samsung
+* Jitaek Lim (ìž„ ì§€íƒ), Samsung
 * Borgar Ljosland, ARM
 * Axel Mamode, SONY
 * Tom McReynolds, NVIDIA
@@ -3085,10 +4032,10 @@ Khronos OpenVG working group:
 * Ville Miettinen, NVIDIA
 * Clay Montgomery, Nokia
 * Brian Murray, Freescale
-* Hiroyasu Negishi (根岸 博康), Mitsubishi Electric
+* Hiroyasu Negishi (æ ¹å²¸ åšåº·), Mitsubishi Electric
 * Toshio Nishidai, TAKUMI
 * Petri Nordlund, AMD
-* Eisaku Oobuchi (大渕 栄作), DMP
+* Eisaku Oobuchi (å¤§æ¸• æ „ä½œ), DMP
 * Tom Olson, Texas Instruments
 * Gary Pallett, NVIDIA
 * Robert Palmer, Symbian
@@ -3099,17 +4046,17 @@ Khronos OpenVG working group:
 * Kari Pulli, Nokia
 * Christophe Quarre, STMicroelectronics
 * Kalle Raita, NVIDIA
-* Jussi Räsänen, NVIDIA
+* Jussi RÃ¤sÃ¤nen, NVIDIA
 * Allan Ristow, Monotype Imaging
 * Lane Roberts, Symbian
 * Tero Sarkkinen, Futuremark
-* Yoshikazu Saka (坂 義和), Fujitsu
+* Yoshikazu Saka (å‚ ç¾©å’Œ), Fujitsu
 * Kimihiko Sato, AMD
 * Thor Arne Gald Semb, ARM
 * Maxim Shemanarev, Scaleform
 * Robert Simpson, AMD, Specification Editor
-* Jacob Ström, Ericsson
-* Hyunchan Sung(성 현찬), HUONE
+* Jacob StrÃ¶m, Ericsson
+* Hyunchan Sung(ì„± í˜„ì°¬), HUONE
 * Thomas Tannert, SGI
 * Ray Taylor, NDS
 * Chris Tremblay, Motorola
@@ -3120,11 +4067,11 @@ Khronos OpenVG working group:
 * Leon Weng, STMicro
 * Chris Wynn, NVIDIA
 * Randy Xu, Intel
-* Naoya Yamamoto (山本 直也), HI Corporation
-* Kwang-Ho Yang (양 광호), ETRI
+* Naoya Yamamoto (å±±æœ¬ ç›´ä¹Ÿ), HI Corporation
+* Kwang-Ho Yang (ì–‘ ê´‘í˜¸), ETRI
 
 Special thanks to Vladimir Levantovsky of Monotype Imaging for the design and specification of the Text API.
-Special thanks to Tero Karras and Jussi Räsänen of NVIDIA; Petri Nordlund, Robert Simpson, and Mika Tuomi of AMD (formerly Bitboys); and Tuomas Lukka, Jarno Paananen, and Sami Tammilehto of the former Bitboys Technology Research Group for creating the reference implementations; and to those who contributed to the conformance test suite: Hwanyong Lee, Junyoung Lee, and Hyunchan Sung of HUONE; TK Chan, Robert Simpson, Valtteri Rantala, Sami Tammilehto, Mika Tuomi, and Miikka Kangasluoma of AMD; Tero Karras, Jussi Räsänen and Kalle Raita of NVIDIA, Vladimir Levantovsky of Monotype Imaging and Toshio Nishidai of TAKUMI
+Special thanks to Tero Karras and Jussi RÃ¤sÃ¤nen of NVIDIA; Petri Nordlund, Robert Simpson, and Mika Tuomi of AMD (formerly Bitboys); and Tuomas Lukka, Jarno Paananen, and Sami Tammilehto of the former Bitboys Technology Research Group for creating the reference implementations; and to those who contributed to the conformance test suite: Hwanyong Lee, Junyoung Lee, and Hyunchan Sung of HUONE; TK Chan, Robert Simpson, Valtteri Rantala, Sami Tammilehto, Mika Tuomi, and Miikka Kangasluoma of AMD; Tero Karras, Jussi RÃ¤sÃ¤nen and Kalle Raita of NVIDIA, Vladimir Levantovsky of Monotype Imaging and Toshio Nishidai of TAKUMI
 
 Thanks are also due to the external reviewers who helped to improve the specification.
 
@@ -3205,9 +4152,9 @@ Figure 28: Round Rectangle Parameters...........................................
 Figure 29: VGUArcType Values.................................................................................205
 Figure 30: vguArc Parameters....................................................................................207
 =======
-$$v'_{repeat} = v−|v|$$
+$$v'_{repeat} = vâˆ’|v|$$
 
-In reflect mode, the offset value v is mapped to a new value v´ that is guaranteed to liebetween 0 and 1. Following this mapping, the color is defined as for pad mode:
+In reflect mode, the offset value v is mapped to a new value vÂ´ that is guaranteed to liebetween 0 and 1. Following this mapping, the color is defined as for pad mode:
 
 $$
 v'_{reflect} =
@@ -3241,7 +4188,7 @@ Figure 22: Color Ramp used for Gradient Examples
 ## 9.4 Pattern Paint
 <a name="Pattern_Paint"></a>
 
-Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + ½, y + ½).
+Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + Â½, y + Â½).
 
 Filtering may be used to construct an interpolated pattern value at the sample point,based on the pattern image pixel values. The pattern tiling mode is used to define valuesfor pixel centers in the pattern space that lie outside of the bounds of the pattern.
 
@@ -3281,11 +4228,11 @@ The `VGTilingMode` enumeration defines possible methods for defining colors fors
 
 The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range.
 
-The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, width– 1)), max(0, min(y, height – 1))).
+The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, widthâ€“ 1)), max(0, min(y, height â€“ 1))).
 
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator ‘a mod b’ returns a value between 0 and(b – 1) such that a = k*b + (a mod b) for some integer k.
+The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator â€˜a mod bâ€™ returns a value between 0 and(b â€“ 1) such that a = k*b + (a mod b) for some integer k.
 
-The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x’, y’) where:
+The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(xâ€™, yâ€™) where:
 
 $$
 x' =
@@ -3343,7 +4290,7 @@ Images are rectangular collections of pixels. Image data may be inserted or extr
 
 An image defines a coordinate system in which pixels are indexed using integercoordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the ycoordinate increases vertically from bottom to top. Note that this orientation is consistentwith the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
-The “energy” of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + ½, y + ½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers.
+The â€œenergyâ€ of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + Â½, y + Â½). The color at a point not located at a pixelcenter may be defined by applying a suitable filter to the colors defined at a set of nearbypixel centers.
 
 ## 10.2 Image Formats
 <a name="Image_Formats"></a>
@@ -3402,7 +4349,7 @@ typedef enum {
 } VGImageFormat;
 ```
 
-The letter A denotes an alpha (α) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues in premultiplied format.
+The letter A denotes an alpha (Î±) channel , R denotes red, G denotes green, and Bdenotes blue. X denotes a padding byte that is ignored. L denotes grayscale, and BWdenotes (linear) bi-level grayscale (black-and-white), with 0 representing black and 1representing white in either case. A lower-case letter s represents a non-linear,perceptually-uniform color space, as in sRGB and sL; a lower-case letter l represents alinear color space using the sRGB primaries. Formats with a suffix of _PRE store pixelvalues in premultiplied format.
 
 Bit 6 of the numeric values of the enumeration indicates the position of the alpha channel(or unused byte for formats that do not include alpha). If bit 6 is disabled, the alpha orunused channel appears as the last channel, otherwise it appears as the first channel. Bit 7indicates the ordering of the RGB color channels. If bit 7 is disabled, the color channelsappear in RGB order, otherwise they appear in BGR order.
 
@@ -3553,7 +4500,7 @@ VGImage vgCreateImage(VGImageFormat format,
 #### vgDestroyImage
 <a name="vgDestoryImage"></a>
 
-The resources associated with an image may be deallocated by callin `vgDestroyImage`. Following the call, the image handle is no longer valid in anycontext that shared it. If the image is currently in use as a rendering target, is theancestor of another image (see `vgChildImage`), is set as a paint pattern image ona VGPaint object, or is set as a glyph an a VGFont object, its definition remainsavailable to those consumers as long as they remain valid, but the handle may nolonger be used. When those uses cease, the image’s resources will automaticallybe deallocated.
+The resources associated with an image may be deallocated by callin `vgDestroyImage`. Following the call, the image handle is no longer valid in anycontext that shared it. If the image is currently in use as a rendering target, is theancestor of another image (see `vgChildImage`), is set as a paint pattern image ona VGPaint object, or is set as a glyph an a VGFont object, its definition remainsavailable to those consumers as long as they remain valid, but the handle may nolonger be used. When those uses cease, the imageâ€™s resources will automaticallybe deallocated.
 
 ```c
 void vgDestroyImage(VGImage image);
@@ -3645,7 +4592,7 @@ Pixel values are read starting at the address given by the pointer data; adjacen
 
 Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointer mustbe aligned according to the number of bytes of the pixel format specified bydataFormat, unless dataFormat is equal to VG_BW_1, VG_A_1, or VG_A_4, in which case 1 byte alignment is sufficient. Each pixel is converted into the format ofthe destination image as it is written.
 
-If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 ≤ i < width and 0 ≤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native 16-bitintegral datatype.
+If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 â‰¤ i < width and 0 â‰¤ j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native 16-bitintegral datatype.
 
 If dataFormat is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of thedestination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered tobe at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms ofbytes, not bits.
 
@@ -3712,7 +4659,7 @@ void vgGetImageSubData(VGImage image,
 ## 10.6 Child Images
 <a name="Child_Images"></a>
 
-A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parent’s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected inall other images to which it is related.
+A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parentâ€™s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected inall other images to which it is related.
 
 A child image remains valid even following a call to `vgDestroyImage` on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
 
@@ -3775,7 +4722,7 @@ VGImage vgGetParent(VGImage image)
 #### vgCopyImage
 <a name="vgCopyImage"></a>
 
-Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
+Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
 If the dither flag is equal to `VG_TRUE`, an implementation-dependent ditheringalgorithm may be applied. This may be useful when copying into a destinationimage with a smaller color bit depth than that of the source image. Implementations should choose an algorithm that will provide good resultswhen the output images are displayed as successive frames in an animation.
 
@@ -3826,7 +4773,7 @@ vgSeti(VG_IMAGE_MODE, drawImageMode);
 #### vgDrawImage
 <a name="vgDrawImage"></a>
 
-An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + ½, py + ½) is mapped to the point (Ti)(px + ½, py+ ½). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
+An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + Â½, py + Â½) is mapped to the point (Ti)(px + Â½, py+ Â½). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
 
 Interpolation is done in the color space of the image. Image color values are processed inpremultiplied alpha format during interpolation. Color channel values are clamped to therange [0, alpha] before interpolation.
 
@@ -3834,7 +4781,7 @@ When a projective transformation is used (i.e., the bottom row of the image-user
 
 When a projective transformation is used, the value of the `VG_IMAGE_MODE` parameteris ignored and the behavior of `VG_DRAW_IMAGE_NORMAL` is substituted. This avoidsthe need to generate paint pixels in perspective.
 
-The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1½ pixels for filtering purposes.
+The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1Â½ pixels for filtering purposes.
 
 Clipping, masking, and scissoring are applied in the same manner as with `vgDrawPath`.To limit drawing to a subregion of the image, create a child image using `vgChildImage`.
 
@@ -3874,7 +4821,7 @@ When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_STENCIL`, theimage b
 
 Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` paintmode) occurs at each pixel. The interpolated image and paint color and alpha values arecombined at each pixel as follows. Each image color channel value is multiplied by itscorresponding alpha value (if the image has an alpha channel) and by the paint alphavalue to produce an alpha value associated with that color channel. The current blending equation (see Section 13) is applied separately for each destination color channel, usingthe alpha value computed above as the source alpha value for the blend; the paint colorvalue is used as input to the color transform stage, the output of which is used as thesource color value for blending
 
-In terms of the blending functions α(αsrc, αdst) and c(csrc, cdst, αsrc, αdst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
+In terms of the blending functions Î±(Î±src, Î±dst) and c(csrc, cdst, Î±src, Î±dst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
 
 $$
 a_{tmp} = a*(a_{image}*a_{paint},a_{dst})
@@ -3888,7 +4835,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff “Src **over** Dst” blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff â€œSrc **over** Dstâ€ blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
@@ -3900,9 +4847,9 @@ $$$$
 B_{dst} \leftarrow (a_{image}*a_{paint}*B_{image}*B_{paint}+a_{dst}*B_{dst}*(1-a_{image}*a_{paint}*B_{image}))/a_{tmp}
 $$
 
-If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions α(αsrc, αdst) andc(csrc, cdst, αsrc, αdst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
+If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions Î±(Î±src, Î±dst) andc(csrc, cdst, Î±src, Î±dst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
 
-수식
+ìˆ˜ì‹
 
 10.9 Reading and Writing Drawing Surface Pixels
 <a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
@@ -3926,7 +4873,7 @@ Table 13: Pixel Copy Functions
 #### vgSetPixels
 <a name="vgSetPixels"></a>
 
-The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
+The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
 
 ```c
 void vgSetPixels(VGint dx, VGint dy,
@@ -4005,7 +4952,7 @@ vgDestroyImage(image);
 #### vgGetPixels
 <a name="vgGetPixels"></a>
 
-The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 ≤ i < width and 0 ≤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
+The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
 
 ```c
 void vgGetPixels(VGImage dst, VGint dx, VGint dy,
@@ -4087,7 +5034,7 @@ vgDestroyImage(image);
 
 The `vgCopyPixels` function copies pixels from one region of the drawing surface toanother. Copies between overlapping regions are allowed and always produce consistentresults identical to copying the entire source region to a scratch buffer followed bycopying the scratch buffer into the destination region.
 
-The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 ≤ i < width$ and $0 ≤ j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
+The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 â‰¤ i < width$ and $0 â‰¤ j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
 
 ```c
 void vgCopyPixels(VGint dx, VGint dy,
@@ -4123,9 +5070,9 @@ OpenVG can assist applications in text composition by hardware-accelerating glyp
 
 ## <a name="Chapter11.2"></a><a name="Font_Terminology"></a> _11.2 Font Terminology_
 
-In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term “character” refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet – a Latin character, Chinese character, etc.) while the term “glyph” refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
+In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term â€œcharacterâ€ refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet â€“ a Latin character, Chinese character, etc.) while the term â€œglyphâ€ refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
 
-When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data – a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
+When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data â€“ a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
 
 ## <a name="Chapter11.3"></a><a name="Glyph_Positioning_and_Text_Layout"></a> _11.3 Glyph Positioning and Text Layout_
 
@@ -4137,7 +5084,7 @@ The glyph origin is not always located at the glyph boundary. Glyphs from variou
 
 <img src="figures/figure23a.PNG"/>
 
-The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the “advance width”, or _escapement_ of the previous character (see Figure 24 below).
+The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the â€œadvance widthâ€, or _escapement_ of the previous character (see Figure 24 below).
 
 <img src="figures/figure24.PNG"/>
 
@@ -4155,7 +5102,7 @@ In some cases, the text composition requires that glyph layout and positioning b
 
 When two or more language scripts are used in the same text fragment, multiple adjustments for glyph positioning may be required. For example, Latin scripts have lowercase characters that have features descending below the text baseline, while Asian scripts typically have glyphs positioned on the baseline. When combining characters from these two scripts the position of the baseline for Asian characters should be adjusted.
 
-Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the “Nastaliq” style.
+Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the â€œNastaliqâ€ style.
 
 <img src="figures/figure26.PNG"/>
 
@@ -4186,12 +5133,12 @@ Glyphs in a VGFont are identified by a glyph index, which is an arbitrary number
 
 - _Unicode character codes_
 
-When a `VGFont` is created as a subset that supports only simple language scripts (_e.g._, Latin, with simple one-to-one character-toglyph mapping), the character code values may be used as glyph indices. This eliminates the need for an additional mapping table and simplifies text rendering – a text string may be passed directly as an argument (as an array of glyph indices) to OpenVG API call
+When a `VGFont` is created as a subset that supports only simple language scripts (_e.g._, Latin, with simple one-to-one character-toglyph mapping), the character code values may be used as glyph indices. This eliminates the need for an additional mapping table and simplifies text rendering â€“ a text string may be passed directly as an argument (as an array of glyph indices) to OpenVG API call
 for text rendering.
 
 - _Native font glyph indices_
 
-OpenVG applications may re-use native glyph indices from an original TrueType or OpenType font when `VGFont` object is created – this simplifies text composition and layout decisions by re-using OpenType/TrueType layout and character-to-glyph mapping tables (and any platform-supplied text composition engine).
+OpenVG applications may re-use native glyph indices from an original TrueType or OpenType font when `VGFont` object is created â€“ this simplifies text composition and layout decisions by re-using OpenType/TrueType layout and character-to-glyph mapping tables (and any platform-supplied text composition engine).
 
 - _Application-defined (custom) glyph indices_
 
@@ -4262,7 +5209,7 @@ Implementations may improve the quality of text rendering by applying optional a
 
 It is recommended that when a path object defines the original unhinted glyph outline, the `scale` parameter of the path object should be set to a value of 1/units-per-EM to achieve the effective size of 1 pixel per EM. This allows path data to be independent of the design unit metrics and original font format, and simplifies affine transformations applied to a glyph. For example, applying an affine transform with the matrix elements $sx = sy = 12$ would result in scaling the glyph to 12 pixels (or 12 units in the surface coordinate system). Both the `glyphOrigin` and `escapement` values are scaled identically.
 
-Original font glyphs that are vector outlines are designed in a deviceindependent coordinate system (design units). The scale of the design coordinates is determined by the EM size (defined as “units-per-EM”) – a number that represents the distance between two adjacent, non-adjusted
+Original font glyphs that are vector outlines are designed in a deviceindependent coordinate system (design units). The scale of the design coordinates is determined by the EM size (defined as â€œunits-per-EMâ€) â€“ a number that represents the distance between two adjacent, non-adjusted
 baselines of text.
 
 If a path object defines a scaled and hinted glyph outline, its `scale` parameter should be set to 1. Since the process of scaling and hinting of original glyph outlines is based on fitting the outline contour's control points to the pixel grid of the destination surface, applying affine transformations to a path (other than translations mapped to the pixel grid in surface coordinate system) may reduce glyph legibility and should be avoided as much as possible.
@@ -4286,14 +5233,14 @@ void vgSetGlyphToPath(VGFont font,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 >
-> – if `path` is not a valid font handle or `VG_INVALID_HANDLE`, or is not shared
+> â€“ if `path` is not a valid font handle or `VG_INVALID_HANDLE`, or is not shared
 with the current context
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
+> â€“ if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
 aligned
 
 #### <a name="vgSetGlyphToImage"></a> _vgSetGlyphToImage_
@@ -4311,18 +5258,18 @@ void vgSetGlyphToImage(VGFont font,
 > ERRORS
 >
 > `VG_BAD_HANDLE_ERROR`
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 >
-> – if `image` is not a valid font handle or `VG_INVALID_HANDLE`, or is not
+> â€“ if `image` is not a valid font handle or `VG_INVALID_HANDLE`, or is not
 shared with the current context
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
-> – if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
+> â€“ if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
 aligned
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if `image` is currently a rendering target
+> â€“ if `image` is currently a rendering target
 
 #### <a name="vgClearGlyph"></a> _vgClearGlyph_
 
@@ -4336,10 +5283,10 @@ void vgClearGlyph (VGFont font, VGuint glyphIndex);
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if `font` is not a valid font handle, or is not shared with the current context
+> â€“ if `font` is not a valid font handle, or is not shared with the current context
 `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `glyphIndex` is not defined for the `font`
+> â€“ if `glyphIndex` is not defined for the `font`
 
 ### <a name="Chapter11.4.5"></a><a name="Font_Sharing"></a> _11.4.5 Font Sharing_
 
@@ -4360,7 +5307,7 @@ In order to avoid additional complexity associated with character-to-glyph mappi
 
 ## <a name="Chapter11.5"></a><a name="Text_Layout_and_Rendering"></a> _11.5 Text Layout and Rendering_
 
-OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to “snap” glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
+OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to â€œsnapâ€ glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
 
 #### <a name="vgDrawGlyph"></a> _vgDrawGlyph_
 
@@ -4382,12 +5329,12 @@ void vgDrawGlyph(VGFont font, VGuint glyphIndex,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if font is not a valid font handle, or is not shared with the current context
+> â€“ if font is not a valid font handle, or is not shared with the current context
 `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `glyphIndex` has not been defined for a given font object
+> â€“ if `glyphIndex` has not been defined for a given font object
 >
-> – if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode`
+> â€“ if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode`
 enumeration, or 0
 
 #### <a name="vgDrawGlyphs"></a> _vgDrawGlyphs_
@@ -4416,20 +5363,20 @@ void vgDrawGlyphs(VGFont font,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if font is not a valid font handle, or is not shared with the current context
+> â€“ if font is not a valid font handle, or is not shared with the current context
 VG_ILLEGAL_ARGUMENT_ERROR
 >
-> – if glyphCount is zero or a negative value
+> â€“ if glyphCount is zero or a negative value
 >
-> – if the pointer to the glyphIndices array is NULL or is not properly
+> â€“ if the pointer to the glyphIndices array is NULL or is not properly
 aligned
 >
-> – if a pointer to either of the adjustments_x or adjustments_y arrays are
+> â€“ if a pointer to either of the adjustments_x or adjustments_y arrays are
 non-NULL and are not properly aligned
 >
-> – if any of the glyphIndices has not been defined in a given font object
+> â€“ if any of the glyphIndices has not been defined in a given font object
 >
-> – if paintModes is not a valid bitwise OR of values from the VGPaintMode
+> â€“ if paintModes is not a valid bitwise OR of values from the VGPaintMode
 enumeration, or 0
 
 # <a name="Chapter12"></a><a name="Image Filters"></a> 12 Image Filters
@@ -4445,7 +5392,7 @@ The source pixels are converted to one of `sRGBA`, `sRGBA_PRE`, `lRGBA`, or `lRG
 1. Source color and alpha values are scaled linearly to lie in a [0, 1] range. The exact precision of the internal representation is implementation-dependent.
 2. If the source image has premultiplied alpha, the alpha values are divided out of each source color channel, and stored for later use. If the source image has no alpha channel, an alpha value of 1 is added to each pixel.
 3. If the source pixel is in a grayscale format (`lL` or `sL`), it is converted to an RGB format (`lRGB` or `sRGB`, respectively) by replication.
-4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`→`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`→`sRGBA`).
+4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`â†’`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`â†’`sRGBA`).
 5. If the `VG_FILTER_FORMAT_PREMULTIPLIED` parameter is equal to `VG_TRUE`, each source color channel is multiplied by the corresponding alpha value. Otherwise, the color channels are left undisturbed.
 
 An implementation may collapse steps algebraically; for example, if no conversion is to take place in step 4, the division and multiplication by alpha in steps 2 and 5 may be implemented as a no-op.
@@ -4561,20 +5508,20 @@ void vgColorMatrix(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-– if either `dst` or `src` is not a valid image handle, or is not shared with the
+â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either dst or src is currently a rendering target
+> â€“ if either dst or src is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `matrix` is NULL
+> â€“ if `matrix` is NULL
 >
-> – if `matrix` is not properly aligned
+> â€“ if `matrix` is not properly aligned
 
 ## <a name="Chapter12.4"></a><a name="Convolution"></a> _12.4 Convolution_
 
@@ -4614,7 +5561,7 @@ $$
 s(\sum_{0\le i\lt w}\sum_{0\le j\lt h} k_{(w-i-1),(h-j-1)}p(x+i-shiftX,y+j-shiftY))+b,
 $$
 
-where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w–i–1, h–j–1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w – 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
+where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(wâ€“iâ€“1, hâ€“jâ€“1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w â€“ 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
 
 The operation is applied to all channels (color and alpha) independently. Version 1.1
 
@@ -4634,26 +5581,26 @@ void vgConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> â€“ if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_KERNEL_SIZE`
 >
-> – if `kernel` is NULL
+> â€“ if `kernel` is NULL
 >
-> – if `kernel` is not properly aligned
+> â€“ if `kernel` is not properly aligned
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgSeparableConvolve"></a> _vgSeparableConvolve_
@@ -4666,7 +5613,7 @@ The output pixel $(x, y)$ is defined as:
 
 
 
-where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w–i–1)$ and $(h–j–1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
+where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(wâ€“iâ€“1)$ and $(hâ€“jâ€“1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
 
 ```c
 void vgSeparableConvolve(VGImage dst, VGImage src,
@@ -4683,26 +5630,26 @@ void vgSeparableConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> â€“ if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_SEPARABLE_KERNEL_SIZE`
 >
-> – if `kernelX` or `kernelY` is NULL
+> â€“ if `kernelX` or `kernelY` is NULL
 >
-> – if `kernelX` or `kernelY` is not properly aligned
+> â€“ if `kernelX` or `kernelY` is not properly aligned
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgGaussianBlur"></a> _vgGaussianBlur_
@@ -4734,22 +5681,22 @@ void vgGaussianBlur(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
+> â€“ if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
 >
 > than `VG_MAX_GAUSSIAN_STD_DEVIATION`
 >
-> – if `tilingMode` is not one of the values from the `VGTilingMode`
+> â€“ if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 ## <a name="Chapter12.5"></a><a name="Lookup Tables"></a> _12.5 Lookup Tables_
@@ -4776,18 +5723,18 @@ void vgLookup(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if any pointer parameter is NULL
+> â€“ if any pointer parameter is NULL
 
 #### <a name="vgLookupSingle"></a> _vgLookupSingle_
 
@@ -4809,24 +5756,24 @@ void vgLookupSingle(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> – if either `dst` or `src` is not a valid image handle, or is not shared with the
+> â€“ if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> – if either `dst` or `src` is currently a rendering target
+> â€“ if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> – if `src` and `dst` overlap
+> â€“ if `src` and `dst` overlap
 >
-> – if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
+> â€“ if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
 `VG_GREEN`, `VG_BLUE` or `VG_ALPHA` from the `VGImageChannel`
 enumeration
 >
-> – if `lookupTable` is NULL
+> â€“ if `lookupTable` is NULL
 >
-> – if `lookupTable` is not properly aligned
+> â€“ if `lookupTable` is not properly aligned
 
 # <a name="13_Color_Transformation_and_Blending"></a> 13 Color Transformation and Blending
 
@@ -4889,10 +5836,10 @@ _Table 15: Porter-Duff Blending Modes_
 
 A number of additional blending modes are available. These modes are a subset of the SVG image blending modes. Note that the SVG "Normal" blending mode is equivalent to the Porter-Duff "Src **over** Dst" mode described above. The additional blend modes have the following effects:
 
-- `VG_BLEND_MULTIPLY` – Multiply the source and destination colors together, producing the effect of placing a transparent filter over a background. A black source pixel forces the destination to black, while a white source pixel leaves the destination unchanged. If all alpha values are 1, this reduces to multiplying the source and destination color values.
-- `VG_BLEND_SCREEN` – The opposite of multiplication, producing the effect of projecting a slide over a background. A black source pixel leaves the destination unchanged, while a white source pixel forces the destination to white. If all alpha values are 1, this reduces to adding the source and destination color values, and subtracting their product.
-- `VG_BLEND_DARKEN` – Compute (Src **over** Dst) and (Dst **over** Src) and take the smaller (darker) value for each channel. If all alpha values are 1, this reduces to choosing the smaller value for each color channel.
-- `VG_BLEND_LIGHTEN` – Compute (Src **over** Dst) and (Dst **over** Src) and take the larger (lighter) value for each channel. If all alpha values are 1, this reduces to choosing the larger value for each color channel.
+- `VG_BLEND_MULTIPLY` â€“ Multiply the source and destination colors together, producing the effect of placing a transparent filter over a background. A black source pixel forces the destination to black, while a white source pixel leaves the destination unchanged. If all alpha values are 1, this reduces to multiplying the source and destination color values.
+- `VG_BLEND_SCREEN` â€“ The opposite of multiplication, producing the effect of projecting a slide over a background. A black source pixel leaves the destination unchanged, while a white source pixel forces the destination to white. If all alpha values are 1, this reduces to adding the source and destination color values, and subtracting their product.
+- `VG_BLEND_DARKEN` â€“ Compute (Src **over** Dst) and (Dst **over** Src) and take the smaller (darker) value for each channel. If all alpha values are 1, this reduces to choosing the smaller value for each color channel.
+- `VG_BLEND_LIGHTEN` â€“ Compute (Src **over** Dst) and (Dst **over** Src) and take the larger (lighter) value for each channel. If all alpha values are 1, this reduces to choosing the larger value for each color channel.
 
 The new destination alpha value for the blending modes defined in this section is always equal to $\alpha (\alpha_{src}, \alpha_{dst})=\alpha_{src}+\alpha_{dst}*(1-\alpha_{src})$, as for Porter-Duff "Src **over** Dst" blending. The formulas for each additional blending mode are shown in Table 16. The right-hand column contains the pre-multiplied output values, that is, the products of the new color value $c(c_{src}, c_{dst}, \alpha_{src}, \alpha_{dst})$ and alpha value $\alpha(\alpha_{src}, \alpha_{dst})$. The source and destination color values $c_{src}$ and $c_{dst}$ are given in non-premultiplied form.
 
@@ -5019,7 +5966,7 @@ Khronos, or its designee, will maintain a publicly-accessible registry of extens
 Extensions may be detected statically, by means of preprocessor symbols, or dynamically, by means of the **vgGetString** function. Extension functions may be included in application code statically by placing appropriate ??ifdef??directives around functions that require the presence of a particular extension, and may also be accessed dynamically through function pointers returned by **eglGetProcAddress** or by other platform-specific means.
 
 ### 15.3.1 Accessing Extensions Statically
-The extensions defined by a given platform are defined in the `openvg.h` header file, or in header files automatically included by `openvg.h`. In order to write applications that run on platforms with and without a given extension, conditional compilation based on the presence of the extension?�s preprocessor macro may be used:
+The extensions defined by a given platform are defined in the `openvg.h` header file, or in header files automatically included by `openvg.h`. In order to write applications that run on platforms with and without a given extension, conditional compilation based on the presence of the extension?™s preprocessor macro may be used:
 ``````C
 #ifdef OVG_EXT_my_extension
   vgMyExtensionFuncEXT(...);
@@ -5087,7 +6034,7 @@ Certain portions of the API are required to produce exact results. For example, 
 The conformance suite will exercise various matrix operations and compare the results against double-precision values. The comparison threshold will be set to exclude implementations with insufficient internal precision.
 
 ### 16.2.4 Interior/Exterior Tests
-Although antialiasing may have varying effects on shape boundaries, the portions of the interior and exterior of shapes that are more than 1 ½ pixels from a geometric boundary should not be affected by that boundary. If a shape is drawn using color paint, a set of known interior and exterior pixels may be tested for equality with the paint color.
+Although antialiasing may have varying effects on shape boundaries, the portions of the interior and exterior of shapes that are more than 1 Â½ pixels from a geometric boundary should not be affected by that boundary. If a shape is drawn using color paint, a set of known interior and exterior pixels may be tested for equality with the paint color.
 
 ### 16.2.5 Positional Invariance
 Drawing should not depend on absolute screen coordinates, except for minor differences due to spatially-variant sampling and dither patterns when copying to the screen. The conformance suite will include tests that verify the positional independence of drawing.
@@ -5125,7 +6072,7 @@ typedef enum {
 
 ## 17.1 Higher-level Geometric Primitives
 
-The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, Bézier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
+The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, BÃ©zier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
 
 ### 17.1.1 Lines
 
@@ -5412,7 +6359,7 @@ This section defines minimal C language header files for the type definitions an
 * *
 * Sample implementation of openvg.h, version 1.1 *
 * *
-* Copyright © 2008 The Khronos Group Inc. *
+* Copyright Â© 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
@@ -6096,7 +7043,7 @@ VG_API_CALL const VGubyte * VG_APIENTRY
 * *
 * Sample implementation of vgu.h, version 1.1 *
 * *
-* Copyright © 2008 The Khronos Group Inc. *
+* Copyright Â© 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
@@ -6211,9 +7158,9 @@ Version
 **ADOB06a** Adobe Systems Incorporated: PDF Reference (sixth edition): http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference.pdf
 **ADOB06b** Adobe Systems Incorporated, Flash Developer Center: http://www.adobe.com/devnet/flash
 **FvDFH95** Foley J., A. van Dam, S. Feiner and J. Hughes, Computer Graphics: Principles and Practice (second edition), Addison-Wesley, Reading, MA, 1995.
-**HECK89** Heckbert, Paul, Fundamentals of Texture Mapping and Image Warping, Master?�s thesis, UCB/CSD 89/516, CS Division, U.C. Berkeley, June 1989.
+**HECK89** Heckbert, Paul, Fundamentals of Texture Mapping and Image Warping, Master?™s thesis, UCB/CSD 89/516, CS Division, U.C. Berkeley, June 1989.
 **ITU90** Recommendation ITU-R BT.709, Basic Parameter Values for the HDTV Standard for the Studio and for International Programme Exchange (1990), ITU, Geneva, Switzerland.
-**PORT84** Porter, T. and T. Duff, ?�Compositing Digital Images,??Computer Graphics 18(3):253-259 (proc. SIGGRAPH 1984), July 1984.
+**PORT84** Porter, T. and T. Duff, ?œCompositing Digital Images,??Computer Graphics 18(3):253-259 (proc. SIGGRAPH 1984), July 1984.
 **POYN03** Poynton, Charles, Digital Video and HDTV Algorithms and Interfaces, Morgan Kaufmann, San Francisco, 2003.
 **sRGB99** IEC 61966-2-1, Multimedia systems and equipment ??Colour measurement and management ??Part 2-1: Default RGB colour space ??sRGB: http://www.w3.org/Graphics/Color/sRGB.html
 **SUN04** Sun Microsystems, Inc., Java 2D API Home Page: http://java.sun.com/products/java-media/2D
@@ -6276,33 +7223,33 @@ This specification and the accompanying conformance test suite were developed by
 Khronos OpenVG working group:
 * Andrzej Mamona, AMD, Chair
 * Daniel Rice, Google, Specification Editor
-* Koichi Mori (�?浩�?), Nokia, Past Chair
+* Koichi Mori (æ£?æµ©ä?), Nokia, Past Chair
 * Neil Trevett, NVIDIA, Past Chair
 * Tomi Aarnio, Nokia
 * Jay Abbott, Tao Group
 * Mike Agar, ALT Software
 * Mathias Agopian, PalmSource
-* Christofer Åkersten, Ikivo
-* Espen Åmodt, ARM
+* Christofer Ã…kersten, Ikivo
+* Espen Ã…modt, ARM
 * Ola Andersson, Ikivo
 * Michael Antonov, Scaleform
-* Rémi Arnaud, SONY
+* RÃ©mi Arnaud, SONY
 * Ben Bowman, Imagination Technologies
 * Mark Callow, HI Corporation
 * Chris Campbell, Sun Microsystems
-* Tolga Çapın, Nokia
-* TK Chan (?�鼎??, AMD
+* Tolga Ã‡apÄ±n, Nokia
+* TK Chan (?³é¼Ž??, AMD
 * Suresh Chitturi, Nokia
-* Hang-Shin Cho (�???��), LG Electronics
+* Hang-Shin Cho (ì¡???‹ ), LG Electronics
 * Angus Dorbie, Qualcomm
 * Sean Ellis, Superscape
 * Jerry Evans, Sun Microsystems
 * Simon Fenney, Imagination Technologies
 * Chris Grimm, AMD
-* Masaki Hamada (濱田 ?�樹), Mitsubishi Electric
-* Antti Hätälä, NVIDIA
+* Masaki Hamada (æ¿±ç”° ?…æ¨¹), Mitsubishi Electric
+* Antti HÃ¤tÃ¤lÃ¤, NVIDIA
 * Frode Heggelund, ARM
-* Toshiki Hijjri (樋尻 ?��?), Panasonic
+* Toshiki Hijjri (æ¨‹å°» ?©ç?), Panasonic
 * Harri Holopainen, NVIDIA
 * Brendan Iribe, Scaleform
 * Rakesh Jain, NVIDIA
@@ -6312,20 +7259,20 @@ Khronos OpenVG working group:
 * Tero Karras, NVIDIA
 * Sila Kayo, Nokia
 * Petri Kero, NVIDIA
-* San-Soo Kim (김 ?�수), Wow4M
-* Sung-Jae Kim (김 ?�재), Wow4M
-* Woo-Seon Kim (김 ?�섭), LG Electronics
-* Yong-Moo Kim (김 ?�무), LG Electronics
-* Keisuke Kiri (桐井 ?�祐), DMP
+* San-Soo Kim (ê¹€ ?°ìˆ˜), Wow4M
+* Sung-Jae Kim (ê¹€ ?±ìž¬), Wow4M
+* Woo-Seon Kim (ê¹€ ?°ì„­), LG Electronics
+* Yong-Moo Kim (ê¹€ ?©ë¬´), LG Electronics
+* Keisuke Kiri (æ¡äº• ?¬ç¥), DMP
 * Kimball, ETRI
 * Claude Knaus, Esmertec
 * Marko Laiho, AMD
-* Hwanyong Lee (???�용), HUONE
-* Junyoung Lee (??준??, HUONE
-* Keechang Lee (??기창), Samsung
+* Hwanyong Lee (???˜ìš©), HUONE
+* Junyoung Lee (??ì¤€??, HUONE
+* Keechang Lee (??ê¸°ì°½), Samsung
 * Jon Leech, EGL Specification Editor
 * Vladimir Levantovsky, Monotype Imaging
-* Jitaek Lim (??지??, Samsung
+* Jitaek Lim (??ì§€??, Samsung
 * Borgar Ljosland, ARM
 * Axel Mamode, SONY
 * Tom McReynolds, NVIDIA
@@ -6334,10 +7281,10 @@ Khronos OpenVG working group:
 * Ville Miettinen, NVIDIA
 * Clay Montgomery, Nokia
 * Brian Murray, Freescale
-* Hiroyasu Negishi (?�岸 ?�康), Mitsubishi Electric
+* Hiroyasu Negishi (?¹å²¸ ?šåº·), Mitsubishi Electric
 * Toshio Nishidai, TAKUMI
 * Petri Nordlund, AMD
-* Eisaku Oobuchi (大渕 ?�作), DMP
+* Eisaku Oobuchi (å¤§æ¸• ?„ä½œ), DMP
 * Tom Olson, Texas Instruments
 * Gary Pallett, NVIDIA
 * Robert Palmer, Symbian
@@ -6348,17 +7295,17 @@ Khronos OpenVG working group:
 * Kari Pulli, Nokia
 * Christophe Quarre, STMicroelectronics
 * Kalle Raita, NVIDIA
-* Jussi Räsänen, NVIDIA
+* Jussi RÃ¤sÃ¤nen, NVIDIA
 * Allan Ristow, Monotype Imaging
 * Lane Roberts, Symbian
 * Tero Sarkkinen, Futuremark
-* Yoshikazu Saka (??義和), Fujitsu
+* Yoshikazu Saka (??ç¾©å’Œ), Fujitsu
 * Kimihiko Sato, AMD
 * Thor Arne Gald Semb, ARM
 * Maxim Shemanarev, Scaleform
 * Robert Simpson, AMD, Specification Editor
-* Jacob Ström, Ericsson
-* Hyunchan Sung(???�찬), HUONE
+* Jacob StrÃ¶m, Ericsson
+* Hyunchan Sung(???„ì°¬), HUONE
 * Thomas Tannert, SGI
 * Ray Taylor, NDS
 * Chris Tremblay, Motorola
@@ -6369,11 +7316,11 @@ Khronos OpenVG working group:
 * Leon Weng, STMicro
 * Chris Wynn, NVIDIA
 * Randy Xu, Intel
-* Naoya Yamamoto (山本 ?�也), HI Corporation
-* Kwang-Ho Yang (??광호), ETRI
+* Naoya Yamamoto (å±±æœ¬ ?´ä¹Ÿ), HI Corporation
+* Kwang-Ho Yang (??ê´‘í˜¸), ETRI
 
 Special thanks to Vladimir Levantovsky of Monotype Imaging for the design and specification of the Text API.
-Special thanks to Tero Karras and Jussi Räsänen of NVIDIA; Petri Nordlund, Robert Simpson, and Mika Tuomi of AMD (formerly Bitboys); and Tuomas Lukka, Jarno Paananen, and Sami Tammilehto of the former Bitboys Technology Research Group for creating the reference implementations; and to those who contributed to the conformance test suite: Hwanyong Lee, Junyoung Lee, and Hyunchan Sung of HUONE; TK Chan, Robert Simpson, Valtteri Rantala, Sami Tammilehto, Mika Tuomi, and Miikka Kangasluoma of AMD; Tero Karras, Jussi Räsänen and Kalle Raita of NVIDIA, Vladimir Levantovsky of Monotype Imaging and Toshio Nishidai of TAKUMI
+Special thanks to Tero Karras and Jussi RÃ¤sÃ¤nen of NVIDIA; Petri Nordlund, Robert Simpson, and Mika Tuomi of AMD (formerly Bitboys); and Tuomas Lukka, Jarno Paananen, and Sami Tammilehto of the former Bitboys Technology Research Group for creating the reference implementations; and to those who contributed to the conformance test suite: Hwanyong Lee, Junyoung Lee, and Hyunchan Sung of HUONE; TK Chan, Robert Simpson, Valtteri Rantala, Sami Tammilehto, Mika Tuomi, and Miikka Kangasluoma of AMD; Tero Karras, Jussi RÃ¤sÃ¤nen and Kalle Raita of NVIDIA, Vladimir Levantovsky of Monotype Imaging and Toshio Nishidai of TAKUMI
 
 Thanks are also due to the external reviewers who helped to improve the specification.
 
