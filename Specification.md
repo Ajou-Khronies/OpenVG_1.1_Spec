@@ -1,9 +1,3 @@
----
-layout: "post"
-title: "p70"
-date: "2016-09-26 22:20"
-writer: "JungHyeon Kim"
----
 In this section, we define the standard data format for paths that may be used to definesequences of various types of path segments. Extensions may define other path data formats.
 
 
@@ -31,7 +25,7 @@ In order to define the semantics of each segment command type, we define three r
 
 Figure 6 illustrates the locations of these points at the end of a sequence of segment commands ``{ `MOVE_TO`, LINE_TO, CUBIC_TO }``.
 
-<img src="OpenVG_1.1_Spec/figures/Figure 6.PNG"/>
+<img src="figures/Figure 6.PNG"/>
 
 *Figure 6: Segment Reference Points*
 
@@ -108,7 +102,7 @@ Segment type markers are defined as 8-bit integers, with the leading 3 bits rese
 
 For the `CLOSE_PATH` segment command, the value of the Abs/Rel bit is ignored.
 
-<img src="OpenVG_1.1_Spec/figures/Figure 7.PNG"/>
+<img src="figures/Figure 7.PNG"/>
 
 *Figure 7: Segment Type Marker Layout*
 
@@ -927,7 +921,7 @@ A path that self-intersects, or that has multiple overlapping subpaths, requires
 
 The non-zero fill rule says that the point is inside the shape if the resulting sum is not equal to 0. The even/odd rule says that the point is inside the shape if the resulting sum is odd, regardless of sign (*e*.*g*., -7 is odd, 0 is even). Consider the star-shaped path shown in Figure 8 below, indicated with solid lines. The orientation of the lines making up the path is indicated with arrows. An imaginary line to infinity starting in the central region of the star is shown as a dashed line pointing to the right. Two edges of the star cross the line to infinity going left to right, indicated by the downward-pointing arrows. The central region therefore has a count of +2. According to the even/odd rule, it is outside the path, whereas according to the non-zero rule it is inside. Implementations must be able to deal with paths having up to 255 crossings along any line. The behavior of more complex paths is undefined.
 
-<img src="OpenVG_1.1_Spec/figures/Figure 8.PNG"/>
+<img src="figures/Figure 8.PNG"/>
 
 *Figure 8: Even/Odd Fill Rule*
 
@@ -940,9 +934,8 @@ The relative orientation of subpaths, along with the fill rule, determines wheth
 
 ||_**Even/Old Fil Rule**_|_**Non-Zero Fill Rule**_|
 |-|-------|-------|
-|_**Same Orientation**_|<img src="OpenVG_1.1_Spec/figures/Figure 9-1.PNG"/>|<img src="OpenVG_1.1_Spec/figures/Figure 9-2.PNG"/>|
-|_**Opposing Orientation**_|<img src="OpenVG_1.1_Spec/figures/Figure 9-3.PNG"/>|<img src="OpenVG_1.1_Spec/figures/Figure 9-4.PNG"/>|
-
+|_**Same Orientation**_|<img src="figures/Figure 9-1.PNG"/>|<img src="figures/Figure 9-2.PNG"/>|
+|_**Opposing Orientation**_|<img src="figures/Figure 9-3.PNG"/>|<img src="figures/Figure 9-4.PNG"/>|
 
 
 $$v'_{repeat} = vâˆ’|v|$$
