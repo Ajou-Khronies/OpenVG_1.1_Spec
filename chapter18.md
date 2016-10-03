@@ -28,7 +28,7 @@ _Table 18: Center Ellipse Parameters_
 
 ## 18.2 The Endpoint Parameterization
 <a name ="The_Endpoint_Parameterization"> </a>
-OpenVG paths use the endpoint parameterization of elliptical arcs as defined in SVG. An elliptical arc segment is defined in terms of its endpoints $(x0, y0), (x1, y1)$, radii $rh$ and $rv$, rotation angle $ϕ$, large arc flag $fA$, and sweep flag $fS$. These parameters are listed in Table 19.
+OpenVG paths use the endpoint parameterization of elliptical arcs as defined in SVG. An elliptical arc segment is defined in terms of its endpoints $(x0, y0), (x1, y1)$, radii $rh$ and $rv$, rotation angle $ϕ$, large arc flag $f_A$, and sweep flag $f_S$. These parameters are listed in Table 19.
 
 |     |     |
 | --- | --- |
@@ -45,15 +45,17 @@ _Table 19: Endpoint Ellipse Parameters_
 Conversion from a center parameterization to an endpoint parameterization simply requires evaluation the initial and final endpoints of the arc, and determining the values of the large arc and sweep flags:
 
 $$
+\begin{matrix}
 \left[ \begin{matrix} x_1 \\ y_1 \end{matrix} \right] = f(cx,cy,rh,rv,\phi,\theta_1 ) \\
 \left[ \begin{matrix} x_2 \\ y_2 \end{matrix} \right] = f(cx,cy,rh,rv,\phi,\theta_2 ) \\
 f_A=\begin{cases} 1 & if\quad \left| \theta _{ 2 }-\theta _{ 1 } \right| >180\quad degrees \\ 0 & otherwise \end{cases} \\
 f_{ S }=\begin{cases} 1 & if\quad \theta _{ 2 }-\theta _{ 1 }\quad >\quad 0\\ 0 & otherwise \end{cases}
+\end{matrix}
 $$
 
 ## 18.4 Converting from Endpoint to Center Parameterization
 <a name ="Converting_from_Endpoint_to_Center_Parameterization"> </a>
-Given an endpoint representation of an ellipse as the set of parameters $(x0, y0), (x1, y1), rh, rv, ϕ, fS,$ and $fA$, we wish to determine the center point $(cx, cy)$ and the initial and final angles $θ1$ and $θ2$.
+Given an endpoint representation of an ellipse as the set of parameters $(x0, y0), (x1, y1), rh, rv, ϕ, fS,$ and $fA$, we wish to determine the center point $(cx, cy)$ and the initial and final angles $θ_1$ and $θ_2$.
 
 An ellipse with center point $(cx, cy)$, radii rh and rv, and rotation angle rot satisfies the implicit equation $(x')^2 + (y')2 = 1$, where $x' = ((x – cx)*cos(rot) + (y – cy)*sin(rot))/rh$ and $y' = (-(x – cx)*sin(rot)$ $+ (y – cy)*cos(rot))/rv$. The transformation from $(x, y)$ to $(x', y')$ simply maps the desired ellipse into a unit circle centered at the origin.
 
@@ -163,6 +165,7 @@ A' x^2 + C' y^2 - 1 = 0
 $$
 where:
 $$
+\begin{matrix}
 A' = \begin {cases}
   A, & if \quad B = 0 \\
   A+\frac{B}{2}, & if \quad B \neq 0 \quad and \quad A = C \\
@@ -174,10 +177,11 @@ C' = \begin {cases}
   \frac{1}{2} ( A + C + K (A - C)), & otherwise \\
 \end {cases} \\
 where \quad  K = \sqrt{1 + \frac{B^2}{(A-C)^2}}
+\end {matrix} \\
 $$
 The radii of the centered, unrotated ellipse are given by:
 $$
-rh  = \frac{1}{\sqrt{A'}} \quad rv  = \frac{1}{\sqrt{C'}}
+rh  = \frac{1}{\sqrt{A'}}, \quad rv  = \frac{1}{\sqrt{C'}}
 $$
 
 ## 18.6 Transformation of Ellipses
@@ -215,12 +219,14 @@ A x^2 + B x y + C y^2 + D x + E y + F = 0
 $$
 where:
 $$
+\begin{matrix}
 A = m_{00}^2 + m_{10}^2 \\
 B = 2(m_{00} m_{01} + m_{10} m_{11}) \\
 C = m_{01}^2 + m_{11}^2 \\
 D = 2(m_{00} m_{02} + m_{10} m_{12}) \\
 E = 2(m_{01} m_{02} + m_{11} m_{12}) \\
 F = m_{02}^2 + m_{12}^2 - 1 \\
+\end{matrix}
 $$
 The center, rotation angle, and radii of the ellipse may be determined using the formulas from the previous section.
 
