@@ -29,8 +29,8 @@ The return value will be one of the values `VG_HARDWARE_ACCELERATED` or `VG_HARD
 
 | _Value of_ `key` | _Allowable values for_ `setting` |
 | --- | --- |
-| `VG_IMAGE_FORMAT_QUERY` |  `VGImageFormat`  [(VGImageFormat)](#VGImageForat) |
-| `VG_PATH_DATATYPE_QUERY` | `VGPathDatatype` [(VGPathDatatype)](#vgpathDataType) |
+| `VG_IMAGE_FORMAT_QUERY` |  `VGImageFormat`  [(VGImageFormat)](#VGImageFormat) |
+| `VG_PATH_DATATYPE_QUERY` | `VGPathDatatype` [(VGPathDatatype)](#vgPathDataType) |
 _Table 17 : Query Key Enumeration Types_
 
 > **Errors**
