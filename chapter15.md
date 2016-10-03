@@ -1,9 +1,13 @@
 #  15 Extending the API
+<a name="chapter15"> </a> <a name="Extending_the_API"> </a>
+
 OpenVG is designed to be extended using an extension mechanism modeled after that of OpenGL and OpenGL ES. An extension may define new state elements, new datatypes, new values for existing parameter types, and new functions. Use of these features may alter the operation of the rendering pipeline. However, an extension must have no effect on programs that do not enable any of its features.
+
 ## 15.1 Extension Naming Conventions
 An OpenVG extension is named by a string of the form `OVG`_\_type_name_, where _type_ is either the string `EXT` or a vendor-specific string and _name_ is a name assigned by the extension author. A letter `X` added to the end of type indicates that the extension is experimental.
 Values (e.g., enumerated values or preprocessor `#defines`) defined by an extension carry the suffix _\_type_. Functions and datatypes carry the suffix _type_ without a separating underscore.
 The `openvg.h` header file will define a preprocessor macro with the name `OVG`_\_type_name_ and a value of 1 for each supported extension.
+
 ## 15.2 The Extension Registry
 Khronos, or its designee, will maintain a publicly-accessible registry of extensions. This registry will contain, for each extension, at least the following information:
 * The name of the extension in the form `OVG`_\_type_name_
@@ -34,14 +38,14 @@ The extensions defined by a given platform are defined in the `openvg.h` header 
 OpenVG contains a mechanism for applications to access information about the runtime platform, and to access extensions that may not have been present when the application was compiled.
 
 #### VGStringID
-``````
+```C
 typedef enum {
-  VG_VENDOR = 0x2300,
-  VG_RENDERER = 0x2301,
-  VG_VERSION = 0x2302,
+  VG_VENDOR     = 0x2300,
+  VG_RENDERER   = 0x2301,
+  VG_VERSION    = 0x2302,
   VG_EXTENSIONS = 0x2303
 } VGStringID;
-``````
+```
 
 #### vgGetString
 
@@ -62,4 +66,3 @@ Functions defined by an extension may be accessed by means of a function pointer
 ## 15.4 Creating Extensions
 Any vendor may define a vendor-specific extension. Each vendor should apply to Khronos to obtain a vendor string and any numerical token values required by the extension.
 An OpenVG extension may be deemed a shared extension if two or more vendors agree in good faith to ship an extension, or the Khronos OpenVG working group determines that it is in the best interest of its members that the extension be shared. A shared extension may be adopted (with appropriate naming changes) into a subsequent release of the OpenVG specification.
-
