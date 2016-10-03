@@ -13,6 +13,7 @@ An ellipse in the center parameterization may be viewed as a unit circle, parame
 $$
 \left[ \begin{matrix} x \\ y \\ 1 \end{matrix} \right] \quad =\quad \left[ \begin{matrix} rh\cos { \phi  }  & -rv\sin { \phi  }  & cx \\ rh\sin { \phi  }  & -rv\cos { \phi  }  & cy \\ 0 & 0 & 1 \end{matrix} \right] \cdot \left[ \begin{matrix} \cos { \theta  }  \\ \sin { \theta  }  \end{matrix} \right]
 $$
+
 |     |     |
 | --- | --- |
 | $(cx, cy)$  | The Center point of the ellipse
@@ -28,7 +29,7 @@ OpenVG paths use the endpoint parameterization of elliptical arcs as defined in 
 
 |     |     |
 | --- | --- |
-| $(x0, y0)$  | Endpoint Ellipse Parameters
+| $(x0, y0)$  | The initial endpoint of the arc
 | $(x1, y1)$ | The final endpoint of the arc
 | $rh, rv$  | The radii of the unrotated ellipse
 | $rot$ | The counter-clockwise angle of the ellipse relative to the x axis, measured prior to scaling by (rh, rv)
@@ -40,6 +41,7 @@ _Table 19: Endpoint Ellipse Parameters_
 <a name ="Converting_from_Center_to_Endpoint_Parameterization"> </a>
 Conversion from a center parameterization to an endpoint parameterization simply requires evaluation the initial and final endpoints of the arc, and determining the values of the large arc and sweep flags:
 
+<!--???? there is Error in the equation x1-> x0, x2-> x1--->
 $$
 \begin{matrix}
 \left[ \begin{matrix} x_1 \\ y_1 \end{matrix} \right] = f(cx,cy,rh,rv,\phi,\theta_1 ) \\
@@ -51,16 +53,16 @@ $$
 
 ## 18.4 Converting from Endpoint to Center Parameterization
 <a name ="Converting_from_Endpoint_to_Center_Parameterization"> </a>
-Given an endpoint representation of an ellipse as the set of parameters $(x0, y0), (x1, y1), rh, rv, ϕ, fS,$ and $fA$, we wish to determine the center point $(cx, cy)$ and the initial and final angles $θ_1$ and $θ_2$.
+Given an endpoint representation of an ellipse as the set of parameters $(x_0, y_0), (x_1, y_1), rh, rv, ϕ, f_S,$ and $f_A$, we wish to determine the center point $(cx, cy)$ and the initial and final angles $θ_1$ and $θ_2$.
 
 An ellipse with center point $(cx, cy)$, radii rh and rv, and rotation angle rot satisfies the implicit equation $(x')^2 + (y')2 = 1$, where $x' = ((x – cx)*cos(rot) + (y – cy)*sin(rot))/rh$ and $y' = (-(x – cx)*sin(rot)$ $+ (y – cy)*cos(rot))/rv$. The transformation from $(x, y)$ to $(x', y')$ simply maps the desired ellipse into a unit circle centered at the origin.
 
 To determine the center points of the pair of ellipses with common radii and rotation
-angle that pass through the two given points $(x0, y0)$ and $(x1, y1)$, the plane is first transformed into a suitably scaled and rotated coordinate system such that the equation of each ellipse becomes $(x' – cx')^2 + (y' – cy')^2 = 1$. Then the problem is reduced to finding the centers (cx0´, cy0´) and (cx1´, cy1´) of the two unit circles whose circumferences pass through two given points. Finally, the center points are placed through an inverse transformation to obtain solutions in the original coordinate system.
+angle that pass through the two given points $(x0, y0)$ and $(x1, y1)$, the plane is first transformed into a suitably scaled and rotated coordinate system such that the equation of each ellipse becomes $(x' – cx')^2 + (y' – cy')^2 = 1$. Then the problem is reduced to finding the centers $(cx_0', cy_0')$ and $(cx_1', cy_1')$ of the two unit circles whose circumferences pass through two given points. Finally, the center points are placed through an inverse transformation to obtain solutions in the original coordinate system.
 
-The center points of the two unit circles that pass through points $(x0, y0)$ and $(x1, y1)$ are given by $(xm ± Δy * d, ym ∓ Δx * d)$, where $xm = (x0 + x1)/2, ym = (y0 + y1)/2, Δx = (x0 – x1) , Δy = (y0 – y1)$, and $d = √(1/(Δx2 + Δy2) – ¼)$. If $d$ is infinite or imaginary, no solution exists due to the input points being coincident or too far apart, respectively.
+The center points of the two unit circles that pass through points $(x_0, y_0)$ and $(x_1, y_1)$ are given by $(xm ± Δy * d, ym ∓ Δx * d)$, where $x_m = (x_0 + x_1)/2, y_m = (y_0 + y_1)/2, Δx = (x_0 – x_1) , Δy = (y_0 – y_1)$, and $d = \sqrt{(1/({Δx}^2 + {Δy}^2) – 1/4)}$. If $d$ is infinite or imaginary, no solution exists due to the input points being coincident or too far apart, respectively.
 
-The angles $θ1$ and $θ2$ may be found by finding the slope of the endpoints on the circle and computing arctangents. The following code illustrates the process of computing the ellipse centers. The findUnitCircles function is called by findEllipses following inverse transformation of the original ellipse parameters.
+The angles $θ_1$ and $θ_2$ may be found by finding the slope of the endpoints on the circle and computing arctangents. The following code illustrates the process of computing the ellipse centers. The findUnitCircles function is called by findEllipses following inverse transformation of the original ellipse parameters.
 
 ```C
 #include <math.h>
@@ -91,7 +93,9 @@ findUnitCircles(double x0, double y0, double x1, double y1,
   *cx1 = xm – sdy;
   *cy1 = ym + sdx; return VG_TRUE;
 }
+```
 
+```C
 /* Given: Ellipse parameters rh, rv, rot (in degrees),
  * endpoints (x0, y0) and (x1, y1)
  * Return: TRUE if a solution exists, FALSE otherwise
