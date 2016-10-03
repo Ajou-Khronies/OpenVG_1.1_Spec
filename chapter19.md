@@ -1,15 +1,15 @@
 # 19 Appendix B: Header files
-
+<a name="chapter19"> </a> <a name="Appendix_B"> </a> <a name="Header_files"> </a>
 This section defines minimal C language header files for the type definitions and functions of OpenVG and the VGU utility library. The actual header files provided by a platform vendor may differ from those shown here.
 
-#### openvg.h 
-
+#### openvg.h
+<a name="openvg_h"> </a>
 ```C
 /**************************************************************************
 * *
 * Sample implementation of openvg.h, version 1.1 *
 * *
-* Copyright ¨Ï 2008 The Khronos Group Inc. *
+* Copyright (C) 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
@@ -90,30 +90,31 @@ typedef enum {
   VG_STROKE_DASH_PHASE                        = 0x1115,
   VG_STROKE_DASH_PHASE_RESET                  = 0x1116,
 
-  /* Edge fill color for VG_TILE_FILL tiling mode */ VG_TILE_FILL_COLOR                          =
-  0x1120,
+  /* Edge fill color for VG_TILE_FILL tiling mode */
+  VG_TILE_FILL_COLOR                          = 0x1120,
 
   /* Color for vgClear */
   VG_CLEAR_COLOR                              = 0x1121,
   /* Glyph origin */
   VG_GLYPH_ORIGIN                             = 0x1122,
 
-  /* Enable/disable alpha masking and scissoring */ VG_MASKING                                  =
-  0x1130,
+  /* Enable/disable alpha masking and scissoring */
+  VG_MASKING                                  = 0x1130,
   VG_SCISSORING                               = 0x1131,
 
   /* Pixel layout information */
   VG_PIXEL_LAYOUT                             = 0x1140,
   VG_SCREEN_LAYOUT                            = 0x1141,
 
-  /* Source format selection for image filters */ VG_FILTER_FORMAT_LINEAR                     =
-  0x1150,
+  /* Source format selection for image filters */
+  VG_FILTER_FORMAT_LINEAR                     = 0x1150,
   VG_FILTER_FORMAT_PREMULTIPLIED              = 0x1151,
 
-  /* Destination write enable mask for image filters */ VG_FILTER_CHANNEL_MASK                      =
-  0x1152,
+  /* Destination write enable mask for image filters */
+  VG_FILTER_CHANNEL_MASK                      = 0x1152,
 
-  /* Implementation limits (read-only) */ VG_MAX_SCISSOR_RECTS                        = 0x1160,
+  /* Implementation limits (read-only) */
+  VG_MAX_SCISSOR_RECTS                        = 0x1160,
   VG_MAX_DASH_COUNT                           = 0x1161,
   VG_MAX_KERNEL_SIZE                          = 0x1162,
   VG_MAX_SEPARABLE_KERNEL_SIZE                = 0x1163,
@@ -272,11 +273,14 @@ typedef enum {
   VG_PAINT_COLOR_RAMP_PREMULTIPLIED           = 0x1A07,
   VG_PAINT_COLOR_RAMP_STOPS                   = 0x1A03,
 
-  /* Linear gradient paint parameters */ VG_PAINT_LINEAR_GRADIENT                    = 0x1A04,
+  /* Linear gradient paint parameters */
+  VG_PAINT_LINEAR_GRADIENT                    = 0x1A04,
 
-  /* Radial gradient paint parameters */ VG_PAINT_RADIAL_GRADIENT                    = 0x1A05,
+  /* Radial gradient paint parameters */
+  VG_PAINT_RADIAL_GRADIENT                    = 0x1A05,
 
-  /* Pattern paint parameters */ VG_PAINT_PATTERN_TILING_MODE                = 0x1A06
+  /* Pattern paint parameters */
+  VG_PAINT_PATTERN_TILING_MODE                = 0x1A06
 } VGPaintParamType;
 
 typedef enum {
@@ -458,7 +462,6 @@ VG_API_CALL void VG_APIENTRY
 VG_API_CALL void VG_APIENTRY
     vgSetParameteriv(VGHandle object, VGint paramType, VGint count,
     const VGint * values) VG_APIEXIT;
-
 VG_API_CALL VGfloat VG_APIENTRY
     vgGetParameterf(VGHandle object, VGint paramType) VG_APIEXIT;
 VG_API_CALL VGint VG_APIENTRY
@@ -516,8 +519,9 @@ VG_API_CALL void VG_APIENTRY
 
 /* Paths */
 VG_API_CALL VGPath VG_APIENTRY
-    vgCreatePath(VGint pathFormat, VGPathDatatype datatype, VGfloat scale, VGfloat bias, VGint
-      segmentCapacityHint, VGint coordCapacityHint, VGbitfield capabilities) VG_APIEXIT;
+    vgCreatePath(VGint pathFormat, VGPathDatatype datatype, VGfloat scale,
+      VGfloat bias, VGint segmentCapacityHint, VGint coordCapacityHint,
+      VGbitfield capabilities) VG_APIEXIT;
 VG_API_CALL void VG_APIENTRY
     vgClearPath(VGPath path, VGbitfield capabilities) VG_APIEXIT;
 VG_API_CALL void VG_APIENTRY
@@ -547,8 +551,8 @@ VG_API_CALL void VG_APIENTRY
     vgPathBounds(VGPath path, VGfloat * minX, VGfloat * minY, VGfloat * width,
       VGfloat * height) VG_APIEXIT;
 VG_API_CALL void VG_APIENTRY
-    vgPathTransformedBounds(VGPath path, VGfloat * minX, VGfloat * minY, VGfloat * width,
-      VGfloat * height) VG_APIEXIT;
+    vgPathTransformedBounds(VGPath path, VGfloat * minX, VGfloat * minY,
+      VGfloat * width, VGfloat * height) VG_APIEXIT;
 VG_API_CALL void VG_APIENTRY
     vgDrawPath(VGPath path, VGbitfield paintModes) VG_APIEXIT;
 
@@ -684,16 +688,17 @@ VG_API_CALL const VGubyte * VG_APIENTRY
 } /* extern "C" */
 #endif
 #endif /* _OPENVG_H */
-``````
+```
 
 #### vgu.h
+<a name="vgu_h"> </a>
 
-``````
+```C
 /**************************************************************************
 * *
 * Sample implementation of vgu.h, version 1.1 *
 * *
-* Copyright Ã‚Â© 2008 The Khronos Group Inc. *
+* Copyright (C) 2008 The Khronos Group Inc. *
 * *
 * Permission is hereby granted, free of charge, to any person obtaining *
 * a copy of this software and associated documentation files (the *
