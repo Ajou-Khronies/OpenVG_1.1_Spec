@@ -1,4 +1,4 @@
-<img src="figures/openvg.png"/>
+<img src="figures/OpenVG.png"/>
 
 OpenVG Specification Version 1.1
 
