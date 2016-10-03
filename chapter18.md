@@ -36,8 +36,8 @@ OpenVG paths use the endpoint parameterization of elliptical arcs as defined in 
 | $(x1, y1)$ | The final endpoint of the arc
 | $rh, rv$  | The radii of the unrotated ellipse
 | $rot$ | The counter-clockwise angle of the ellipse relative to the x axis, measured prior to scaling by (rh, rv)
-| $fA$ | Large arc flag: 1 if more than 180 degrees of the arc is to be traversed (as measured on the unscaled circle), 0 otherwise
-| $fS$ | Sweep flag: 1 if the arc is to be traversed in the counter-clockwise direction, 0 otherwise
+| $f_A$ | Large arc flag: 1 if more than 180 degrees of the arc is to be traversed (as measured on the unscaled circle), 0 otherwise
+| $f_S$ | Sweep flag: 1 if the arc is to be traversed in the counter-clockwise direction, 0 otherwise
 _Table 19: Endpoint Ellipse Parameters_
 
 ## 18.3 Converting from Center to Endpoint Parameterization
