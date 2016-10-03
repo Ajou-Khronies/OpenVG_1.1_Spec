@@ -406,8 +406,8 @@ If the `VG_COLOR_TRANSFORM` parameter is enabled, each color from the preceding 
 
 $$A^{'}=A\times S_a+B_a$$$$
 R^{'}=R\times S_r+B_r$$$$
-G^{'}=A\times S_g+B_g$$$$
-B^{'}=A\times S_b+B_b$$
+G^{'}=G\times S_g+B_g$$$$
+B^{'}=B\times S_b+B_b$$
 
 
 Scale and bias values are input in floating point format but are then modified as follows:
