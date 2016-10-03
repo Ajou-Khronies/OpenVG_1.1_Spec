@@ -1,7 +1,5 @@
 # 23 Indices
-<a name="chapter23"><a>
-<a name="Indices"><a>
-
+<a name="chapter23"><a> <a name="Indices"><a>
 #### Index of Tables
 <a name="Index_of_Tables"><a>
 Table 1: Naming and Typographical Conventions - 12
@@ -24,8 +22,7 @@ Table 17: Query Key Enumeration Types - 192
 Table 18: Center Ellipse Parameters - 211
 Table 19: Endpoint Ellipse Parameters - 211
 
-#### Index of Figures
-<a name="Index_of_Figures"><a>
+#### Index of Figures <a name="Index_of_Figures"><a>
 Figure 1: The OpenVG Pipeline - 13
 Figure 2: VGPixelLayout Values - 47
 Figure 3: Coordinates, Transformation, Clipping, and Scissoring - 48
@@ -57,6 +54,5 @@ Figure 28: Round Rectangle Parameters - 204
 Figure 29: VGUArcType Values - 205
 Figure 30: vguArc Parameters - 207
 
-#### Alphabetical Index
-<a name="Alphabetical_Index"><a>
+#### Alphabetical Index <a name="Alphabetical_Index"><a>
 Alphabetical Index is ommitted.  Use "find" function on your viewer.
