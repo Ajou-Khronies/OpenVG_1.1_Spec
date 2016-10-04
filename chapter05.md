@@ -29,32 +29,32 @@ When a new OpenVG context is created, it contains default values as shown in Tab
 
 Parameter | Datatype | Default Value
 ----------|----------|--------------
-VG_MATRIX_MODE|VGMatrixMode|VG_MATRIX_PATH_USER_TO_SURFACE
-VG_FILL_RULE|VGFillRule|VG_EVEN_ODD
-VG_IMAGE_QUALITY|VGImageQuality|VG_IMAGE_QUALITY_FASTER
-VG_RENDERING_QUALITY|VGRendering Quality|VG_RENDERING_QUALITY_BETTER
-VG_BLEND_MODE|VGBlendMode|VG_BLEND_SRC_OVER
-VG_IMAGE_MODE|VGImageMode|VG_DRAW_IMAGE_NORMAL
-VG_SCISSOR_RECTS|VGint *|{ } (array of length 0)
-VG_COLOR_TRANSFORM|VGboolean|VG_FALSE (disabled)
-VG_COLOR_TRANSFORM_VALUES|VGfloat[8]|{ 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f }
-VG_STROKE_LINE_WIDTH|VGfloat|1.0f
-VG_STROKE_CAP_STYLE|VGCapStyle|VG_CAP_BUTT
-VG_STROKE_JOIN_STYLE|VGJoinStyle|VG_JOIN_MITER
-VG_STROKE_MITER_LIMIT|VGfloat|4.0f
-VG_STROKE_DASH_PATTERN|VGfloat *|{ } (array of length 0) (disabled)
-VG_STROKE_DASH_PHASE|VGfloat|0.0f
-VG_STROKE_DASH_PHASE_ RESET|VGboolean|VG_FALSE (disabled)
-VG_TILE_FILL_COLOR|VGfloat[4]|{ 0.0f, 0.0f, 0.0f, 0.0f }
-VG_CLEAR_COLOR|VGfloat[4]|{ 0.0f, 0.0f, 0.0f, 0.0f }
-VG_GLYPH_ORIGIN|VGfloat[2]|{ 0.0f, 0.0f }
-VG_MASKING|VGboolean|VG_FALSE (disabled)
-VG_SCISSORING|VGboolean|VG_FALSE (disabled)
-VG_PIXEL_LAYOUT|VGPixelLayout|VG_PIXEL_LAYOUT_UNKNOWN
-VG_SCREEN_LAYOUT|VGPixelLayout|Layout of the drawing surface
-VG_FILTER_FORMAT_LINEAR|VGboolean|VG_FALSE (disabled)
-VG_FILTER_FORMAT_PREMULTIPLIED |VGboolean|VG_FALSE (disabled)
-VG_FILTER_CHANNEL_MASK|VGbitfield|(VG_RED  \| VG_GREEN \| VG_BLUE \| VG_ALPHA)
+`VG_MATRIX_MODE`|`VGMatrixMode`|`VG_MATRIX_PATH_USER_TO_SURFACE`
+`VG_FILL_RULE`|`VGFillRule`|`VG_EVEN_ODD`
+`VG_IMAGE_QUALITY`|`VGImageQuality`|`VG_IMAGE_QUALITY_FASTER`
+`VG_RENDERING_QUALITY`|`VGRendering Quality`|`VG_RENDERING_QUALITY_BETTER`
+`VG_BLEND_MODE`|`VGBlendMode`|`VG_BLEND_SRC_OVER`
+`VG_IMAGE_MODE`|`VGImageMode`|`VG_DRAW_IMAGE_NORMAL`
+`VG_SCISSOR_RECTS`|`VGint *`|{ } (array of length 0)
+`VG_COLOR_TRANSFORM`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_COLOR_TRANSFORM_VALUES`|`VGfloat[8]`|{ 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f }
+`VG_STROKE_LINE_WIDTH`|`VGfloat`|1.0f
+`VG_STROKE_CAP_STYLE`|`VGCapStyle`|`VG_CAP_BUTT`
+`VG_STROKE_JOIN_STYLE`|`VGJoinStyle`|`VG_JOIN_MITER`
+`VG_STROKE_MITER_LIMIT`|`VGfloat`|4.0f
+`VG_STROKE_DASH_PATTERN`|`VGfloat *`|{ } (array of length 0) (disabled)
+`VG_STROKE_DASH_PHASE`|`VGfloat`|0.0f
+`VG_STROKE_DASH_PHASE_ RESET`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_TILE_FILL_COLOR`|`VGfloat[4]``|{ 0.0f, 0.0f, 0.0f, 0.0f }
+`VG_CLEAR_COLOR`|`VGfloat[4]`|{ 0.0f, 0.0f, 0.0f, 0.0f }
+`VG_GLYPH_ORIGIN`|`VGfloat[2]`|{ 0.0f, 0.0f }
+`VG_MASKING`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_SCISSORING`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_PIXEL_LAYOUT`|`VGPixelLayout`|`VG_PIXEL_LAYOUT_UNKNOWN`
+`VG_SCREEN_LAYOUT`|`VGPixelLayout`|Layout of the drawing surface
+`VG_FILTER_FORMAT_LINEAR`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_FILTER_FORMAT_PREMULTIPLIED`|`VGboolean`|`VG_FALSE` (disabled)
+`VG_FILTER_CHANNEL_MASK`|`VGbitfield`|`(VG_RED \| VG_GREEN \| VG_BLUE \| VG_ALPHA)`
 _Table 4: Default Parameter Values for a Context_
 
 The read-only parameter values `VG_MAX_SCISSOR_RECTS,VG_MAX_DASH_COUNT, VG_MAX_KERNEL_SIZE, VG_MAX_SEPARABLE_KERNEL_SIZE, VG_MAX_GAUSSIAN_STD_DEVIATION, VG_MAX_COLOR_RAMP_STOPS, VG_MAX_IMAGE_WIDTH, VG_MAX_IMAGE_HEIGHT, VG_MAX_IMAGE_PIXELS, VG_MAX_IMAGE_BYTES,` and `VG_MAX_FLOAT` are initialized to implementation-defined values.
