@@ -50,6 +50,46 @@ Given a previous quadratic or cubic segment with an internal control point $(px,
 $$ (x_1,y_1) = (2*ox-px,2*oy-py) $$
 * When joining a previous quadratic segment to a following cubic segment:
 $$ (x_1,y_1) = (5*ox-2*px,5*oy-2*py)/3 $$
+* When joining a previous cubic segment to a following quadratic segment:
+$$ (x_1,y_1) = $(5*ox-3*px,5*oy-3*py)/2 $$
+
+###_8.3.5 $C^2$ Smooth Segments_
+_[ Note: this section is informative only. ]_
+<a name="C2 Smooth Segments"></a>
+$C^2$ smooth cubic segments implicitly define both of their internal control points $(x_1, y_1)$ and $(x_2, y_2)$ in such a manner as to guarantee continuous first and second derivatives at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet with continuous velocity and acceleration at the join point.
+Note that joining a $C^2$ smooth segment to a preceding line segment will not produce a smooth join. To guarantee a smooth join, convert line segments to equivalent quadratic or cubic curves whose internal control points all lie along the line segment.
+Given three previous control points $(qx, qy)$, $(px, py)$, and $(ox, oy)$ (for a quadratic segment, $(qx, qy)$ is the initial endpoint, $(px, py)$ is the internal control point and $(ox, oy)$ is the final endpoint; for a cubic segment, $(qx, qy)$, and $(px, py)$ are the first and second internal control points, respectively, and $(ox, oy)$ is the final endpoint), $(x_1, y_1)$ is computed as described in the preceding section, and $(x_2, y_2)$ is computed as follows.
+
+* When joining a previous quadratic segment to a following cubic segment:
+$$ (x_2,y_2) = (8*ox-6*px+qx, 8*oy-6*py+qy)/3 $$
+* When joining a previous cubic segment to a following cubic segment:
+$$ (x_2,y_2) = (4*(ox-px)+qx, 4*(oy-py)+qy) $$
+
+###_8.3.6 Converting Segments From Quadratic to Cubic Form_
+<a name="Converting Segments From Qudratic to Cubic Form"></a>
+_[ Note: This section is informative only. ]_
+
+Given a quadratic Bézier curve with control points $(x_0, y_0)$, $(x_1, y_1)$, and $(x_2, y_2)$, an
+identical cubic Bézier curve may be formed using the control points $(x_0, y_0)$, $(x_0 + 2*x_1, y_0 + 2*y_1)/3, (x_2 + 2*x_1, y_2 + 2*y_1)/3, (x_2, y_2)$.
+
+##_8.4 Elliptical Arcs_
+<a name="Elliptical Arcs"></a>
+Elliptical arc segments join a pair of points with a section of an ellipse with given horizontal and vertical axes and a rotation angle (in degrees). Given these parameters,there are four possible arcs distinguished by their direction around the ellipse (clockwise or counter-clockwise) and whether they take the smaller or larger path around the ellipse.
+
+Figure 5 below shows the two possible ellipses with horizontal axis $rh$, vertical axis $rv$, and counter-clockwise rotation angle rot (shown as the angle between the vertical line labeled rot and the line labeled $rv$) passing through the points $(x_0, y_0)$ and $(x_1, y_1)$. The four arcs connecting the points are labeled L and S for large and small, and CW and CCW for clockwise and counter-clockwise.
+
+Negative values of $rh$ and $rv$ are replaced with their absolute values. If exactly one of $rh$ and $rv$ is 0, and the arc endpoints are not coincident, the arc is drawn as if it were projected onto the line containing the endpoints. If both $rh$ and $rv$ are 0, or if the arc endpoints are coincident, the arc is drawn as a line segment between its endpoints. The rot parameter is taken modulo 360 degrees.
+
+If no elliptical arc exists with the given parameters because the endpoints are too far apart (as detailed in the next section), the arc is drawn as if the radii were scaled up uniformly by the smallest factor that permits a solution.
+
+Notes on the mathematics of ellipses are provided in Appendix A (Section 18).
+
+![Figure05](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/1e06fb916951c386c9ea043e03c25ad8116c411c/figures/figure05.png)
+_Figure 5: Elliptical Arcs_
+
+##_8.5 The Standard Path Format_
+<a name="The Standard Path Format"></a>
+Complex paths may be constructed in application memory and passed into OpenVG to define a `VGPath` object. Such path data is defined by a sequence of segment commands referencing a separate sequence of geometric coordinates and parameters.
 
 In this section, we define the standard data format for paths that may be used to definesequences of various types of path segments. Extensions may define other path data formats.
 
