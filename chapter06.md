@@ -1,16 +1,17 @@
 #_6 Rendering Quality and Antialiasing_
-<a name="Chapter06"></a>
-<a name="Rendering Quality and Antialiasing"></a>
+<a name="chapter06"></a><a name="Rendering_Quality_and_Antialiasing"></a>
 Rendering quality settings are available to control implementation-specific trade-offs between quality and performance. For example, an application might wish to use the highest quality setting for still images, and the fastest setting during UI operations or animation. The implementation must satisfy conformance requirements regardless of the quality setting.
 
 A non-antialiased mode is provided for single-sampled drawing surfaces in which pixel coverage is always assigned to be 0 or 1, based on the inclusion of the pixel center in the geometry being rendered. When antialiasing is disabled, a coverage value of 1 will be assigned to each pixel whose center lies within the estimated path geometry, and a coverage value of 0 will be assigned otherwise. A consistent tie-breaking rule must be used for paths that pass through pixel centers.
 
 For purposes of estimating whether a pixel center is included within a path, implementations may make use of approximations to the exact path geometry, providing that the following constraints are met. Conceptually, draw a disc D around each pixel center with a radius of just under 1⁄2 a pixel (in topological terms, an open disc of radius 1⁄2) and consider its intersection with the exact path geometry:
 
-1. If D is entirely inside the path, the coverage at the pixel center must be estimated as 1;
-2. If D is entirely outside the path, the coverage at the pixel center must be estimated as 0;
-3. If D lies partially inside and partially outside the path, the coverage may be estimated as either 0 or 1 subject to the additional constraints that:
+1. If _D_ is entirely inside the path, the coverage at the pixel center must be estimated as 1;
+2. If _D_ is entirely outside the path, the coverage at the pixel center must be estimated as 0;
+3. If _D_ lies partially inside and partially outside the path, the coverage may be estimated as either 0 or 1 subject to the additional constraints that:
+
     a. The estimation is deterministic and invariant with respect to state variables apart from the current user-to-surface transformation, path coordinate geometry, and clipping due to different drawing surface dimensions; and
+
     b. For two disjoint paths that share a common segment, if D is partially covered by each path and completely covered by the union of the paths, the coverage must be estimated as 1 for exactly one of the paths. A segment is considered common to two paths if and only if both paths have the same path format, path datatype, scale, and bias, and the segments have bit-for-bit identical segment types and coordinate values, possibly in flipped order. If the segment is specified using relative coordinates, any preceding segments that may influence the segment must also have identical segment types and coordinate values.
 
 Non-antialiased rendering may be useful for previewing results or for techniques such as picking (selecting the geometric primitive that appears at a given screen location) that require a single geometric entity to be associated with each pixel after rendering has completed.
@@ -18,11 +19,11 @@ Non-antialiased rendering may be useful for previewing results or for techniques
 Applications may indicate the sub-pixel color layout of the display in order to optimize rendering quality.
 
 ##6.1 Rendering Quality
-<a name="Rendering Quality"></a>
+<a name="Rendering_Quality"></a>
 The overall rendering quality may be set to one of three settings: non-antialiased, faster, or better. These settings do not affect rendering to multisampled surfaces; for such surfaces, each sample is evaluated independently and antialiasing occurs automatically as part of the process of resolving multiple samples into pixels.
 
 ###_VGRenderingQuality_
-
+<a name="VGRenderingQuality"></a>
 The `VGRenderingQuality` enumeration defines the values for setting the rendering quality:
 
 ```
@@ -45,7 +46,7 @@ vgSeti(VG_RENDERING_QUALITY, VG_RENDERING_QUALITY_BETTER);
 
 ```
 ##_6.2 Additional Quality Settings_
-<a name="Additional Quality Settings"></a>
+<a name="Additional_Quality_Settings"></a>
 ###VGPixelLayout
 
 The `VGPixelLayout` enumeration describes a number of possible geometric layouts of the red, green, and blue emissive or reflective elements within a pixel. This information may be used as a hint to the rendering engine to improve rendering quality. The supported pixel layouts are illustrated in Figure 2.
@@ -68,13 +69,13 @@ To provide the renderer with a pixel layout hint, use **vgSeti** with a `paramTy
 *_Figure 2: `VGPixelLayout` Values_*
 
 ##_6.3 Coordinate Systems and Transformations_
-<a name="Coordinate Systems and Transformations"></a>
+<a name="Coordinate_Systems_and_Transformations"></a>
 
 Geometry is defined in a two-dimensional coordinate system that may or may not correspond to pixel coordinates. Drawing may be performed independently of the details of screen size, resolution, and drawing area by establishing suitable transformations between coordinate systems.
 
 
 ##_6.4 Coordinate Systems_
-<a name="Coordinate Systems"></a>
+<a name="Coordinate_Systems"></a>
 Geometric coordinates are specified in the user coordinate system. The path-user-to- surface and image-user-to-surface transformations map between the user coordinate system and pixel coordinates on the destination drawing surface. This pixel-based coordinate system is known as the surface coordinate system. The relationship between the user and surface coordinate systems and the transformations that map between them is shown in Figure 3 below.
 
 The user coordinate system is oriented such that values along the X axis increase from left to right and values along the Y axis increase from bottom to top, as in OpenGL. When the user-to-surface transformation is the identity transformation, a change of 1 unit along the X axis corresponds to moving by one pixel.
@@ -86,18 +87,20 @@ In the surface coordinate system, pixel (0, 0) is located at the lower-left corn
 Geometry is defined in the user coordinate system, and is ultimately transformed into surface coordinates and assigned colors by means of a set of user-specified transformations that apply to geometric path data and to paint.
 
 ###_6.5.1 Homogeneous Coordinates_
-<a name="Homogeneous Coordinates"></a>
+<a name="Homogeneous_Coordinates"></a>
 Homogeneous coordinates are used in order to allow translation factors to be included in the affine matrix formulation, as well as to allow perspective effects for images. In homogeneous coordinates, a two-dimensional point (x, y) is represented by the three- dimensional column vector [x, y, 1]T. The same point may be equivalently represented by the vector [s*x, s*y, s]T for any non-zero scale factor s. More detailed explanations of the use of homogeneous coordinates may be found in most standard computer graphics textbooks, for example [FvDFH95].
 
 ![Figure 3](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/0b3d69e55090b1dd337328b0c97e582cfa750746/figures/Figure_3.png)
 _Figure 3: Coordinates, Transformation, Clipping, and Scissoring_
 
 ###_6.5.2 Affine Transformations_
-<a name="Affine Transformations"></a>
+<a name="Affine_Transformations"></a>
 Geometric objects to be drawn are transformed from user coordinates to surface coordinates as they are drawn by means of a 3x3 affine transformation matrix with the following entries:
 
-$\begin{bmatrix} sh & shx & tx \\
- shy & sy & ty \\ 0 & 0 & 1 \end{bmatrix}$
+$$
+\begin{bmatrix} sh & shx & tx \\
+ shy & sy & ty \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 The entries may be divided by their function:
 
@@ -107,8 +110,10 @@ The entries may be divided by their function:
 
 An affine transformation maps a point (x, y) (represented using homogeneous coordinates as the column vector $[x, y, 1]^T$)  into the point  $(x*sx + y*shx + tx, x*shy + y*sy + ty)$ using matrix multiplication:
 
- $\begin{bmatrix} sh & shx & tx \\
-  shy & sy & ty \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix}\ = \begin{bmatrix} x*sx & + y*shx & + tx \\ x*shy & + y*sy & + ty \\ &1 \end{bmatrix}$
+ $$
+ \begin{bmatrix} sh & shx & tx \\
+  shy & sy & ty \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix}\ = \begin{bmatrix} x*sx & + y*shx & + tx \\ x*shy & + y*sy & + ty \\ &1 \end{bmatrix}
+  $$
 
 Affine transformations allow any combination of scaling, rotation, shearing, and translation. The concatenation of two affine transformations is an affine transformation, whose matrix form is the product of the matrices of the original transformations.
 
@@ -117,28 +122,34 @@ Gradients and patterns are subject to an additional affine transformation mappin
 OpenVG does not provide the notion of a hierarchy of transformations; applications must maintain their own matrix stacks if desired.
 
 ###_6.5.3 Projective (Perspective) Transformations_
-<a name="Projective (Perspective) Transformations"></a>
+<a name="Projective_(Perspective)_Transformations"></a>
 The **vgDrawImage** function uses a 3x3 projective (or perspective) transformation matrix (representing the image-user-to-surface transformation) with the following entries to transform from user coordinates to surface coordinates:
 
-_ Rendering Quality and Antialiasing_
+_Rendering Quality and Antialiasing_
 
-$\begin{bmatrix} sh & shx & tx \\
- shy & sy & ty \\ w_0 & w_1 & w_2 \end{bmatrix}$
+$$
+\begin{bmatrix} sh & shx & tx \\
+ shy & sy & ty \\ w_0 & w_1 & w_2 \end{bmatrix}
+ $$
 
 A projective transformation maps a point (x, y) into the point:
 
-$\left( \frac { x*sx+y*shx+tx }{ x*w_ 0+y*w_ 1+w_ 2 } ,\frac { x*shy+y*sy+ty }{ x*w_ 0+y*w_ 1+ w_ 2 }  \right)$
+$$
+\left( \frac { x*sx+y*shx+tx }{ x*w_ 0+y*w_ 1+w_ 2 } ,\frac { x*shy+y*sy+ty }{ x*w_ 0+y*w_ 1+ w_ 2 }  \right)
+$$
 
 using matrix multiplication and division by the third homogeneous coordinate:
 
-$\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ w_{ 0 } & w_{ 1 } & w_{ 2 } \end{bmatrix}\begin{bmatrix} x \\ y \\ z \end{bmatrix}=\begin{bmatrix} x*sx+y*shx+tx \\ x*shy+y*sy+ty \\ x*w_{ 0 }+y*w_{ 1 }+w_{ 2 } \end{bmatrix}=\begin{bmatrix} \frac { x*sx+y*shx+tx }{ x*w\_ 0+y*w\_ 1+w\_ 2 }  \\ \frac {w*shy+y*sy+ty  }{ x*w_1+y*w_1+w_2 } \\ 1\end{bmatrix}$
+$$
+\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ w_{ 0 } & w_{ 1 } & w_{ 2 } \end{bmatrix}\begin{bmatrix} x \\ y \\ z \end{bmatrix}=\begin{bmatrix} x*sx+y*shx+tx \\ x*shy+y*sy+ty \\ x*w_{ 0 }+y*w_{ 1 }+w_{ 2 } \end{bmatrix}=\begin{bmatrix} \frac { x*sx+y*shx+tx }{ x*w\_ 0+y*w\_ 1+w\_ 2 }  \\ \frac {w*shy+y*sy+ty  }{ x*w_1+y*w_1+w_2 } \\ 1\end{bmatrix}
+$$
 The concatenation of two projective transformations is a projective transformation, whose matrix form is the product of the matrices of the original transformations.
 
 Both affine and projective transformations map straight lines to straight lines. However, affine transformations map evenly spaced points along a source line to evenly spaced points in the destination, whereas projective transformations allow the distance between points to vary due to the effect of division by the denominator $d = (x*w_0 + y*w_1 + w_2)$.
 Although OpenVG does not provide support for three-dimensional coordinates, proper setting of the w matrix entries can simulate the effect of placement of images in three dimensions, as well as other warping effects.
 
 ##_6.6 Matrix Manipulation_
-<a name="Matrix Manipulation"></a>
+<a name="Matrix_Manipulation"></a>
 Transformation matrices are manipulated using the **vgLoadIdentity**, **vgLoadMatrix**, and **vgMultMatrix** functions. For convenience, the **vgTranslate**, **vgScale**, **vgShear**, and **vgRotate** functions may be used to concatenate common types of transformations.
 
 The matrix conventions used by OpenVG are similar to those of OpenGL. A point to be transformed is given by a homogeneous column vector $[x, y, 1^]T$. Transformation of a point p by a matrix M is defined as the product M∙p. Concatenation of transformations is performed using right-multiplication of matrices.
@@ -160,7 +171,7 @@ typedef enum {
 ```
 
 
-To set the matrix mode, call **vgSeti*8 with a type of `VG_MATRIX_MODE` and a value of `VG_MATRIX_*`. For example, to set the matrix mode to allow manipulation of the path- user-to-surface transformation, call:
+To set the matrix mode, call **vgSeti** with a type of `VG_MATRIX_MODE` and a value of `VG_MATRIX_*`. For example, to set the matrix mode to allow manipulation of the path- user-to-surface transformation, call:
 
 ```
 vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
@@ -170,7 +181,9 @@ vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
 <a name="vgLoadIdentity"></a>
 The **vgLoadIdentity** function sets the current matrix M to the identity matrix:
 
-$M =\begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$
+$$
+M =\begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 ```
 void vgLoadIdentity(void)
@@ -180,15 +193,21 @@ void vgLoadIdentity(void)
 <a name="vgLoadMatrix"></a>
 The vgLoadMatrix function loads an arbitrary set of matrix values into the current matrix. Nine matrix values are read from m, in the order:
 
-$\left\{ sx, shy, w_0, shx, sy, w_1, tx, ty, w_2  \right\}$
+$$
+\left\{ sx, shy, w_0, shx, sy, w_1, tx, ty, w_2  \right\}
+$$
 
 defining the matrix:
 
-$M=\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ w_{ 0 } & w_{ 1 } & w_{ 2 } \end{bmatrix}$
+$$
+M=\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ w_{ 0 } & w_{ 1 } & w_{ 2 } \end{bmatrix}
+$$
 
 However, if the targeted matrix is affine (_i.e.,_ the matrix mode is not `VG_MATRIX_IMAGE_USER_TO_SURFACE`), the values _{$w_0, w_1, w_2$}_ are ignored and replaced by the values _{ $0, 0, 1$ }_, resulting in the affine matrix:
 
-$\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ 0 & 0 &1 \end{bmatrix}$
+$$
+\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ 0 & 0 &1 \end{bmatrix}
+$$
 
 ```
 void vgLoadMatrix(const VGfloat * m)
@@ -244,7 +263,8 @@ void vgMultMatrix(const VGfloat * m)
 <a name="vgTranslate"></a>
 The **vgTranslate** function modifies the current transformation by appending a translation. This is equivalent to right-multiplying the current matrix **M** by a translation matrix:
 
-$M\leftarrow M = \begin{bmatrix} 1 & 0 & tx \\ 0 & 1 & ty \\ 0 & 0 & 1 \end{bmatrix}$
+$$ M\leftarrow M = \begin{bmatrix} 1 & 0 & tx \\ 0 & 1 & ty \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 ```
 void vgTranslate(VGfloat tx, VGfloat ty)
@@ -254,7 +274,9 @@ void vgTranslate(VGfloat tx, VGfloat ty)
 <a name="vgScale"></a>
 The **vgScale** function modifies the current transformation by appending a scale. This is equivalent to right-multiplying the current matrix $M$ by a scale matrix:
 
-$M\leftarrow M = \begin{bmatrix} sx & 0 & 0 \\ 0 & sy & 0 \\ 0 & 0 & 1 \end{bmatrix}$
+$$
+M\leftarrow M = \begin{bmatrix} sx & 0 & 0 \\ 0 & sy & 0 \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 ```
 void vgScale(VGfloat sx, VGfloat sy)
@@ -264,7 +286,9 @@ void vgScale(VGfloat sx, VGfloat sy)
 <a name="vgShear"></a>
 The **vgShear** function modifies the current transformation by appending a shear. This is equivalent to right-multiplying the current matrix $M$ by a shear matrix:
 
-$M\leftarrow M = \begin{bmatrix} 1 & shx & 0 \\ shy & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}$
+$$
+M\leftarrow M = \begin{bmatrix} 1 & shx & 0 \\ shy & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 ```
 void vgShear(VGfloat shx, VGfloat shy)
@@ -274,11 +298,15 @@ void vgShear(VGfloat shx, VGfloat shy)
 <a name="vgRotate"></a>
 The **vgRotate** function modifies the current transformation by appending a counter- clockwise rotation by a given angle (expressed in degrees) about the origin. This is equivalent to right-multiplying the current matrix $M$ by the following matrix (using the symbol a to represent the value of the `angle` parameter):
 
-$M\leftarrow M = \begin{bmatrix} cos(a) & -sin(a) & 0 \\ sin(a) & cos(a) & 0 \\ 0 & 0 & 1 \end{bmatrix}$
+$$
+M\leftarrow M = \begin{bmatrix} cos(a) & -sin(a) & 0 \\ sin(a) & cos(a) & 0 \\ 0 & 0 & 1 \end{bmatrix}
+$$
 
 
-To rotate about a center point (cx, cy) other than the origin, the application may perform a translation by $(cx, cy)$, followed by the rotation, followed by a translation by $(-cx, -cy)$.
+To rotate about a center point $(cx, cy)$ other than the origin, the application may perform a translation by $(cx, cy)$, followed by the rotation, followed by a translation by $(-cx, -cy)$.
 
 ```
 void vgRotate(VGfloat angle)
 ```
+
+<div style="page-break-after: always;"> </div>

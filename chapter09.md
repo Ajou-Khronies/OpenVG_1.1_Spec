@@ -239,7 +239,7 @@ where $\Delta x=x1-x0$ and $\Delta y=y1-y0$. If the points $\left( x0,y0 \right)
 #### _Setting Linear Gradient Parameters_
 <a name="Setting_Linear_Gradient_Parameters"></a>
 To enable linear gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_LINEAR_GRADIENT`.
-The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order $\{ x0,y0,x1,y1 \} $.
+The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order { $x0,y0,x1,y1$ }.
 ```
 VGfloat fill_x0, fill_y0, fill_x1, fill_y1;
 VGfloat stroke_x0, stroke_y0, stroke_x1, stroke_y1;
@@ -285,7 +285,7 @@ _Figure 18: Radial Gradient Function_
 
 #### _Setting Radial Gradient Parameters_
 <a name="Setting_Radial_Gradient_Parameters"></a>
-To enable radial gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_RADIAL_GRADIENT`. The radial gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_RADIAL_GRADIENT`. The gradient values are supplied as a vector of 5 floats in the order $\{cx,cy,fx,fy,r\}$.
+To enable radial gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_RADIAL_GRADIENT`. The radial gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_RADIAL_GRADIENT`. The gradient values are supplied as a vector of 5 floats in the order { $cx,cy,fx,fy,r$ }.
 
 If $\left(fx,fy\right)$ lies outside the circumference of the circle, the intersection of the line from the center to the focal point with the circumference of the circle is used as the focal point in place of the specified point. To avoid a division by 0, the implementation may move the focal point along the line towards the center of the circle by an amount sufficient to avoid numerical instability, provided the new location lies at a distance of at least .99r from the circle center. The following code illustrates the setting of radial gradient parameters:
 
@@ -386,7 +386,7 @@ A common set of color ramp settings are used for both linear and radial gradient
 <a name="Formal_Definition_of_Spread_Modes"></a>
 This section provides a formal definition of the color ramp spread modes.
 
-In the following, assume that a sequence of stops $\left\{S_0,S_1, ... , S_{ N-1 }\right\}$ have been defined by the application, and/or by default or implicit values. The stop $S_i$ is defined to have offset $x_i$ and color $c_i$. The stops are assumed to be ordered by offset but may have duplicate offsets; that is, for all $i<j$, ${ x }_{ i }\le{ x }_{ j }$. To determine the interpolated color value at a given offset value v, determine the smallest $i$ such that ${ x }_{ i+1 }>v$. If $x_i = v$, use the color $c_i$, otherwise perform linear interpolation between the stops $S_i$ and $S_{i+1}$ to produce the color $c_{ i }+\left( c_{ i+1 }-c_{ i } \right) \left( v-x_{ i } \right) /\left( x_{ i+1 }-x_{ i } \right) $.
+In the following, assume that a sequence of stops { $S_0,S_1, ... , S_{ N-1 }$ } have been defined by the application, and/or by default or implicit values. The stop $S_i$ is defined to have offset $x_i$ and color $c_i$. The stops are assumed to be ordered by offset but may have duplicate offsets; that is, for all $i<j$, ${ x }_{ i }\le{ x }_{ j }$. To determine the interpolated color value at a given offset value v, determine the smallest $i$ such that ${ x }_{ i+1 }>v$. If $x_i = v$, use the color $c_i$, otherwise perform linear interpolation between the stops $S_i$ and $S_{i+1}$ to produce the color $c_{ i }+\left( c_{ i+1 }-c_{ i } \right) \left( v-x_{ i } \right) /\left( x_{ i+1 }-x_{ i } \right) $.
 
 In pad mode, values smaller than 0 are assigned the color $c_0$ and values greater than or equal to 1 are assigned the color ${ c }_{ N-1 }$.
 
@@ -408,9 +408,9 @@ $$
 ### 9.3.4 Gradient Examples
 <a name="Gradient_Examples"></a>
 
-Figure 20 shows a square from (0, 0) to (400, 400) painted with a set of linear gradientswith (x0, y0) = (100, 100), (x1, y1) = (300, 300).
+Figure 20 shows a square from $(0, 0)$ to $(400, 400)$ painted with a set of linear gradients with $(x0, y0) = (100, 100)$, $(x1, y1) = (300, 300)$.
 
-Figure 21 shows the same square painted with radial gradients with centered and noncentered focal points. The centered gradient, shown in the top row, has its center (cx, cy)and focal point (fx, fy) both at (200, 200). The non-centered gradient, shown in thebottom row, has its center (cx, cy) at (200, 200) and its focal point (fx, fy) at (250, 250).The radius r for both gradients is equal to 100.
+Figure 21 shows the same square painted with radial gradients with centered and noncentered focal points. The centered gradient, shown in the top row, has its center $(cx, cy)$and focal point $(fx, fy)$ both at (200, 200). The non-centered gradient, shown in thebottom row, has its center $(cx, cy)$ at $(200, 200)$ and its focal point $(fx, fy)$ at $(250, 250)$.The radius r for both gradients is equal to 100.
 
 All the gradients shown in this section utilize a color ramp with stops at offsets 0.0,0.33, 0.66, and 1.0 colored white, red, green, and blue, respectively, as shown in Figure22.
 
@@ -429,11 +429,11 @@ Figure 22: Color Ramp used for Gradient Examples
 ## 9.4 Pattern Paint
 <a name="Pattern_Paint"></a>
 
-Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + Â½, y + Â½).
+Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + 1/2, y + 1/2).
 
 Filtering may be used to construct an interpolated pattern value at the sample point,based on the pattern image pixel values. The pattern tiling mode is used to define valuesfor pixel centers in the pattern space that lie outside of the bounds of the pattern.
 
-Interpolation may be performed between multiple pixels of the pattern image to producean antialiased pattern value. The image quality setting at the time of drawing (determinedby the `VG_IMAGE_QUALITY` parameter) is used to control the quality of patterninterpolation. If the image quality is set `toVG_IMAGE_QUALITY_NONANTIALIASED`, nearest-neighbor interpolation (pointsampling) is used. If the image quality is set to `VG_IMAGE_QUALITY_FASTER` or `VG_IMAGE_QUALITY_BETTER`, higher-quality interpolation will b...(line truncated)...
+Interpolation may be performed between multiple pixels of the pattern image to producean antialiased pattern value. The image quality setting at the time of drawing (determinedby the `VG_IMAGE_QUALITY` parameter) is used to control the quality of patterninterpolation. If the image quality is set `toVG_IMAGE_QUALITY_NONANTIALIASED`, nearest-neighbor interpolation (pointsampling) is used. If the image quality is set to `VG_IMAGE_QUALITY_FASTER` or `VG_IMAGE_QUALITY_BETTER`, higher-quality interpolation will be used if available. Interpolation is done in the color space of the image using a premultiplied representation.
 
 #### vgPaintPattern
 <a name="vgPaintPattern"></a>
@@ -469,11 +469,11 @@ The `VGTilingMode` enumeration defines possible methods for defining colors fors
 
 The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range.
 
-The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, widthâ€“ 1)), max(0, min(y, height â€“ 1))).
+The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel $(x, y)$ has the same value as the image pixel $(max(0, min(x, width - 1)), max(0, min(y, height - 1)))$.
 
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator â€˜a mod bâ€™ returns a value between 0 and(b â€“ 1) such that a = k*b + (a mod b) for some integer k.
+The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel $\text {(x mod width, y mod height)}$ where the operator $\text {a mod b}$ returns a value between 0 and $(b-1)$ such that $a = k*b + ( \text {a mod b} )$ for some integer k.
 
-The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(xâ€™, yâ€™) where:
+The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel $(x, y)$ has the same value as the image pixel $(x', y')$ where:
 
 $$
 x' =

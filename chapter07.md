@@ -1,5 +1,5 @@
 #_7 Scissoring, Masking, and Clearing_
-<a name="Chapter 7"></a><a name="Scissoring, Masking, and Clearing"></a>
+<a name="chapter07"></a><a name="Scissoring__Masking__and_Clearing"></a>
 All drawing is _clipped_ (restricted) to the bounds of the drawing surface, and may be further clipped to the interior of a set of scissoring rectangles. If available, a mask is applied for further clipping and to create soft edge and partial transparency effects.
 
 Pixels outside the drawing surface bounds, or (when scissoring is enabled) not in any scissoring rectangle are not affected by any drawing operation. For any drawing operation, each pixel will receive the same value for any setting of the scissoring rectangles that contains the pixel. That is, the placement of the scissoring rectangles, and whether scissoring is enabled, affects only whether a given pixel will be written, without affecting what value it will receive.
@@ -17,7 +17,7 @@ VGint maxScissorRects = vgGeti(VG_MAX_SCISSOR_RECTS);
 ```
 
 ####_Specifying Scissoring Rectangles_
-<a name="Specifying Scissoring Rectangles"></a>
+<a name="Specifying_Scissoring_Rectangles"></a>
 Each scissoring rectangle is specified as an integer 4-tuple of the form $(minX, minY, width, height)$, where $minX$ and $minY$ are inclusive. A rectangle with $width ≤ 0$ or $height ≤ 0$ is ignored. The scissoring region is defined as the union of all the specified rectangles. The rectangles as specified need not be disjoint. If scissoring is enabled and no valid scissoring rectangles are present, no drawing occurs. If more than `VG_MAX_SCISSOR_RECTS` rectangles are specified, those beyond the first `VG_MAX_SCISSOR_RECTS` are discarded immediately (and will not be returned by **vgGet**).
 
 ```
@@ -60,15 +60,15 @@ The `VG_INTERSECT_MASK` operation replaces the previous mask in the region of in
 
 The `VG_SUBTRACT_MASK` operation subtracts the new mask from the previous mask and replaces the previous mask in the region of interest by the resulting mask. The resulting values are always less than or equal to their previous value.
 
-Table 5 gives the equations defining the new mask value for each mask operation in terms of the previous mask value μprev and the newly supplied mask value $μ_{mask}$.
+Table 5 gives the equations defining the new mask value for each mask operation in terms of the previous mask value $μ_{prev}$ and the newly supplied mask value $μ_{mask}$.
 Operation|Mask Equation
 ---------|-------------
-VG_CLEAR_MASK|$μ_{new} = 0$
-VG_FILL_MASK|$μ_{new} = 1$
-VG_SET_MASK|$μ_{new} = μ_{mask}$
-VG_UNION_MASK|$μ_{new} = 1 – (1 – μ_{mask})*(1 – μ_{prev})$
-VG_INTERSECT_MASK|$μnew = μ_{mask} *μ_{prev}$
-VG_SUBTRACT_MASK|$μnew = μ_{prev}*(1 – μ_{mask})$
+`VG_CLEAR_MASK`|$μ_{new} = 0$
+`VG_FILL_MASK`|$μ_{new} = 1$
+`VG_SET_MASK`|$μ_{new} = μ_{mask}$
+`VG_UNION_MASK`|$μ_{new} = 1 – (1 – μ_{mask})*(1 – μ_{prev})$
+` VG_INTERSECT_MASK`|$μnew = μ_{mask} *μ_{prev}$
+`VG_SUBTRACT_MASK`|$μnew = μ_{prev}*(1 – μ_{mask})$
 
 _Table 5: VGMaskOperation Equations_
 
