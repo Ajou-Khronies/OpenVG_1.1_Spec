@@ -521,3 +521,5 @@ vgSetParameteri(myStrokePaint, VG_PAINT_PATTERN_TILING_MODE,
 stroke_tilingMode);
 vgPaintPattern(myStrokePaint, myStrokePaintPatternImage);
 ```
+
+<div style="page-break-after: always;"> </div>
