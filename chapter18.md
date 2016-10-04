@@ -231,3 +231,5 @@ $$
 The center, rotation angle, and radii of the ellipse may be determined using the formulas from the previous section.
 
 In practice, it may be simpler to represent a transformed ellipse as the affine transformation mapping an arc of the unit circle into it. The ellipse may be rendered by concatenating its transform with the current transform and rendering the circular arc. It may be transformed by simply concatenating the transforms.
+
+<div style="page-break-after: always;"> </div>

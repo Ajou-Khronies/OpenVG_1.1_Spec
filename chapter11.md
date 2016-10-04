@@ -1,8 +1,8 @@
-# <a name="Chapter11"></a><a name="Text"></a> 11 Text
+# <a name="chapter11"></a><a name="Text"></a> 11 Text
 
 Several classes of applications were considered in order to determining the set of features supported by the OpenVG text rendering API. E-book readers, scalable user interfaces with text-driven menus, and SVG viewers used to display textintensive content rely on high-quality text rendering using well-hinted fonts. For these applications, the use of unhinted outlines, or the use of hardwareaccelerated glyph scaling that does not support hints, would be detrimental to application rendering quality. Gaming applications that use special custom fonts, applications where text is rotated or placed along a path, or SVG viewers where unhinted SVG fonts are specified are less sensitive to the use of unhinted fonts for text rendering and may benefit from hardware-accelerated glyph scaling. These application requirements made it clear that OpenVG must provide a fast, low-level hardware-accelerated API that is capable of supporting both hinted and unhinted vector glyph outlines, as well as glyphs represented as bitmaps.
 
-## <a name="Chapter11.1"></a><a name="Text_Rendering"></a> _11.1 Text Rendering_
+## <a name="Text_Rendering"></a> _11.1 Text Rendering_
 
 The process of text rendering involves the following steps:
 
@@ -18,13 +18,13 @@ OpenVG provides a mechanism to allow applications to define a `VGFont` object as
 
 OpenVG can assist applications in text composition by hardware-accelerating glyph positioning calculations; however, the text layout and positioning are the responsibilities of the application.
 
-## <a name="Chapter11.2"></a><a name="Font_Terminology"></a> _11.2 Font Terminology_
+## <a name="Font_Terminology"></a> _11.2 Font Terminology_
 
 In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term “character” refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet – a Latin character, Chinese character, etc.) while the term “glyph” refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
 
 When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data – a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
 
-## <a name="Chapter11.3"></a><a name="Glyph_Positioning_and_Text_Layout"></a> _11.3 Glyph Positioning and Text Layout_
+## <a name="Glyph_Positioning_and_Text_Layout"></a> _11.3 Glyph Positioning and Text Layout_
 
 Scalable fonts define glyphs using vector outlines and additional set of data, such as hinting instructions, font and glyph metrics, etc. A typical glyph would be defined as presented in Figure 23 below:
 
@@ -63,9 +63,9 @@ vgTranslate((escapement.x[i] + adjustment.x[i]),
             (escapement.y[i] + adjustment.y[i]));
 ```
 
-## <a name="Chapter11.4"></a><a name="Fonts_in_OpenVG"></a> _11.4 Fonts in OpenVG_
+## <a name="Fonts_in_OpenVG"></a> _11.4 Fonts in OpenVG_
 
-### <a name="Chapter11.4.1"></a><a name="VGFont_Objects_and_Glyph_Mapping"></a> _11.4.1 VGFont Objects and Glyph Mapping_
+### <a name="VGFont_Objects_and_Glyph_Mapping"></a> _11.4.1 VGFont Objects and Glyph Mapping_
 
 OpenVG provides `VGFont` objects to assist applications with text rendering. Each VGFont object defines a collection of glyphs. Glyphs in OpenVG can be represented either using `VGPath` or `VGImage` data. `VGFont` objects are created by an application, and can contain either a full set of glyphs or a subset of glyphs of an original font. `VGFont` objects do not contain any metric or layout information; instead, applications are responsible for all text layout operations using the information provided by the original fonts.
 
@@ -94,7 +94,7 @@ OpenVG applications may re-use native glyph indices from an original TrueType or
 
 OpenVG applications may assign arbitrary numbers as glyph indices. This may be beneficial for special purpose fonts that have a limited number of glyphs (_e.g._, SVG fonts).
 
-### <a name="Chapter11.4.2"></a><a name="Managing_VGFont_Objects"></a> _11.4.2 Managing VGFont Objects_
+### <a name="Managing_VGFont_Objects"></a> _11.4.2 Managing VGFont Objects_
 
 `VGFont` objects are created and destroyed using the **vgCreateFont** and **vgDestroyFont** functions. Font glyphs may be added, deleted, or replaced after the font has been created.
 
@@ -119,7 +119,7 @@ void vgDestroyFont (VGFont font);
 ```
 
 
-### <a name="Chapter11.4.3"></a><a name="Querying_VGFont_Objects"></a> _11.4.3 Querying VGFont Objects_
+### <a name="Querying_VGFont_Objects"></a> _11.4.3 Querying VGFont Objects_
 
 #### <a name="VGFontParamType"></a> _VGFontParamType_
 
@@ -145,7 +145,7 @@ VGFont font;
 VGint numGlyphs = vgGetParameteri(font, VG_FONT_NUM_GLYPHS);
 ```
 
-### <a name="Chapter11.4.4"></a><a name="Adding_and_Modifying_Glyphs_in_VGFonts"></a> _11.4.4 Adding and Modifying Glyphs in VGFonts_
+### <a name="Adding_and_Modifying_Glyphs_in_VGFonts"></a> _11.4.4 Adding and Modifying Glyphs in VGFonts_
 
 `VGFonts` are collections of glyph data and may have glyphs represented using `VGPath` objects (for vector outline fonts) or `VGImage` objects (for bitmap fonts). `VGFont` may be created for a particular target text size, where the glyphs can be defined using either scaled and hinted outlines or embedded bitmaps. The **vgSetGlyphToPath**, **vgSetGlyphToImage**, and **vgClearGlyph** functions are provided to add and/or modify glyphs in a `VGFont`.
 
@@ -238,7 +238,7 @@ void vgClearGlyph (VGFont font, VGuint glyphIndex);
 >
 > – if `glyphIndex` is not defined for the `font`
 
-### <a name="Chapter11.4.5"></a><a name="Font_Sharing"></a> _11.4.5 Font Sharing_
+### <a name="Font_Sharing"></a> _11.4.5 Font Sharing_
 
 Mobile platforms usually provide a limited number of resident fonts. These fonts are available for use by any application that is running on a device, and the same font could be used by more than one application utilizing OpenVG. The sharing of `VGFont` objects may increase the efficiency of using OpenVG memory and other resources.
 
@@ -255,7 +255,7 @@ in the `VGFont` object.
 
 In order to avoid additional complexity associated with character-to-glyph mapping, it is recommended that shared `VGFont` objects utilize character-toglyph mappings based on either Unicode or native OpenType/TrueType glyph indices., as the use of custom glyph indices requires maintaining a standalone character-to glyph mapping table for each `VGFont` object.
 
-## <a name="Chapter11.5"></a><a name="Text_Layout_and_Rendering"></a> _11.5 Text Layout and Rendering_
+## <a name="Text_Layout_and_Rendering"></a> _11.5 Text Layout and Rendering_
 
 OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to “snap” glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
 
@@ -329,3 +329,4 @@ non-NULL and are not properly aligned
 > – if paintModes is not a valid bitwise OR of values from the VGPaintMode
 enumeration, or 0
 
+<div style="page-break-after: always;"> </div>
