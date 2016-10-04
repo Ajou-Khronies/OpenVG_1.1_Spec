@@ -1,5 +1,5 @@
 # 3 Constants, Functions and Data Types
-<a name="Chapter3"></a><a name="Constants, Functions and Data Types"></a>
+<a name="Chapter03"></a><a name="Constants_Functions_and_Data_Types"></a>
 OpenVG type definitions and function prototypes are found in an `openvg.h` header file, located in a VG subdirectory of a platform-specific header file location. OpenVG makes use of 8-, 16-, and 32-bit data types. A 64-bit data type is not required. If the `khronos_types.h` header file is provided, the primitive data types will be compatible across all Khronos APIs on the same platform.
 
 ## _3.1 Versioning_
@@ -16,7 +16,7 @@ For the current specification, the constant `OPENVG_VERSION_1_1` is defined. The
 ```
 
 ## _3.2 Primitive Data Types_
-<a name="Primitive Data Types"></a>
+<a name="Primitive_Data_Types"></a>
 OpenVG defines a number of primitive data types by means of C  `typedef`s. The actual data types used are platform-specific.
 
 #### _VGbyte_
@@ -52,14 +52,14 @@ typedef enum {
 VG_FALSE = 0,
 VG_TRUE = 1
 } VGboolean;
-````
+```
 
 #### _VGfloat_
 <a name="VGfloat"></a>
 `VGfloat` defines a 32-bit IEEE 754 floating-point value. If `khronos_types.h` is defined, `VGfloat` will be defined as `khronos_float_t`.
 
 ## _3.3 Floating-Point and Integer representations_
-<a name="Floating-Point and Integer Representations"></a>
+<a name="Floating-Point_and_Integer_Representations"></a>
 All floating-point values are specified in standard IEEE 754 format. However, implementations may clamp extremely large or small values to a restricted range, and internal processing may be performed with lesser precision. At least 16 bits of mantissa, 6 bits of exponent, and a sign bit must be present, allowing values from ± $2^{-30}$ to ±$2^{31}$ to be represented with a fractional precision of at least 1 in $2^{16}$.
 
 Path data (_i.e._, vertex and control point coordinates and ellipse parameters) may be pecified in one of four formats: 8-, 16-, or 32-bit signed integers, or floating-point. Floating-point scale and bias factors are used to map the incoming integer and floatingpoint values into a desired range when path processing occurs.
@@ -72,7 +72,7 @@ The macro `VG_MAXSHORT` contains the largest positive value that may be represen
 
 #### _VG_MAXINT_
 <a name="VG_MAXINT"></a>
-The macro `VG_MAXINT` contains the largest positive value that may be represented by a VGint. `VG_MAXINT` is defined to be equal to $2^{31}$ – 1, or 2,147,483,647. The smallest negative value that may be represented by a `VGint` is given by (``–VG_MAXINT` – 1), or -2,147,483,648.
+The macro `VG_MAXINT` contains the largest positive value that may be represented by a VGint. `VG_MAXINT` is defined to be equal to $2^{31}$ – 1, or 2,147,483,647. The smallest negative value that may be represented by a `VGint` is given by (`–VG_MAXINT` – 1), or -2,147,483,648.
 
 #### _VG_MAX_FLOAT_
 <a name="VG_MAX_FLOAT"></a>
@@ -85,7 +85,7 @@ Colors in OpenVG other than those stored in image pixels (_e.g._, colors for cle
 Non-linear quantities are denoted using primed (’) symbols below. [POYN03] contains an excellent discussion of the use of non-linear coding to achieve perceptual uniformity.
 
 ### _3.4.1 Linear and Non-Linear Color representations_
-<a name="Linear and Non-Linear Color Representations"></a>
+<a name="Linear_and_Non-Linear_Color_Representations"></a>
 In a linear color representation, the numeric values associated with a color channel value measure the rate at which light is emitted by an object, multiplied by some constant scale factor. Informally, it can be thought of as counting the number of photons emitted in a given amount of time. Linear representations are useful for computation, since light values may be added together in a physically meaningful way.
 
 However, the human visual system responds non-linearly to the light power (“intensity”) of an image. Accordingly, many common image coding standards (_e.g._, the EXIF JPEG format used by many digital still cameras and the MPEG format used for video) utilize non-linear relationships between light power and code values. This allows a larger number of distinguishable colors to be represented in a given number of bits than is possible with a linear encoding. Common display devices such as CRTs and LCDs also emit light whose power at each pixel component is proportional to a non-linear `power function` (_i.e._, a function of the form $x^a$ where $a$ is constant) of the applied code value, whether due to the properties of analog CRT electronics or to the deliberate application of a non-linear transfer function elsewhere in the signal path. The exponent, or `gamma`, of this power function is typically between 2.2 and 2.5. OpenVG makes use of the nonlinear sRGB color specification described below.
@@ -93,12 +93,14 @@ However, the human visual system responds non-linearly to the light power (“in
 Because linear coding of intensity fails to optimize the number of distinguishable values, 8-bit linear pixel formats suffer from poor contrast ratios and banding artifacts; their use with photographic imagery is not recommended. However, synthetic imagery generated by other APIs such as OpenGL ES that make use of linear light may require the use of linear formats. 8-bit linear coding is also appropriate for representing pseudoimages such as coverage masks that are not based on perceptual light intensity. Although computing directly with non-linear representations may lead to significant errors compared with the results of first converting to a linear representation, it is common industry practice in many imaging domains to do so. Because the cost of performing linearization on pixel values to be interpolated or blended is considered prohibitive for mobile devices in the near future, OpenVG may perform these operations directly on non-linear code values. A future version of this specification may introduce flags to force values to be converted to a linear representation prior to interpolation and blending.
 
 ### _3.4.2 Color Space Definitions_
-<a name="Color Space Definitions"></a>
+<a name="Color_Space_Definitions"></a>
 The linear lRGB color space is defined in terms of the standard CIE XYZ color space [WYSZ00], following ITU Rec. 709 [ITU90] using a D65 white point:
 
-$$R = 3.240479 X –1.537150 Y –0.498535 Z$$
-$$G =-0.969256 X +1.875992 Y +0.041556 Z$$
-$$B = 0.055648 X –0.204043 Y +1.057311 Z$$
+$$
+R = 3.240479 X -1.537150 Y –0.498535 Z\\
+G =-0.969256X +1.875992 Y +0.041556 Z\\
+B = 0.055648 X –0.204043 Y +1.057311 Z\\
+$$
 
 The sRGB color space defines values $R'_{sRGB}$, $G'_{sRGB}$, $B'_{sRGB}$ in terms of the linear lRGB primaries by applying a gamma ($\gamma$) mapping consisting of a linear segment and an offset power function:
 
@@ -116,27 +118,35 @@ $$\gamma^{-1}(x)=[(x+0.0556)/1.0556]^{2.4}$$
 
 To convert from lRGB to sRGB, the gamma mapping is used:
 
-$$R'_{sRGB}=\gamma(R)$$
-$$G'_{sRGB}=\gamma(G)\tag{1} $$
-$$B'_{sRGB}=\gamma(B)$$
+$$
+R'_{sRGB}=\gamma(R)\\
+G'_{sRGB}=\gamma(G)\tag{1} \\
+B'_{sRGB}=\gamma(B)
+$$
 
 To convert from sRGB to lRGB, the inverse gamma mapping is used:
 
-$$ R = \gamma^{-1}(R'_{sRGB})$$
-$$ G = \gamma^{-1}(G'_{sRGB})\tag{2}$$
-$$ B = \gamma^{-1}(B'_{sRGB})$$
+$$
+R = \gamma^{-1}(R'_{sRGB})\\
+G = \gamma^{-1}(G'_{sRGB})\tag{2}\\
+B = \gamma^{-1}(B'_{sRGB})
+$$
 
 Because the gamma function involves offset and scaling factors, it behaves similarly to a pure power function with an exponent of 1/2.2 (or approximately 0.45) rather than the “advertised” exponent of 1/2.4, (or approximately 0.42).
 
 The linear grayscale (luminance) color space (which we denote as lL) is related to the linear lRGB color space by the equations:
 
-$$L = 0.2126 R + 0.7152 G + 0.0722 B\tag{3}$$
-$$R = G = B = L\tag{4}$$
+$$
+L = 0.2126 R + 0.7152 G + 0.0722 B\tag{3}\\
+R = G = B = L\tag{4}
+$$
 
 The perceptually-uniform grayscale color space (which we denote as sL) is related to the linear grayscale (luminance) color space by the gamma mapping:
 
-$$L'=\gamma(L)\tag{5}$$
-$$L=\gamma^1(L')\tag{6}$$
+$$
+L'=\gamma(L)\tag{5}\\
+L=\gamma^1(L')\tag{6}\\
+$$
 
 Conversion from perceptually-uniform grayscale to sRGB is performed by replication:
 
