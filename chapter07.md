@@ -60,15 +60,15 @@ The `VG_INTERSECT_MASK` operation replaces the previous mask in the region of in
 
 The `VG_SUBTRACT_MASK` operation subtracts the new mask from the previous mask and replaces the previous mask in the region of interest by the resulting mask. The resulting values are always less than or equal to their previous value.
 
-Table 5 gives the equations defining the new mask value for each mask operation in terms of the previous mask value μprev and the newly supplied mask value $μ_{mask}$.
+Table 5 gives the equations defining the new mask value for each mask operation in terms of the previous mask value $μ_{prev}$ and the newly supplied mask value $μ_{mask}$.
 Operation|Mask Equation
 ---------|-------------
 `VG_CLEAR_MASK`|$μ_{new} = 0$
 `VG_FILL_MASK`|$μ_{new} = 1$
 `VG_SET_MASK`|$μ_{new} = μ_{mask}$
 `VG_UNION_MASK`|$μ_{new} = 1 – (1 – μ_{mask})*(1 – μ_{prev})$
-VG_INTERSECT_MASK|$μnew = μ_{mask} *μ_{prev}$
-VG_SUBTRACT_MASK|$μnew = μ_{prev}*(1 – μ_{mask})$
+` VG_INTERSECT_MASK`|$μnew = μ_{mask} *μ_{prev}$
+`VG_SUBTRACT_MASK`|$μnew = μ_{prev}*(1 – μ_{mask})$
 
 _Table 5: VGMaskOperation Equations_
 

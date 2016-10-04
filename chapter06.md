@@ -1,6 +1,5 @@
 #_6 Rendering Quality and Antialiasing_
-<a name="Chapter06"></a>
-<a name="Rendering_Quality_and_Antialiasing"></a>
+<a name="chapter06"></a><a name="Rendering_Quality_and_Antialiasing"></a>
 Rendering quality settings are available to control implementation-specific trade-offs between quality and performance. For example, an application might wish to use the highest quality setting for still images, and the fastest setting during UI operations or animation. The implementation must satisfy conformance requirements regardless of the quality setting.
 
 A non-antialiased mode is provided for single-sampled drawing surfaces in which pixel coverage is always assigned to be 0 or 1, based on the inclusion of the pixel center in the geometry being rendered. When antialiasing is disabled, a coverage value of 1 will be assigned to each pixel whose center lies within the estimated path geometry, and a coverage value of 0 will be assigned otherwise. A consistent tie-breaking rule must be used for paths that pass through pixel centers.
