@@ -1,8 +1,8 @@
-# <a name="Chapter12"></a><a name="Image Filters"></a> 12 Image Filters
+# <a name="chapter12"></a><a name="Image Filters"></a> 12 Image Filters
 
 Image filters allow images to be modified and/or combined using a variety of imaging operations. Operations are carried out using a bit depth greater than or equal to the largest bit depth of the supplied images. The lower-left corners of all source and destination images are aligned. The destination area to be written is the intersection of the source and destination image areas. The entire source image area is used as the filter input. The source and destination images involved in the filter operation must not overlap (i.e., have any pixels in common within any common ancestor image). Source and destination images may have a common ancestor as long as they occupy disjoint areas within that area.
 
-## <a name="Chapter2.1"></a><a name="Format_hormalization"></a> 12.1 _Format Normalization_
+## <a name="Format_hormalization"></a> 12.1 _Format Normalization_
 
 A series of steps are carried out on application-supplied source images in order to produce normalized source images for filtering. In practice, these normalizations may be combined with the filter operations themselves for efficiency.
 
@@ -20,7 +20,7 @@ The resulting pixel will be in `sRGBA`, `sRGBA_PRE`, `lRGBA`, or `lRGBA_PRE` for
 
 Finally, the filtered pixels are converted into the destination format using the normal pixel format conversion rules, as described in section 3.4. Premultiplied alpha values are divided out prior to color-space conversion, and restored afterwards if necessary. The destination channels specified by the `VG_FILTER_CHANNEL_MASK` parameter (see below) are written into the destination image.
 
-## <a name="Chapter12.2"></a><a name="Channel_Masks"></a> _12.2 Channel Masks_
+## <a name="Channel_Masks"></a> _12.2 Channel Masks_
 
 #### <a name="VGImageChannel"></a> _VGImageChannel_
 
@@ -43,7 +43,7 @@ typedef enum {
 } VGImageChannel;
 ```
 
-## <a name="Chapter12.3"></a><a name="Color_Combination"></a> _12.3 Color Combination_
+## <a name="Color_Combination"></a> _12.3 Color Combination_
 
 Color channel values may be combined using the **vgColorMatrix** function, which computes output colors as linear combinations of input colors.
 
@@ -142,7 +142,7 @@ current context
 >
 > ? if `matrix` is not properly aligned
 
-## <a name="Chapter12.4"></a><a name="Convolution"></a> _12.4 Convolution_
+## <a name="Convolution"></a> _12.4 Convolution_
 
 The **vgConvolve**, **vgSeparableConvolve**, and vgGaussianBlur functions define destination pixels based on a weighted average of neighboring source pixels, a process known as `convolution`. The set of weights, along with their relative locations, is known as the `convolution kernel`. In the discussion below, width and `height` refer to the dimensions of the source image.
 
@@ -318,7 +318,7 @@ current context
 > ? if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
-## <a name="Chapter12.5"></a><a name="Lookup Tables"></a> _12.5 Lookup Tables_
+## <a name="Lookup Tables"></a> _12.5 Lookup Tables_
 
 #### <a name="vgLookup"></a> _vgLookup_
 
