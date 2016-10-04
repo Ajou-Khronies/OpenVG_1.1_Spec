@@ -16,7 +16,7 @@ Bézier curves are polynomial curves defined using a parametric representation.
 
 ###_8.3.1 Quadratic Bézier Curves_
 <a name="Quadratic Bézier Curves"></a>
-A quadratic Bézier segment is defined by three control points, $(x_0, y_0)$, $(x_1, y_1)$, and $(x_2, y_2)$. The curve starts at $(x_0, y_0)$ and ends at $(x_2, y_2)$. The shape of the curve is influenced by the placement of the internal control point $(x_1, y_1)$, but the curve does not usually pass through that point. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_2$ is aligned with and has the same direction as the vector $x_2 – x_1$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
+A quadratic Bézier segment is defined by three control points, $(x0, y0)$, $(x1, y1)$, and $(x2, y2)$. The curve starts at $(x0, y0)$ and ends at $(x2, y2)$. The shape of the curve is influenced by the placement of the internal control point $(x1, y1)$, but the curve does not usually pass through that point. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_2$ is aligned with and has the same direction as the vector $x_2 – x_1$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
 
 $$x(t)=x_0(1-t)^2+2*x_1*(1-t)*t+x_2*t^2$$
 $$y(t)=y_0(1-t)^2+2*y_1*(1-t)*t+y_2*t^2$$
@@ -42,6 +42,7 @@ _Figure 4: Smooth Curve Construction_
 _[ Note: this section is informative only. ]_
 
 $C^1$ smooth quadratic or cubic segments define their first internal control point $(x_1, y_1)$ in such a manner as to guarantee a continuous first derivative at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet with continuous parametric velocity at the join point. This is a stronger condition than $G^1$ continuity.
+
 Note that joining a $C^1$ smooth segment to a preceding line segment will not produce a smooth join. To guarantee a smooth join, convert line segments to equivalent quadratic or cubic curves whose internal control points all lie along the line segment.
 
 Given a previous quadratic or cubic segment with an internal control point $(px, py)$ and final endpoint $(ox, oy)$, $(x_1, y_1)$ is computed as follows:
@@ -51,13 +52,15 @@ $$ (x_1,y_1) = (2*ox-px,2*oy-py) $$
 * When joining a previous quadratic segment to a following cubic segment:
 $$ (x_1,y_1) = (5*ox-2*px,5*oy-2*py)/3 $$
 * When joining a previous cubic segment to a following quadratic segment:
-$$ (x_1,y_1) = $(5*ox-3*px,5*oy-3*py)/2 $$
+$$ (x_1,y_1) = (5*ox-3*px,5*oy-3*py)/2 $$
 
 ###_8.3.5 $C^2$ Smooth Segments_
 _[ Note: this section is informative only. ]_
 <a name="C2 Smooth Segments"></a>
 $C^2$ smooth cubic segments implicitly define both of their internal control points $(x_1, y_1)$ and $(x_2, y_2)$ in such a manner as to guarantee continuous first and second derivatives at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet with continuous velocity and acceleration at the join point.
+
 Note that joining a $C^2$ smooth segment to a preceding line segment will not produce a smooth join. To guarantee a smooth join, convert line segments to equivalent quadratic or cubic curves whose internal control points all lie along the line segment.
+
 Given three previous control points $(qx, qy)$, $(px, py)$, and $(ox, oy)$ (for a quadratic segment, $(qx, qy)$ is the initial endpoint, $(px, py)$ is the internal control point and $(ox, oy)$ is the final endpoint; for a cubic segment, $(qx, qy)$, and $(px, py)$ are the first and second internal control points, respectively, and $(ox, oy)$ is the final endpoint), $(x_1, y_1)$ is computed as described in the preceding section, and $(x_2, y_2)$ is computed as follows.
 
 * When joining a previous quadratic segment to a following cubic segment:
@@ -111,11 +114,11 @@ In order to define the semantics of each segment command type, we define three r
 
 • *(sx, sy)*: the beginning of the current subpath,*i*.*e*., the position of the last ``MOVE_TO`` segment.
 
-• $(ox, oy)$: the last point of the previous segment.
+• *(ox, oy)*: the last point of the previous segment.
 
-• $(px, py)$: the last internal control point of the previous segment, if the segment was a (regular or smooth) quadratic or cubic Bézier, or else the last point of the previous segment.
+• *(px, py)*: the last internal control point of the previous segment, if the segment was a (regular or smooth) quadratic or cubic Bézier, or else the last point of the previous segment.
 
-Figure 6 illustrates the locations of these points at the end of a sequence of segment commands ``{ `MOVE_TO`, LINE_TO, CUBIC_TO }``.
+Figure 6 illustrates the locations of these points at the end of a sequence of segment commands `{ MOVE_TO, LINE_TO, CUBIC_TO }`.
 
 <img src="figures/Figure 6.PNG"/>
 
@@ -141,9 +144,9 @@ Quadratic|`QUAD_TO`|*x0,y0,x1,y1*|10||*(px,py)=(x0,y0) (ox,oy)=(x1,y1)*
 Cubic|`CUBIC_TO`|*x0,y0,x1,y1,x2,y2*|12||*(px,py)=(x1,y1) (ox,oy)=(x2,y2)*
 G1 Smooth Quad|`SQUAD_TO`|*x1,y1*|14|*(x0,y0)=(2*ox-px,2*oy-py)*|*(px,py)= (2*ox-px, 2*oy-py) (ox,oy)=(x1,y1)*
 G1 Smooth Cubic|`SCUBIC_TO`|*x1,y1,x2,y2*|16|*(x0,y0)=(2*ox-px,2*oy-py)*|*(px,py)=(x1,y1) (ox,oy)=(x2,y2)*
-Small CCW Arc|`SCCWARC_TO|*rh,rv,rot,x0,y0*|18||*(px,py)=(ox,oy)=(x0,y0)*
-Small CW Arc|`SCWARC_TO|*rh,rv,rot,x0,y0*|20||*(px,py)=(ox,oy)=(x0,y0)*
-Large CCW|`LCCWARC_TO|*rh,rv,rot,x0,y0*|22||*(px,py)=(ox,oy)=(x0,y0)*
+Small CCW Arc|`SCCWARC_TO`|*rh,rv,rot,x0,y0*|18||*(px,py)=(ox,oy)=(x0,y0)*
+Small CW Arc|`SCWARC_TO`|*rh,rv,rot,x0,y0*|20||*(px,py)=(ox,oy)=(x0,y0)*
+Large CCW|`LCCWARC_TO`|*rh,rv,rot,x0,y0*|22||*(px,py)=(ox,oy)=(x0,y0)*
 Arc|||||
 Large CW Arc|`LCWARC_TO`|*rh,rv,rot,x0,y0*|24||*(px,py)=(ox,oy)=(x0,y0)*
 Reserved|Reserved||26,28,30||
@@ -167,9 +170,9 @@ Judicious use of smooth curve segments and 8- and 16-bit datatypes can result in
 
 _**Datatype**_|`VG_PATH_DATATYPE` _**Suffix**_|_**bytes**_|_**Value**_
 --------------|-------------------------------|-----------|-----------
-8-bit signed integer|S_8|1|0
-16-bit signed integer|S_16|2|1
-32-bit signed integer|S_32|4|2
+8-bit signed integer|`S_8`|1|0
+16-bit signed integer|`S_16`|2|1
+32-bit signed integer|`S_32`|4|2
 IEEE 754 floating-point|F|4|3
 
 *Table 7: Path Coordinate Datatypes*
@@ -506,12 +509,12 @@ VG_PATH_NUM_COORDS = 0x1605
 
 _**Parameter**_ | _**Datatype**_
 --------------- | --------------
-VG_PATH_FORMAT|VGint
-VG_PATH_DATATYPE|VGint
-VG_PATH_SCALE|VGfloat
-VG_PATH_BIAS|VGfloat
-VG_PATH_NUM_SEGMENTS|VGint
-VG_PATH_NUM_COORDS|VGint
+`VG_PATH_FORMAT`|VGint
+`VG_PATH_DATATYPE`|VGint
+`VG_PATH_SCALE`|VGfloat
+`VG_PATH_BIAS`|VGfloat
+`VG_PATH_NUM_SEGMENTS`|VGint
+`VG_PATH_NUM_COORDS`|VGint
 
 *Table 8: VGPathParamType Datatypes*
 
@@ -1032,19 +1035,21 @@ The relative orientation of subpaths, along with the fill rule, determines wheth
 
 #### _Implicit Closure of Filled Subpaths_
 <a name="Implicit_Closure_of_Filled_Subpaths"></a>
+
 When filling a path, any subpaths that do not end with a `CLOSE_PATH` segment command (_i.e_., that are terminated with a `MOVE_TO_ABS` or `MOVE_TO_REL` segment command, or that contain the final segment of the path) are implicitly closed, without affecting the position of any other vertices of the path or the $\left( sx, sy\right)$, $\left( px, py\right)$ or $\left( ox, oy\right)$ variables. For example, consider the sequence of segment commands:
 
 `MOVE_TO_ABS 0, 0`; `LINE_TO_ABS 10, 10`; `LINE_TO_ABS 10, 0`
 `MOVE_TO_REL 10, 2`; `LINE_TO_ABS 30, 12`; `LINE_TO_ABS 30, 2`
 
 If filled, this sequence will result in one filled triangle with vertices $\left( 0, 0\right)$, $\left( 10, 10\right)$, and $\left( 10, 0\right)$ and another filled triangle with vertices $\left( 20, 2\right)$, $\left( 30, 12\right)$, and $\left( 30, 2\right)$. Note that the implicit closure of the initial subpath prior to the `MOVE_TO_REL` segment command has no effect on the starting coordinate of the second triangle; it is computed by adding the relative offset $\left( 10, 2\right)$ to the final coordinate of the previous segment $\left( 10, 0\right)$ to obtain $\left( 20, 2\right)$ and is not altered by the (virtual) insertion of the line connecting the first subpath’s final vertex $\left( 10, 0\right)$ to its initial vertex $\left( 0, 0\right)$). Figure 10 illustrates this process, with the resulting filled areas highlighted. When stroking a path, no implicit closure takes place, as shown in Figure 11. Implicit closure affects only the output when filling a path, and does not alter the path data in any way.
+
 ![figure10](figures/figure10.PNG)
 _Figure 10: Implicit Closure of Filled Paths_
-<a name="Figure10:Implicit_Closure_of_Filled_Paths"></a>
+
 
 ![figure11](figures/figure11.PNG)
 _Figure 11: Stroked Paths Have No Implicit Closure_
-<a name="Figure11:Stroked_Paths_Have_No_Implicit_Closure"></a>
+
 
 ### _8.7.2 Stroking Paths_
 <a name="Stroking_Paths"></a>
@@ -1055,7 +1060,7 @@ Conceptually, stroking of a path is performed in two steps. First, the stroke pa
 Stroking a path applies a single “layer” of paint, regardless of any intersections between portions of the thickened path. Figure 12 illustrates this principle. A single stroke (above) is drawn with a black color and an alpha value of 50%, compared with two separate strokes (below) drawn with the same color and alpha values. The single stroke produces a shape with a uniform color of 50% gray, as if a single layer of translucent paint has been applied, even where portions of the path overlap one another. By contrast, the separate strokes produce two applications of the translucent paint in the area of overlap, resulting in a darkened area.
 ![figure12](figures/figure12.PNG)
 _Figure 12: Each Stroke Applies a Single Layer of Paint_
-<a name="Figure12:_Each_Stroke_Applies_a_Single_Layer_of_Paint"></a>
+
 
 ### _8.7.3 Stroke Parameters_
 <a name="Stroke_Parameters"></a>
@@ -1074,11 +1079,11 @@ These parameters are set on the current context using the variants of the **vgSe
 Figure 13 illustrates the Butt (top), Round (center), and Square (bottom) end cap styles applied to a path consisting of a single line segment. Figure 14 highlights the additional geometry created by the end caps. The Butt end cap style terminates each segment with a line perpendicular to the tangent at each endpoint. The Round end cap style appends a semicircle with a diameter equal to the line width centered around each endpoint. The Square end cap style appends a rectangle with two sides of length equal to the line width perpendicular to the tangent, and two sides of length equal to half the line width parallel to the tangent, at each endpoint. The outgoing tangent is used at the left endpoint and the incoming tangent is used at the right endpoint.
 ![figure13](figures/figure13.PNG)
 _Figure 13: End Cap Styles_
-<a name="Figure13:End_Cap_Styles"></a>
+
 
 ![figure14](figures/figure14.PNG)
 _Figure 14: End Cap Styles with Additional Geometry Highlighted_
-<a name="Figure14:End_Cap_Styles_with_Additional_Geometry_Highlighted"></a>
+
 
 #### _Line Join Styles_
 <a name="Line_Join_Styles"></a>
@@ -1087,11 +1092,11 @@ Figure 15 illustrates the Bevel (left), Round (center), and Miter (right) line j
 When stroking using the Miter join style, the _miter length_ (_i.e_., the length between the intersection points of the inner and outer perimeters of the two “fattened” lines) is compared to the product of the user-set miter limit and the line width. If the miter length exceeds this product, the Miter join is not drawn and a Bevel join is substituted.
 ![figure15](figures/figure15.PNG)
 _Figure 15: Line Join Styles_
-<a name="Figure15:Line_Join_Styles"></a>
+
 
 ![figure16](figures/figure16.PNG)
 _Figure 16: Line Join Styles with Additional Geometry Highlighted_
-<a name="Figure16:Line_Join_Styles_with_Additional_Geometry_Highlighted"></a>
+
 
 #### _Miter Length_
 <a name="Miter_Length"></a>
@@ -1124,7 +1129,7 @@ A negative dash phase is equivalent to the positive phase obtained by adding a s
 
 ![figure17](figures/figure17.PNG)
 _Figure 17: Dash Pattern and Phase Example_
-<a name="Figure17:Dash_Pattern_and_Phase_Example"></a>
+
 
 ### _8.7.4 Stroke Generation_
 <a name="Stroke_Generation"></a>
@@ -1344,3 +1349,5 @@ Calling **vgDrawPath** with a `paintModes` argument of (`VG_FILL_PATH` | `VG_STR
 ```
 vgDrawPath(VGPath path, VG_FILL_PATH | VG_STROKE_PATH);
 ```
+
+<div style="page-break-after: always;"></div>
