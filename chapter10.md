@@ -9,7 +9,7 @@ Images are rectangular collections of pixels. Image data may be inserted or extr
 
 An image defines a coordinate system in which pixels are indexed using integer coordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the y coordinate increases vertically from bottom to top. Note that this orientation is consistent with the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
-The \"energy\" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
+The """energy""" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
 
 ## 10.2 Image Formats
 <a name="Image_Formats"></a>
@@ -441,7 +441,7 @@ void vgCopyImage(VGImage dst, VGint dx, VGint dy,
 ## 10.8 Drawing Images to the Drawing Surface
 <a name="Drawing_Images_to_the_Drawing_Surface"></a>
 
-Images may be drawn onto a drawing surface. An affine or projective transformationmay be applied while drawing. The current image and blending modes are used tocontrol how image pixels are combined with the current paint and blended into thedestination. Conversion between the image and destination pixel formats is appliedautomatically.
+Images may be drawn onto a drawing surface. An affine or projective transformationmay be applied while drawing. The current image and blending modes are used tocontrol how image pixels are combined with the current paint and blended into thedestination. Conversion between the image and destination pixel formats is applied automatically.
 
 #### VGImageMode
 <a name="VGImageMode"></a>
@@ -528,7 +528,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff \"Src **over** Dst\" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff ""Src **over** Dst"" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
@@ -727,7 +727,7 @@ vgDestroyImage(image);
 
 The `vgCopyPixels` function copies pixels from one region of the drawing surface toanother. Copies between overlapping regions are allowed and always produce consistentresults identical to copying the entire source region to a scratch buffer followed bycopying the scratch buffer into the destination region.
 
-The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 $i < width$ and $0j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
+The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 <= i < width$ and $0 <= j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
 
 ```c
 void vgCopyPixels(VGint dx, VGint dy,
