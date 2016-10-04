@@ -48,7 +48,7 @@ vgSeti(VG_RENDERING_QUALITY, VG_RENDERING_QUALITY_BETTER);
 ##_6.2 Additional Quality Settings_
 <a name="Additional_Quality_Settings"></a>
 ###VGPixelLayout
-
+<a name="VGPixelLayout"></a>
 The `VGPixelLayout` enumeration describes a number of possible geometric layouts of the red, green, and blue emissive or reflective elements within a pixel. This information may be used as a hint to the rendering engine to improve rendering quality. The supported pixel layouts are illustrated in Figure 2.
 
 ```
