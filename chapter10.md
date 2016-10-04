@@ -9,7 +9,7 @@ Images are rectangular collections of pixels. Image data may be inserted or extr
 
 An image defines a coordinate system in which pixels are indexed using integer coordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the y coordinate increases vertically from bottom to top. Note that this orientation is consistent with the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
-The \"energy\" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
+The "energy" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
 
 ## 10.2 Image Formats
 <a name="Image_Formats"></a>
@@ -415,7 +415,7 @@ VGImage vgGetParent(VGImage image)
 #### vgCopyImage
 <a name="vgCopyImage"></a>
 
-Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
+Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
 If the dither flag is equal to `VG_TRUE`, an implementation-dependent ditheringalgorithm may be applied. This may be useful when copying into a destinationimage with a smaller color bit depth than that of the source image. Implementations should choose an algorithm that will provide good resultswhen the output images are displayed as successive frames in an animation.
 
@@ -441,7 +441,7 @@ void vgCopyImage(VGImage dst, VGint dx, VGint dy,
 ## 10.8 Drawing Images to the Drawing Surface
 <a name="Drawing_Images_to_the_Drawing_Surface"></a>
 
-Images may be drawn onto a drawing surface. An affine or projective transformationmay be applied while drawing. The current image and blending modes are used tocontrol how image pixels are combined with the current paint and blended into thedestination. Conversion between the image and destination pixel formats is appliedautomatically.
+Images may be drawn onto a drawing surface. An affine or projective transformationmay be applied while drawing. The current image and blending modes are used tocontrol how image pixels are combined with the current paint and blended into thedestination. Conversion between the image and destination pixel formats is applied automatically.
 
 #### VGImageMode
 <a name="VGImageMode"></a>
@@ -466,7 +466,7 @@ vgSeti(VG_IMAGE_MODE, drawImageMode);
 #### vgDrawImage
 <a name="vgDrawImage"></a>
 
-An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + Â½, py + Â½) is mapped to the point (Ti)(px + Â½, py+ Â½). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
+An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + 1/2, py + 1/2) is mapped to the point (Ti)(px + 1/2, py + 1/2). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
 
 Interpolation is done in the color space of the image. Image color values are processed inpremultiplied alpha format during interpolation. Color channel values are clamped to therange [0, alpha] before interpolation.
 
@@ -474,7 +474,7 @@ When a projective transformation is used (i.e., the bottom row of the image-user
 
 When a projective transformation is used, the value of the `VG_IMAGE_MODE` parameteris ignored and the behavior of `VG_DRAW_IMAGE_NORMAL` is substituted. This avoidsthe need to generate paint pixels in perspective.
 
-The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1Â½ pixels for filtering purposes.
+The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1/2 pixels for filtering purposes.
 
 Clipping, masking, and scissoring are applied in the same manner as with `vgDrawPath`.To limit drawing to a subregion of the image, create a child image using `vgChildImage`.
 
@@ -514,7 +514,7 @@ When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_STENCIL`, theimage b
 
 Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` paintmode) occurs at each pixel. The interpolated image and paint color and alpha values arecombined at each pixel as follows. Each image color channel value is multiplied by itscorresponding alpha value (if the image has an alpha channel) and by the paint alphavalue to produce an alpha value associated with that color channel. The current blending equation (see Section 13) is applied separately for each destination color channel, usingthe alpha value computed above as the source alpha value for the blend; the paint colorvalue is used as input to the color transform stage, the output of which is used as thesource color value for blending
 
-In terms of the blending functions Î±(Î±src, Î±dst) and c(csrc, cdst, Î±src, Î±dst) defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
+In terms of the blending functions $\alpha(\alpha_{src}, \alpha_{dst})$ and $C(C_{src}, C_{dst}, \alpha_{src}, \alpha_{dst})$ defined inSection 13.2, the stenciled output color and alpha values for an RGB destination are:
 
 $$
 a_{tmp} = a*(a_{image}*a_{paint},a_{dst})
@@ -528,7 +528,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff â€œSrc **over** Dstâ€ blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff "Src **over** Dst" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
@@ -540,9 +540,15 @@ $$$$
 B_{dst} \leftarrow (a_{image}*a_{paint}*B_{image}*B_{paint}+a_{dst}*B_{dst}*(1-a_{image}*a_{paint}*B_{image}))/a_{tmp}
 $$
 
-If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions Î±(Î±src, Î±dst) andc(csrc, cdst, Î±src, Î±dst) defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
+If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions  $\alpha(\alpha_{src}, \alpha_{dst})$ and $C(C_{src}, C_{dst}, \alpha_{src}, \alpha_{dst})$ defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
 
-ìˆ˜ì‹
+$$
+\alpha = \alpha ( \alpha_{image} * \alpha_{paint}, \alpha_{dst})
+$$$$
+L_{dst} \leftarrow c(L_{paint} * L_{dst}, L_{image} * \alpha_{image} * 	\alpha_{paint}, \alpha_{dst}) / \alpha_{tmp}
+$$$$
+\alpha_{dst} \leftarrow \alpha_{tmp}
+$$
 
 10.9 Reading and Writing Drawing Surface Pixels
 <a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
@@ -566,7 +572,7 @@ Table 13: Pixel Copy Functions
 #### vgSetPixels
 <a name="vgSetPixels"></a>
 
-The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
+The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
 
 ```c
 void vgSetPixels(VGint dx, VGint dy,
@@ -727,7 +733,7 @@ vgDestroyImage(image);
 
 The `vgCopyPixels` function copies pixels from one region of the drawing surface toanother. Copies between overlapping regions are allowed and always produce consistentresults identical to copying the entire source region to a scratch buffer followed bycopying the scratch buffer into the destination region.
 
-The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 $i < width$ and $0j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
+The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 <= i < width$ and $0 <= j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
 
 ```c
 void vgCopyPixels(VGint dx, VGint dy,
