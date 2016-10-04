@@ -471,7 +471,7 @@ The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sou
 
 The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel $(x, y)$ has the same value as the image pixel $(max(0, min(x, width - 1)), max(0, min(y, height - 1)))$.
 
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel $(x mod width, y mod height)$ where the operator $a mod b$ returns a value between 0 and(b - 1) such that $a = k*b + (a mod b)$ for some integer k.
+The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel $\text {(x mod width, y mod height)}$ where the operator $\text {a mod b}$ returns a value between 0 and $(b-1)$ such that $a = k*b + ( \text {a mod b} )$ for some integer k.
 
 The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel $(x, y)$ has the same value as the image pixel $(x', y')$ where:
 
