@@ -9,7 +9,7 @@ Images are rectangular collections of pixels. Image data may be inserted or extr
 
 An image defines a coordinate system in which pixels are indexed using integer coordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of (0, 0), the x coordinate increases horizontally from left to right, and the y coordinate increases vertically from bottom to top. Note that this orientation is consistent with the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
-The """energy""" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
+The "energy" of a pixel is located at the pixel center; that is, the pixel with coordinate (x,y) has its energy at the point (x + 1/2, y + 1/2). The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
 
 ## 10.2 Image Formats
 <a name="Image_Formats"></a>
@@ -415,7 +415,7 @@ VGImage vgGetParent(VGImage image)
 #### vgCopyImage
 <a name="vgCopyImage"></a>
 
-Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
+Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
 If the dither flag is equal to `VG_TRUE`, an implementation-dependent ditheringalgorithm may be applied. This may be useful when copying into a destinationimage with a smaller color bit depth than that of the source image. Implementations should choose an algorithm that will provide good resultswhen the output images are displayed as successive frames in an animation.
 
@@ -528,7 +528,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff ""Src **over** Dst"" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff "Src **over** Dst" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
