@@ -1,5 +1,5 @@
 # 9 Paint
-<a name="Chapter09"></a> <a name="Paint"></a>
+<a name="chapter09"></a> <a name="Paint"></a>
 Paint defines a color and an alpha value for each pixel being drawn. _Color paint_ defines a constant color for all pixels; _gradient paint_ defines a linear or radial pattern of smoothly varying colors; and _pattern paint_ defines a possibly repeating rectangular pattern of colors based on a source image. It is possible to define new types of paint as extensions.
 
 Paint is defined in its own coordinate system, which is transformed into user coordinates by means of the fill-paint-to-user and stroke-paint-to-user transformations (set using the `VG_MATRIX_FILL_PAINT_TO_USER` and `VG_MATRIX_STROKE_PAINT_TO_USER` matrix modes) depending on whether the current geometry is being filled or stroked.
@@ -239,7 +239,7 @@ where $\Delta x=x1-x0$ and $\Delta y=y1-y0$. If the points $\left( x0,y0 \right)
 #### _Setting Linear Gradient Parameters_
 <a name="Setting_Linear_Gradient_Parameters"></a>
 To enable linear gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_LINEAR_GRADIENT`.
-The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order $\left\{ x0,y0,x1,y1 \right\} $.
+The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order $\{ x0,y0,x1,y1 \} $.
 ```
 VGfloat fill_x0, fill_y0, fill_x1, fill_y1;
 VGfloat stroke_x0, stroke_y0, stroke_x1, stroke_y1;
@@ -282,11 +282,10 @@ and to use forward differencing of $Ax+B$ and $C{ x }^{ 2 }+Dx+E$ to evaluate it
 
 ![figure18](figures/figure18.PNG)
 _Figure 18: Radial Gradient Function_
-<a name="Figure18:Radial_Gradient_Function"></a>
 
 #### _Setting Radial Gradient Parameters_
 <a name="Setting_Radial_Gradient_Parameters"></a>
-To enable radial gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_RADIAL_GRADIENT`. The radial gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_RADIAL_GRADIENT`. The gradient values are supplied as a vector of 5 floats in the order $\left\{cx,cy,fx,fy,r \right\}$.
+To enable radial gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_RADIAL_GRADIENT`. The radial gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_RADIAL_GRADIENT`. The gradient values are supplied as a vector of 5 floats in the order $\{cx,cy,fx,fy,r\}$.
 
 If $\left(fx,fy\right)$ lies outside the circumference of the circle, the intersection of the line from the center to the focal point with the circumference of the circle is used as the focal point in place of the specified point. To avoid a division by 0, the implementation may move the focal point along the line towards the center of the circle by an amount sufficient to avoid numerical instability, provided the new location lies at a distance of at least .99r from the circle center. The following code illustrates the setting of radial gradient parameters:
 
@@ -351,7 +350,6 @@ In reflect mode, the color values defined between 0 and 1 are repeated indefinit
 The color ramp pad modes are illustrated schematically in Figure 19.
 ![figure19](figures/figure19.PNG)
 _Figure 19: Color Ramp Pad Modes_
-<a name="Color_Ramp_Pad_Modes"></a>
 
 #### _Setting Color Ramp Parameters_
 <a name="Setting_Color_Ramp_Parameters"></a>
