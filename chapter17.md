@@ -1,5 +1,5 @@
 # 17 The VGU Utility Library
-<a name="The_VGU_Utility_Library"> </a>
+<a name="chapter17"></a> <a name="The_VGU_Utility_Library"> </a>
 For convenience, OpenVG provides an optional utility library known as VGU. Applications may choose whether to link to VGU at compile time; the library is not guaranteed to be present on the run-time platform. VGU is designed so it may be implemented in a portable manner using only the public functionality provided by the OpenVG library. VGU functions may alter the error state of the OpenVG context in which they run (i.e., the value returned by **vgGetError**), but do not otherwise alter the OpenVG state when they complete without generating a `VGU_OUT_OF_MEMORY_ERROR`. VGU functions are defined in a `vgu.h` header file.
 
 #### VGU_VERSION_1_1
@@ -332,3 +332,5 @@ VGUErrorCode vguComputeWarpQuadToQuad(VGfloat dx0, VGfloat dy0,
 >
 > `VGU_BAD_WARP_ERROR`
 > - if no non-degenerate transformation satisfies the constraints
+
+<div style="page-break-after: always;"> </div>

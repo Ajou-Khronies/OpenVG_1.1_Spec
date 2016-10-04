@@ -16,7 +16,7 @@ Bézier curves are polynomial curves defined using a parametric representation.
 
 ###_8.3.1 Quadratic Bézier Curves_
 <a name="Quadratic Bézier Curves"></a>
-A quadratic Bézier segment is defined by three control points, $(x0, y0)$, $(x1, y1)$, and $(x2, y2)$. The curve starts at $(x0, y0)$ and ends at $(x2, y2)$. The shape of the curve is influenced by the placement of the internal control point $(x1, y1)$, but the curve does not usually pass through that point. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_2$ is aligned with and has the same direction as the vector $x_2 – x_1$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
+A quadratic Bézier segment is defined by three control points, $(x_0, y_0)$, $(x_1, y_1)$, and $(x_2, y_2)$. The curve starts at $(x_0, y_0)$ and ends at $(x_2, y_2)$. The shape of the curve is influenced by the placement of the internal control point $(x_1, y_1)$, but the curve does not usually pass through that point. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_2$ is aligned with and has the same direction as the vector $x_2 – x_1$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
 
 $$x(t)=x_0(1-t)^2+2*x_1*(1-t)*t+x_2*t^2$$
 $$y(t)=y_0(1-t)^2+2*y_1*(1-t)*t+y_2*t^2$$
