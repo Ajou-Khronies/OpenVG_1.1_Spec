@@ -408,9 +408,9 @@ $$
 ### 9.3.4 Gradient Examples
 <a name="Gradient_Examples"></a>
 
-Figure 20 shows a square from (0, 0) to (400, 400) painted with a set of linear gradientswith (x0, y0) = (100, 100), (x1, y1) = (300, 300).
+Figure 20 shows a square from $(0, 0)$ to $(400, 400)$ painted with a set of linear gradients with $(x0, y0) = (100, 100)$, $(x1, y1) = (300, 300)$.
 
-Figure 21 shows the same square painted with radial gradients with centered and noncentered focal points. The centered gradient, shown in the top row, has its center (cx, cy)and focal point (fx, fy) both at (200, 200). The non-centered gradient, shown in thebottom row, has its center (cx, cy) at (200, 200) and its focal point (fx, fy) at (250, 250).The radius r for both gradients is equal to 100.
+Figure 21 shows the same square painted with radial gradients with centered and noncentered focal points. The centered gradient, shown in the top row, has its center $(cx, cy)$and focal point $(fx, fy)$ both at (200, 200). The non-centered gradient, shown in thebottom row, has its center $(cx, cy)$ at $(200, 200)$ and its focal point $(fx, fy)$ at $(250, 250)$.The radius r for both gradients is equal to 100.
 
 All the gradients shown in this section utilize a color ramp with stops at offsets 0.0,0.33, 0.66, and 1.0 colored white, red, green, and blue, respectively, as shown in Figure22.
 
@@ -469,11 +469,11 @@ The `VGTilingMode` enumeration defines possible methods for defining colors fors
 
 The `VG_TILE_FILL` condition specifies that pixels outside the bounds of the sourceimage should be taken as the color `VG_TILE_FILL_COLOR`. The color is expressed asa non-premultiplied sRGBA color and alpha value. Values outside the [0, 1] range areinterpreted as the nearest endpoint of the range.
 
-The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel (x, y) has the same value as the image pixel (max(0, min(x, width - 1)), max(0, min(y, height - 1))).
+The `VG_TILE_PAD` condition specifies that pixels outside the bounds of the sourceimage should be taken as having the same color as the closest edge pixel of the sourceimage. That is, a pixel $(x, y)$ has the same value as the image pixel $(max(0, min(x, width - 1)), max(0, min(y, height - 1)))$.
 
-The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x mod width, y mod height) where the operator ''a mod b'' returns a value between 0 and(b - 1) such that a = k*b + (a mod b) for some integer k.
+The `VG_TILE_REPEAT` condition specifies that the source image should be repeatedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel $(x mod width, y mod height)$ where the operator $a mod b$ returns a value between 0 and(b - 1) such that $a = k*b + (a mod b)$ for some integer k.
 
-The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel (x, y) has the same value as the image pixel(x'', y'') where:
+The `VG_TILE_REFLECT` condition specifies that the source image should be reflectedindefinitely in all directions. That is, a pixel $(x, y)$ has the same value as the image pixel $(x', y')$ where:
 
 $$
 x' =
