@@ -1,5 +1,5 @@
 # 4 The Drawing Context
-<a name="Chapter4"></a><a name="The Drawing Context"></a>
+<a name="chapter4"></a><a name="The_Drawing_Context"></a>
 OpenVG functions that perform drawing, or that modify or query drawing state make use of an implicit _drawing context_ (or simply a _context_). A context is created, attached to a drawing surface, and bound to a running application thread outside the scope of the OpenVG API, for example by the Khronos EGL API. OpenVG API calls are executed with respect to the context currently bound to the thread in which they are executed. A call to any OpenVG API function when no drawing context is bound to the current thread has no effect. The drawing context currently bound to a running thread is referred to as the _current context_.
 
 When an image, paint, path, font, or mask handle is defined, it is permanently attached to the context that is current at that time. It is an error to use the handle as an argument to any OpenVG function when a different context is active, unless that context has been designated as a _shared context_ of the original context by the API responsible for context creation (usually EGL).
@@ -78,7 +78,7 @@ VGErrorCode vgGetError(void)
 ```
 
 ## _4.2 Manipulating the Context Using EGL_
-<a name="Manipulating the Context Using EGL"></a>
+<a name="Manipulating_the_Context_Using_EGL"></a>
 Most OpenVG implementations are expected to make use of version 1.2 or later of the EGL API to obtain drawing contexts. This section provides only a partial, non-normative description of some aspects of the use of EGL that are specific to OpenVG. Refer to the EGL 1.2 specification for more details.
 
 ### _4.2.1 EGLConfig Attributes_
@@ -93,7 +93,7 @@ An `EGLConfig` describes the capabilities of a configuration. Each `EGLConfig` e
 The `EGL_ALPHA_MASK_SIZE` attribute contains the bit depth of the mask associated with a configuration. Masking will take place in the OpenVG pipeline only if the bit depth for the drawing surface mask is greater than zero.
 
 ### _4.2.2 EGL Functions_
-<a name="EGL Functions"></a>
+<a name="EGL_Functions"></a>
 #### _eglBindAPI_
 <a name="eglBindAPI"></a>
 EGL has a notion of the _current rendering API_. This setting acts as an implied parameter to some EGL functions. To set OpenVG as the current rendering API in EGL, it is necessary to call **eglBindAPI** with an `api` argument of `EGL_OPENVG_API`:
@@ -161,7 +161,7 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy,
                           EGLSurface surface);
 ```
 ## _4.3 Forcing Drawing to Complete_
-<a name="Forcing Drawing to Complete"></a>
+<a name="Forcing_Drawing_to_Complete"></a>
 OpenVG provides functions to force the completion of rendering, in order to allow applications to synchronize between multiple rendering APIs.
 
 #### _vgFlush_
@@ -176,3 +176,4 @@ The **vgFinish** function forces all outstanding requests on the current context
 ```
 void vgFinish(void)
 ```
+<div style="page-break-after: always;"> </div>
