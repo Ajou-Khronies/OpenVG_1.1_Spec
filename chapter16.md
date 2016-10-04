@@ -1,6 +1,5 @@
 # 16 API Conformance
-<a name="chapter16"> </a>
-<a name="API_Conformance"> </a>
+<a name="chapter16"> </a> <a name="API_Conformance"> </a>
 All OpenVG implementations are required to pass a conformance test suite. The exact details of the conformance testing process are available in a separate document. This chapter outlines the OpenVG conformance test philosophy and provides information that may be useful in order to ensure conformant implementations.
 
 ## 16.1 Conformance Test Principles
@@ -46,3 +45,5 @@ Drawing should not depend on absolute screen coordinates, except for minor diffe
 ### 16.2.6 Image Comparison Tests
 <a name="Image_Comparison_Tests"> </a>
 To allow for controlled variation, the conformance suite will provide a set of rendering code fragments, along with reference images that have been generated using a highquality implementation. Implementation-generated images will be compared to these reference images using a fuzzy comparison system. This approach is intended to allow for small differences in the accuracy of geometry and color processing and antialiasing, while rejecting larger differences that are considered visually unacceptable. The comparison threshold will be determined by generating images with a variety of acceptable and unacceptable differences and comparing them against the reference image.
+
+<div style="page-break-after: always;"> </div>

@@ -806,3 +806,5 @@ VGU_API_CALL VGUErrorCode VGU_APIENTRY
 #endif /* #ifndef _VGU_H */
 Version
 ```
+
+<div style="page-break-after: always;"> </div>

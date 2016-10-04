@@ -39,3 +39,5 @@ _Table 17 : Query Key Enumeration Types_
 > * if `key` is not one of the values from the `VGHardwareQueryType`
 enumeration
 > * if `setting` is not one of the values from the enumeration associated with key
+
+<div style="page-break-after: always;"> </div>

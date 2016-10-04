@@ -74,3 +74,5 @@ Functions defined by an extension may be accessed by means of a function pointer
 <a name="Creating_Extensions"> </a>
 Any vendor may define a vendor-specific extension. Each vendor should apply to Khronos to obtain a vendor string and any numerical token values required by the extension.
 An OpenVG extension may be deemed a shared extension if two or more vendors agree in good faith to ship an extension, or the Khronos OpenVG working group determines that it is in the best interest of its members that the extension be shared. A shared extension may be adopted (with appropriate naming changes) into a subsequent release of the OpenVG specification.
+
+<div style="page-break-after: always;"> </div>
