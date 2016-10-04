@@ -542,7 +542,13 @@ $$
 
 If the drawing surface has a luminance-only format, the pixels of the image being drawn are each converted to luminance format using formula (3) of section 3.4.2 prior to applying the stencil equations. In terms of the blending functions  $\alpha(\alpha_{src}, \alpha_{dst})$ and $C(C_{src}, C_{dst}, \alpha_{src}, \alpha_{dst})$ defined in Section 13.2, the stenciled output luminance and alpha values for an luminance-only destination are:
 
-ìˆ˜ì‹
+$$
+\alpha = \alpha ( \alpha_{image} * \alpha_{paint}, \alpha_{dst})
+$$$$
+L_{dst} \leftarrow c(L_{paint} * L_{dst}, L_{image} * \alpha_{image} * 	\alpha_{paint}, \alpha_{dst}) / \alpha_{tmp}
+$$$$
+\alpha_{dst} \leftarrow \alpha_{tmp}
+$$
 
 10.9 Reading and Writing Drawing Surface Pixels
 <a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
