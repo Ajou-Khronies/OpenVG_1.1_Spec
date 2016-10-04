@@ -7,21 +7,15 @@ void    vgGetfv(VGParamType paramType, VGint count, VGfloat * values)
 void    vgGetiv(VGParamType paramType, VGint count, VGint * values)
 ```
 
->_**ERRORS**_
+>**ERRORS**
 >
->`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `paramType` is not a valid value from the `VGParamType` enumeration
->
->– if `paramType` refers to a vector parameter in **vgGetf** or **vgGeti**
->
->– if `values` is `NULL` in **vgGetfv** or **vgGetiv**
->
->– if `values` is not properly aligned in **vgGetfv** or **vgGetiv**
->
->– if `count` is less than or equal to 0 in **vgGetfv** or **vgGetiv**
->
->– if `count` is greater than the value returned by **vgGetVectorSize** for the given parameter in **vgGetfv** or **vgGetiv**
+> `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if `paramType` is not a valid value from the `VGParamType` enumeration
+>* if `paramType` refers to a vector parameter in **vgGetf** or **vgGeti**
+>* if `values` is `NULL` in **vgGetfv** or **vgGetiv**
+>* if `values` is not properly aligned in **vgGetfv** or **vgGetiv**
+>* if `count` is less than or equal to 0 in **vgGetfv** or **vgGetiv**
+>* if `count` is greater than the value returned by **vgGetVectorSize** for the given parameter in **vgGetfv** or **vgGetiv**
 
 ###_5.2.1 Default Context Parameter Values_
 <a name=“Default Context Parameter Values_”></a>
@@ -89,24 +83,15 @@ void vgSetParameteriv(VGHandle object, VGint paramType,
 >**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
->
->– if object is not a valid handle, or is not shared with the current context `VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if paramType is not a valid value from the appropriate enumeration
->
->– if paramType refers to a vector parameter in **vgSetParameterf** or **vgSetParameteri**
->
->– if paramType refers to a scalar parameter in **vgSetParameterfv** or **vgSetParameteriv** and count is not equal to 1
->
->– if value is not a legal enumerated value for the given parameter in **vgSetParameterf** or **vgSetParameteri**, or if values[i] is not a legal enumerated value for the given parameter in **vgSetParameterfv** or **vgSetParameteriv** for 0 ≤ i < count
->
->– if values is NULL in **vgSetParameterfv** or **vgSetParameteriv** and count is greater than 0
->
->– if values is not properly aligned in **vgSetParameterfv** or **vgSetParameteriv**
->
->– if count is less than 0 in vgSetParameterfv or vgSetParameteriv
->
->– if count is not a valid value for the given parameter
+>* if object is not a valid handle, or is not shared with the current context `VG_ILLEGAL_ARGUMENT_ERROR`
+>* if paramType is not a valid value from the appropriate enumeration
+>* if paramType refers to a vector parameter in **vgSetParameterf** or **vgSetParameteri**
+>* if paramType refers to a scalar parameter in **vgSetParameterfv** or **vgSetParameteriv** and count is not equal to 1
+>* if value is not a legal enumerated value for the given parameter in **vgSetParameterf** or **vgSetParameteri**, or if values[i] is not a legal enumerated value for the given parameter in **vgSetParameterfv** or **vgSetParameteriv** for 0 ≤ i < count
+>* if values is NULL in **vgSetParameterfv** or **vgSetParameteriv** and count is greater than 0
+>* if values is not properly aligned in **vgSetParameterfv** or **vgSetParameteriv**
+>* if count is less than 0 in vgSetParameterfv or vgSetParameteriv
+>* if count is not a valid value for the given parameter
 
 ####_vgGetParameter and vgGetParameterVectorSize_
 <a name="vgGetParameter and vgGetParameterVectorSize"></a>
@@ -132,22 +117,15 @@ void    vgGetParameteriv(VGHandle object,
                          VGint count, VGint * values)
 ```
 
->ERRORS
+>**ERRORS**
 >
->VG_BAD_HANDLE_ERROR
+>`VG_BAD_HANDLE_ERROR`
+>* if object is not a valid handle, or is not shared with the current context
 >
->– if object is not a valid handle, or is not shared with the current context
->
->VG_ILLEGAL_ARGUMENT_ERROR
->
->– if *paramType* is not a valid value from the appropriate enumeration
->
->– if *paramType* refers to a vector parameter in **vgGetParameterf** or **vgGetParameteri**
->
->– if values is NULL in **vgGetParameterfv** or **vgGetParameteriv**
->
->– if values is not properly aligned in **vgGetParameterfv** or **vgGetParameteriv**
->
->– if count is less than or equal to 0 in **vgGetParameterfv* or **vgGetParameteriv**
->
->– if count is greater than the value returned by **vgGetParameterVectorSize** for the given parameter in **vgGetParameterfv** or **vgGetParameteriv**
+>`VG_ILLEGAL_ARGUMENT_ERROR`
+>* if *paramType* is not a valid value from the appropriate enumeration
+>* if *paramType* refers to a vector parameter in **vgGetParameterf** or **vgGetParameteri**
+>* if values is NULL in **vgGetParameterfv** or **vgGetParameteriv**
+>* if values is not properly aligned in **vgGetParameterfv** or **vgGetParameteriv**
+>* if count is less than or equal to 0 in **vgGetParameterfv* or **vgGetParameteriv**
+>* if count is greater than the value returned by **vgGetParameterVectorSize** for the given parameter in **vgGetParameterfv** or **vgGetParameteriv**

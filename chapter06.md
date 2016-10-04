@@ -1,5 +1,6 @@
 #_6 Rendering Quality and Antialiasing_
- <a name=“Chapter 6”></a> <a name=“Rendering Quality and Antialiasing”></a>
+<a name="Chapter06"></a>
+<a name="Rendering Quality and Antialiasing"></a>
 Rendering quality settings are available to control implementation-specific trade-offs between quality and performance. For example, an application might wish to use the highest quality setting for still images, and the fastest setting during UI operations or animation. The implementation must satisfy conformance requirements regardless of the quality setting.
 
 A non-antialiased mode is provided for single-sampled drawing surfaces in which pixel coverage is always assigned to be 0 or 1, based on the inclusion of the pixel center in the geometry being rendered. When antialiasing is disabled, a coverage value of 1 will be assigned to each pixel whose center lies within the estimated path geometry, and a coverage value of 0 will be assigned otherwise. A consistent tie-breaking rule must be used for paths that pass through pixel centers.
@@ -193,13 +194,11 @@ $\begin{bmatrix} sx & shx & tx \\ shy & sy & ty \\ 0 & 0 &1 \end{bmatrix}$
 void vgLoadMatrix(const VGfloat * m)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `m` is `NULL`
->
->– if `m` is not properly aligned
+>* if `m` is `NULL`
+>* if `m` is not properly aligned
 
 ####_vgGetMatrix_
 <a name="vgGetMatrix"></a>
@@ -213,13 +212,11 @@ For an affine matrix, w0 and w1 will always be $0$ and $w_2$ will always be 1.
 void vgGetMatrix(VGfloat * m)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `m` is `NULL`
->
->– ***if m is not properly aligned***
+>* if `m` is `NULL`
+>* ***if m is not properly aligned***
 
 ####_vgMultMatrix_
 <a name="vgMultMatrix"></a>
@@ -237,13 +234,11 @@ and the current matrix is multiplied by the resulting matrix. However, if the ta
 void vgMultMatrix(const VGfloat * m)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `m` is `NULL`
->
->– **`if m is not properly aligned`**
+>* if `m` is `NULL`
+>* **`if m is not properly aligned`**
 
 ####_vgTranslate_
 <a name="vgTranslate"></a>

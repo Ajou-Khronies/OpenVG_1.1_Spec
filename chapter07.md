@@ -100,19 +100,14 @@ void vgMask(VGHandle mask, VGMaskOperation operation,
             VGint x, VGint y, VGint width, VGint height)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
->
->– if operation is not `VG_CLEAR_MASK` or `VG_FILL_MASK`, and mask is not a valid mask layer or image handle, or is not shared with the current context `VG_IMAGE_IN_USE_ERROR`
->
->– if mask is a `VGImage` that is currently a rendering target `VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `operation` is not a valid value from the `VGMaskOperation` enumeration
->
->– if `width` or `height` is less than or equal to 0
->
->– if `mask` is a `VGMaskLayer` and is not compatible with the current surface mask
+>* if operation is not `VG_CLEAR_MASK` or `VG_FILL_MASK`, and mask is not a valid mask layer or image handle, or is not shared with the current context `VG_IMAGE_IN_USE_ERROR`
+>* if mask is a `VGImage` that is currently a rendering target `VG_ILLEGAL_ARGUMENT_ERROR`
+>* if `operation` is not a valid value from the `VGMaskOperation` enumeration
+>* if `width` or `height` is less than or equal to 0
+>* if `mask` is a `VGMaskLayer` and is not compatible with the current surface mask
 
 ####_vgRenderToMask_
 <a name="vgRenderToMask"></a>
@@ -127,15 +122,13 @@ An implementation that supports geometric clipping of primitives may cache the c
                     VGMaskOperation operation)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
 >
->– if `path` is not a valid path handle `VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode` enumeration
->
->– if `operation` is not a valid value from the `VGMaskOperation` enumeration
+>* if `path` is not a valid path handle `VG_ILLEGAL_ARGUMENT_ERROR`
+>* if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode` enumeration
+>* if `operation` is not a valid value from the `VGMaskOperation` enumeration
 
 ####_VGMaskLayer_
 <a name="VGMaskLayer"></a>
@@ -153,17 +146,14 @@ typedef VGHandle VGMaskLayer;
 VGMaskLayer vgCreateMaskLayer(VGint width, VGint height)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
 >
->– if `width` or `height` are less than or equal to 0
->
->– if `width` is greater than `VG_MAX_IMAGE_WIDTH`
->
->– if `height` is greater than `VG_MAX_IMAGE_HEIGHT`
->
->– if `width*height` is greater than `VG_MAX_IMAGE_PIXELS`
+>* if `width` or `height` are less than or equal to 0
+>* if `width` is greater than `VG_MAX_IMAGE_WIDTH`
+>* if `height` is greater than `VG_MAX_IMAGE_HEIGHT`
+>* if `width*height` is greater than `VG_MAX_IMAGE_PIXELS`
 
 ####_vgDestroyMaskLayer_
 <a name="vgDestroyMaskLayer"></a>
@@ -177,8 +167,7 @@ void vgDestroyMaskLayer(VGMaskLayer maskLayer)
 >**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
->
->– if `maskLayer` is not a valid mask handle
+>* if `maskLayer` is not a valid mask handle
 
 ####_vgFillMaskLayer_
 <a name="vgFillMaskLayer"></a>
@@ -190,23 +179,17 @@ void vgFillMaskLayer(VGMaskLayer maskLayer,
                      VGint x, VGint y, VGint width, VGint height,
                      VGfloat value)
 ```
->ERRORS
+>**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
->
->– if `maskLayer` is not a valid mask layer handle, or is not shared with the current context
+>* if `maskLayer` is not a valid mask layer handle, or is not shared with the current context
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `value` is less than 0 or greater than 1
->
->– if `width` or `height` is less than or equal to 0
->
->– if `x` or `y` is less than 0
->
->– if `x + width` is greater than the width of the mask
->
->– if `y + height` is greater than the height of the mask
+>* if `value` is less than 0 or greater than 1
+>* if `width` or `height` is less than or equal to 0
+>* if `x` or `y` is less than 0
+>* if `x + width` is greater than the width of the mask
+>* if `y + height` is greater than the height of the mask
 
 ####_vgCopyMask_
 <a name="vgCopyMask"></a>
@@ -218,17 +201,13 @@ void vgFillMaskLayer(VGMaskLayer maskLayer,
                 VGint width, VGint height)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_BAD_HANDLE_ERROR`
->
->– if maskLayer is not a valid mask layer handle
->
+>* if maskLayer is not a valid mask layer handle
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `width` or `height` are less than or equal to 0
->
->– if `maskLayer` is not compatible with the current surface mask
+>* if `width` or `height` are less than or equal to 0
+>* if `maskLayer` is not compatible with the current surface mask
 
 ##_7.3 Fast Clearing_
 <a name="Fast Clearing"></a>
@@ -242,11 +221,10 @@ The **vgClear** function fills the portion of the drawing surface intersecting t
 void vgClear(VGint x, VGint y, VGint width, VGint height)
 ```
 
->ERRORS
+>**ERRORS**
 >
 >`VG_ILLEGAL_ARGUMENT_ERROR`
->
->– if `width` or `height` is less than or equal to 0
+>* if `width` or `height` is less than or equal to 0
 
 For example, to set the entire drawing surface with dimensions `WIDTH` and `HEIGHT` to an opaque yellow color, the following code could be used:
 
