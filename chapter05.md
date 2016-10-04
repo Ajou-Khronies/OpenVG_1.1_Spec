@@ -1,14 +1,15 @@
 # 5 Setting API Parameters
-<a name="Chapter5"></a><a name="Setting API Parameters"></a>
+<a name="chapter05"></a><a name="Setting_API_Parameters"></a>
 API parameters may be set and retrieved using generic _get_ and _set_ functions. The use of generic functions allows for extensibility of the API without the addition of additional functions. Extensions may receive unique identifier values for new parameter types by registering with the Khronos group.
 
 Parameters take two forms: some are set relative to a rendering context, and others are set on a particular `VGHandle`-based object. The former make use of the **vgSet** and **vgGet** functions and the latter make use of the **vgSetParameter** and **vgGetParameter** functions.
 
-## _5.2 Context Parameter Types_
-<a name="Context Parameter Types"></a>
+## _5.1 Context Parameter Types_
+<a name="Context_Parameter_Types"></a>
 Parameter types that are set on a rendering context are defined in the `VGParamType` enumeration. The datatype and default value associated with each parameter is shown in Table 4.
 
 #### _VGParamType_
+<a name="VGParam_Type"></a>
 The `VGParamType` enumeration defines the parameter type of the value to be set or retrieved using **vgSet** and **vgGet**:
 ```
 typedef enum {
@@ -75,7 +76,7 @@ typedef enum {
 } VGParamType;
 ```
 ## _5.2 Setting and Querying Context Parameter values_
-<a name="Setting and Querying Context Parameter Values"></a>
+<a name="Setting_and_Querying_Context_Parameter_Values"></a>
 Each **vgGet**/**vgGetParameter** or vgSet/vgSetParameter function has four variants, depending on the data type of the value being set, differentiated by a suffix: **i** for scalar integral values, **f** for scalar floating-point values, and **iv** and **fv** for vectors of integers and floating-point values, respectively. The vector variants may also be used to set scalar values using a `count` of 1. When setting a value of integral type using a floating-point **vgSet** variant (ending with **f** or **fv**), or retrieving a floating-point value using an integer **vgGet** function (ending with **i** or **iv**), the value is converted to an integer using a mathematical _floor_ operation. If the resulting value is outside the range of integer values, the closest valid integer value is substituted.
 
 The `count` parameter used by the array variants (ending with **iv** or **fv**) limits the number of values that are read from the `values` array parameter. For parameters that require a fixed number of values (_e.g._, color values of type `VGfloat[4]`), `count` must have the appropriate value. For parameters that place restrictions on the number of values that may be accepted (_e.g._, that it be a multiple of a specific number, as for scissor rectangles which are specified as a set of 4-tuples), `count` must obey the restriction. For parameters that accept an arbitrary number of values up to some maximum number (_e.g._, dash patterns) , all `count` specified values up to the maximum are used and values beyond the maximum are ignored. If the count parameter is 0, the pointer argument is not dereferenced. For example, the call `vgSet(VG_STROKE_DASH_PATTERN, 0, (void *) 0)` sets the dash pattern to a zero-length array (which has the effect of disabling dashing) without dereferencing the third parameter. If an error occurs due to an inappropriate value of `count`, the call has no effect on the parameter value.
@@ -111,7 +112,7 @@ vgSeti(`VG_BLEND_MODE`, `VG_BLEND_SRC_OVER`);
 ```
 
 #### _vgGet and vgGetVectorSize_
-<a name="vgGet and vgGetVectorSize"></a>
+<a name="vgGet_and_vgGetVectorSize"></a>
 The **vgGet** functions return the value of a parameter on the current context.
 
 The **vgGetVectorSize** function returns the maximum number of elements in the vector that will be retrieved by the **vgGetiv** or **vgGetfv** functions if called with the given paramType argument. For scalar values, 1 is returned. If **vgGetiv** or **vgGetfv** is called with a smaller value for count than that returned by **vgGetVectorSize**, only the first count elements of the vector are retrieved. Use of a greater value for count will result in an error.
@@ -141,7 +142,7 @@ void    vgGetiv(VGParamType paramType, VGint count, VGint * values)
 >* if `count` is greater than the value returned by **vgGetVectorSize** for the given parameter in **vgGetfv** or **vgGetiv**
 
 ### _5.2.1 Default Context Parameter values_
-<a name="Default Context Parameter Values "></a>
+<a name="Default_Context_Parameter_Values"></a>
 When a new OpenVG context is created, it contains default values as shown in Table 4. Note that some tokens have been split across lines for reasons of space.
 
 |Parameter| Datatype| DefaultValue|
@@ -149,7 +150,7 @@ When a new OpenVG context is created, it contains default values as shown in Tab
 |`VG_MATRIX_MODE`| `VGMatrixMode`|`VG_MATRIX_PATH_USER_ TO_SURFACE` |
 |`VG_FILL_RULE` |`VGFillRule` |`VG_EVEN_ODD` |
 |`VG_IMAGE_QUALITY` |`VGImageQuality`| `VG_IMAGE_QUALITY_FASTER` |
-|`VG_RENDERING_QUALITY` |`VGRendering Quality`| VG_RENDERING_QUALITY_BETTER|
+|`VG_RENDERING_QUALITY` |`VGRendering Quality`| `VG_RENDERING_QUALITY_BETTER`|
 | `VG_BLEND_MODE` |`VGBlendMode` |`VG_BLEND_SRC_OVER`|
 | `VG_IMAGE_MODE` |`VGImageMode`| `VG_DRAW_IMAGE_NORMAL`|
 |`VG_SCISSOR_RECTS` |`VGint *` |{ } (array of length 0) |
@@ -169,7 +170,7 @@ When a new OpenVG context is created, it contains default values as shown in Tab
 | `VG_SCISSORING` |`VGboolean` |`VG_FALSE` (disabled)|
 | `VG_PIXEL_LAYOUT` |`VGPixelLayout`| `VG_PIXEL_LAYOUT_UNKNOWN`|
 | `VG_SCREEN_LAYOUT`| `VGPixelLayout` |Layout of the drawing surface|
-| `VG_FILTER_FORMAT_LINEAR` |`VGboolean`| VG_FALSE` (disabled)|
+| `VG_FILTER_FORMAT_LINEAR` |`VGboolean`| `VG_FALSE` (disabled)|
 | `VG_FILTER_FORMAT_ PREMULTIPLIED`| `VGboolean`| `VG_FALSE` (disabled) |
 |`VG_FILTER_CHANNEL_MASK`| `VGbitfield`| (`VG_RED`  \|` VG_GREEN` \| `VG_BLUE` \| `VG_ALPHA`) |
 
@@ -189,6 +190,7 @@ $\begin{bmatrix} sh & shx & tx \\
  By default, no paint object is set for filling or stroking paint modes. The default paint parameter values are used instead, as described in Section 9.1.3.
 
  ##_5.3 Setting and Querying Object Parameter Values_
+ <a name="Setting_and_Querying_Object_Parameter_Values"></a>
  Objects that are referenced using a `VGHandle` (_i.e.,_ `VGImage, VGPaint, VGPath, VGFont,` and `VGMaskLayer` objects) may have their parameters set and queried using a number of **vgSetParameter** and **vgGetParameter** functions. The semantics of these functions (including the handling of invalid count values) are similar to those of the **vgGet** and **vgSet** functions.
 
  ####_vgSetParameter_
@@ -219,7 +221,7 @@ void vgSetParameteriv(VGHandle object, VGint paramType,
 >* if count is not a valid value for the given parameter
 
 ####_vgGetParameter and vgGetParameterVectorSize_
-<a name="vgGetParameter and vgGetParameterVectorSize"></a>
+<a name="vgGetParameter_and_vgGetParameterVectorSize"></a>
 The **vgGetParameter** functions return the value of a parameter on a given `VGHandle-` based object.
 
 The **vgGetParameterVectorSize** function returns the number of elements in the vector that will be returned by the **vgGetParameteriv** or **vgGetParameterfv** functions if called with the given paramType argument. For scalar values, 1 is returned. If **vgGetParameteriv** or **vgGetParameterfv** is called with a smaller value for count than that returned by **vgGetParameterVectorSize**, only the first count elements of the vector are retrieved. Use of a greater value for count will result in an error.
@@ -254,3 +256,5 @@ void    vgGetParameteriv(VGHandle object,
 >* if values is not properly aligned in **vgGetParameterfv** or **vgGetParameteriv**
 >* if count is less than or equal to 0 in **vgGetParameterfv* or **vgGetParameteriv**
 >* if count is greater than the value returned by **vgGetParameterVectorSize** for the given parameter in **vgGetParameterfv** or **vgGetParameteriv**
+
+<div style="page-break-after: always;"> </div>
