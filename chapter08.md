@@ -1,5 +1,5 @@
 #_8 Paths_
-<a name="chapter 8"></a><a name="Paths"></a>
+<a name="Chapter 8"></a><a name="Paths"></a>
 Paths are the heart of the OpenVG API. All geometry to be drawn must be defined in terms of one or more paths. Paths are defined by a sequence of _segment commands_ (or _segments_). Each segment command in the standard format may specify a move, a straight line segment, a quadratic or cubic Bézier segment, or an elliptical arc. Extensions may define other segment types.
 
 ##_8.1 Moves_
@@ -34,7 +34,7 @@ $G^1$ Smooth quadratic or cubic segments implicitly define their first internal 
 
 $G^1$ smoothness at the initial point of a quadratic or cubic segment may be guaranteed by suitable placement of the first internal control point $(x_1, y_1)$ of the following segment. Given a previous quadratic or cubic segment with an internal control point $(px, py)$ and final endpoint $(ox, oy)$, we compute $(x_1, y_1)$ as $(2*ox – px, 2*oy – py)$ (_i.e.,_ the reflection of the point $(px, py)$ about the point $(ox, oy)$). For segments of the same type, this will provide $C^1$ smoothness (see the next section).
 
-![Figure4](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/0b3d69e55090b1dd337328b0c97e582cfa750746/figures/Figure_4.png)
+![figure04](figures/figure04.png)
 _Figure 4: Smooth Curve Construction_
 
 ###_8.3.4 **$C^1$** Smooth Segments_
@@ -87,7 +87,7 @@ If no elliptical arc exists with the given parameters because the endpoints are 
 
 Notes on the mathematics of ellipses are provided in Appendix A (Section 18).
 
-![Figure05](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/1e06fb916951c386c9ea043e03c25ad8116c411c/figures/figure05.png)
+![figure05](figures/figure05.png)
 _Figure 5: Elliptical Arcs_
 
 ##_8.5 The Standard Path Format_
@@ -96,7 +96,7 @@ Complex paths may be constructed in application memory and passed into OpenVG to
 
 In this section, we define the standard data format for paths that may be used to definesequences of various types of path segments. Extensions may define other path data formats.
 
-#### _VG_PATH_FORMAT_STANDARD_
+#### VG_PATH_FORMAT_STANDARD
 <a name="VG_PATH_FORMAT_STANDARD"></a>
 
 The `VG_PATH_FORMAT_STANDARD `macro defines a constant to be used as an argument to **vgCreatePath** to indicate that path data are stored using the standard format. As this API is revised, the lower 16 bits of version number may increase. Each version of OpenVG will accept formats defined in all prior specification versions with which it is backwards-compatible.
@@ -107,7 +107,7 @@ Extensions wishing to define additional path formats may register for format ide
 #define VG_PATH_FORMAT_STANDARD 0;
 ```
 
-### _8.5.1 Path Segment Command Side Effects_
+### 8.5.1 Path Segment Command Side Effects
 <a name="Path Segment Command Side Effects"></a>
 
 In order to define the semantics of each segment command type, we define three reference points (all are initially (0, 0)):
@@ -121,6 +121,7 @@ In order to define the semantics of each segment command type, we define three r
 Figure 6 illustrates the locations of these points at the end of a sequence of segment commands `{ MOVE_TO, LINE_TO, CUBIC_TO }`.
 
 <img src="figures/Figure 6.PNG"/>
+![figure06](figures/figure06.png)
 
 *Figure 6: Segment Reference Points*
 
@@ -128,7 +129,7 @@ We define points *(x0, y0)*, *(x1, y1)*, and *(x2, y2)* in the discussion below 
 
 A path consists of a sequence of subpaths. As path segment commands are encountered, each segment is appended to the current subpath. The current subpath is ended by a `MOVE_TO` or `CLOSE_PATH` segment, and a new current subpath is begun. The end of the path data also ends the current subpath.
 
-### _8.5.2 Segment Commands_
+### 8.5.2 Segment Commands
 <a name="Segment Commands"></a>
 
 The following table describes each segment command type along with its prefix, the number of specified coordinates and parameters it requires, the numerical value of the segment command, the formulas for any implicit coordinates, and the side effects of the segment command on the points $(ox, oy)$, *(sx, sy)*, and $(px, py)$ and on the termination of the current subpath.
@@ -161,7 +162,7 @@ In SVG, the behavior of smooth quadratic and cubic segments differs slightly fro
 
 Note that the coordinates of a path are defined even if the path begins with a segment type other than `MOVE_TO` (including `HLINE_TO`, `VLINE_TO`, or relative segment types) since the coordinates are based on the initial values of $(ox, oy)$, $(sx, sy)$, and *(px, py)* which are each defined as (0, 0).
 
-### _8.5.3 Coordinate Data Formats_
+### 8.5.3 Coordinate Data Formats
 <a name="Coordinate Data Formats"></a>
 
 Coordinate and parameter data (henceforth called simply coordinate data) may be expressed in the set of formats shown in Table 7 below. Multi-byte coordinate data (*i*.*e*., `S_16`, `S_32` and F datatypes) are represented in application memory using the native byte order (endianness) of the platform. Implementations may quantize incoming data in the `S_32` and F formats to a lesser number of bits, provided at least 16 bits of precision are maintained.
@@ -177,7 +178,7 @@ IEEE 754 floating-point|F|4|3
 
 *Table 7: Path Coordinate Datatypes*
 
-#### _VGPathDatatype_
+#### VGPathDatatype
 <a name="VGPathDatatype"></a>
 
 The `VGPathDatatype` enumeration defines values describing the possible numerical datatypes for path coordinate data.
@@ -191,17 +192,17 @@ VG_PATH_DATATYPE_F = 3
 } VGPathDatatype;
 ```
 
-###_8.5.4 Segment Type Marker Definitions_
+###8.5.4 Segment Type Marker Definitions
 
 Segment type markers are defined as 8-bit integers, with the leading 3 bits reserved for future use, the next 4 bits containing the segment command type, and the least significant bit indicating absolute vs. relative coordinates (0 for absolute, 1 for relative). The reserved bits must be set to 0.
 
 For the `CLOSE_PATH` segment command, the value of the Abs/Rel bit is ignored.
 
-<img src="figures/Figure 7.PNG"/>
+![figure07](figures/figure07.png)
 
 *Figure 7: Segment Type Marker Layout*
 
-#### _VGPathAbsRel_
+#### VGPathAbsRel
 <a name=" VGPathAbsRel"></a>
 
 The `VGPathAbsRel` enumeration defines values indicating absolute (`VG_ABSOLUTE`) and relative (`VG_RELATIVE`) values.
@@ -213,7 +214,7 @@ VG_RELATIVE = 1
 } VGPathAbsRel;
 ```
 
-#### _VGPathSegment_
+#### VGPathSegment
 <a name="VGPathSegment"></a>
 
 The `VGPathSegment` enumeration defines values for each segment command type. The values are pre-shifted by 1 bit to allow them to be combined easily with values from `VGPathAbsRel`.
@@ -235,7 +236,7 @@ VG_LCCWARC_TO = (11 << 1),
 VG_LCWARC_TO = (12 << 1)
 } VGPathSegment;
 ```
-#### _VGPathCommand_
+#### VGPathCommand
 <a name="VGPathCommand"></a>
 
 The `VGPathCommand` enumeration defines combined values for each segment command type and absolute/relative value. The values are shifted left by one bit and ORed bitwise (*i*.*e*., using the C | operator) with the appropriate value from `VGPathAbsRel` to obtain a complete segment command value.
@@ -270,7 +271,7 @@ VG_LCWARC_TO_REL = VG_LCWARC_TO | VG_RELATIVE
 
 ```
 
-### _8.5.5 Path Example_
+### 8.5.5 Path Example
 <a name="Path Example"></a>
 
 The following code example shows how to traverse path data stored in application memory using the standard representation. A byte is read containing a segment command, and the segment command type and relative/absolute flag are extracted by application-defined `SEGMENT_COMMAND` and `SEGMENT_ABS_REL` macros. The number of coordinates and number of bytes per coordinate (for the given data format) are also determined using lookup tables. Finally, the relevant portion of the path data stream representing the current segment is copied into a temporary buffer and used as an argument to a user-defined **processSegment** function that may perform further processing.
@@ -313,7 +314,7 @@ dataIdx += numBytes;
 }
 ```
 
-## _8.6 Path Operations_
+## 8.6 Path Operations
 <a name="Path Operations"></a>
 
 In addition to filling or stroking a path, the API allows the following basic operations on paths:
@@ -364,12 +365,12 @@ path (**vguPolygon**)
 
 • Append a circular arc to a path (**vguArc**)
 
-### _8.6.1 Storage of Paths_
+### 8.6.1 Storage of Paths
 <a name="Storage of Paths"></a>
 
 OpenVG stores path data internally to the implementation. Paths are referenced via opaque VGPath handles. Applications may initialize paths using the memory representation defined above or other representations defined by extensions. It is possible for an implementation to store path data in hardware-accelerated memory. Implementations may also make use of their own internal representation of path segments. The intent is for applications to be able to define a set of paths, for example one for each glyph in the current typeface, and to be able to re-render each previously defined path with maximum efficiency.
 
-#### _VGPath_
+#### VGPath
 <a name="VGPath"></a>
 
 `VGPath` represents an opaque handle to a path.
@@ -378,7 +379,7 @@ OpenVG stores path data internally to the implementation. Paths are referenced v
 typedef VGHandle VGPath;
 ```
 
-### _8.6.2 Creating and Destroying Paths_
+### 8.6.2 Creating and Destroying Paths
 <a name="Creating and Destroying Paths"></a>
 
 Paths are created and destroyed using the **vgCreatePath** and **vgDestroyPath** functions. During the lifetime of a path, an application may indicate which path operations it plans to perform using path capability flags defined by the `VGPathCapabilities` enumeration.
@@ -436,7 +437,7 @@ VG_PATH_CAPABILITY_ALL = (1 << 12) - 1
 
 It is legal to call **vgCreatePath**, **vgClearPath**, and **vgDestroyPath** regardless of the current setting of the path’s capability bits, as these functions discard the existing path definition.
 
-#### _vgCreatePath_
+#### vgCreatePath
 <a name="vgCreatePath"></a>
 
 **vgCreatePath** creates a new path that is ready to accept segment data and returns a `VGPath` handle to it. The path data will be formatted in the format given by `pathFormat`, typically `VG_PATH_FORMAT_STANDARD`. The `datatype` parameter contains a value from the `VGPathDatatype` enumeration indicating the datatype that will be used for coordinate data. The `capabilities` argument is a bitwise OR of the desired `VGPathCapabilities` values. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect. If an error occurs, `VG_INVALID_HANDLE` is returned.
@@ -462,7 +463,7 @@ VGbitfield capabilities)
 > * if `datatype` is not a valid value from the `VGPathDatatype` enumeration
 > * if `scale` is equal to 0
 
-#### _vgClearPath_
+#### vgClearPath
 <a name="vgClearPath"></a>
 
 **vgClearPath** removes all segment command and coordinate data associated with a path. The handle continues to be valid for use in the future, and the path format and datatype retain their existing values. The `capabilities` argument is a bitwise OR of the desired VGPathCapabilities values. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect. Using **vgClearPath** may be more efficient than destroying and re-creating a path for short-lived paths.
@@ -475,7 +476,7 @@ void vgClearPath(VGPath path, VGbitfield capabilities)
 >`VG_BAD_HANDLE_ERROR`
 > * if `path` is not a valid path handle, or is not shared with the current context
 
-#### _vgDestroyPath_
+#### vgDestroyPath
 <a name=" vgDestroyPath"></a>
 
 **vgDestroyPath** releases any resources associated with `path`, and makes the handle invalid in all contexts that shared it.
@@ -488,10 +489,10 @@ void vgDestroyPath(VGPath path)
 >`VG_BAD_HANDLE_ERROR`
 > * if `path` is not a valid path handle, or is not shared with the current context
 
-### _8.6.3 Path Queries_
+### 8.6.3 Path Queries
 <a name="Path Queries"></a>
 
-#### _VGPathParamType_
+#### VGPathParamType
 <a name="VGPathParamType"></a>
 
 Values from the `VGPathParamType` enumeration may be used as the `paramType` argument to **vgGetParameter** to query various features of a path. All of the parameters defined by `VGPathParamType` are read-only. Table 8 shows the datatypes for each parameter type.
@@ -518,7 +519,7 @@ _**Parameter**_ | _**Datatype**_
 
 *Table 8: VGPathParamType Datatypes*
 
-#### _Path Format_
+#### Path Format
 <a name="Path Format"></a>
 
 The command format of a path is queried as an integer value using the `VG_PATH_FORMAT` parameter:
@@ -529,7 +530,7 @@ VGint pathFormat = vgGetParameteri(path, VG_PATH_FORMAT);
 ```
 
 
-#### _Path Datatype_
+#### Path Datatype
 <a name="Path Datatypet"></a>
 
 The coordinate datatype of a path is queried as an integer value using the `VG_PATH_DATATYPE` parameter. The returned integral value should be cast to the `VGPathDatatype` enumeration:
@@ -540,7 +541,7 @@ VGPathDatatype pathDatatype =
 (VGPathDatatype)vgGetParameteri(path, VG_PATH_DATATYPE);
 ```
 
-#### _Path Scale_
+#### Path Scale
 <a name="Path Scale"></a>
 
 The scale factor of the path is queried as a floating-point value using the `VG_PATH_SCALE` parameter:
@@ -548,7 +549,7 @@ The scale factor of the path is queried as a floating-point value using the `VG_
 VGPath path;
 VGfloat pathScale = vgGetParameterf(path, VG_PATH_SCALE);
 ```
-#### _Path Bias_
+#### Path Bias
 <a name="Path Bias"></a>
 
 The bias of the path is queried as a floating-point value using the `VG_PATH_BIAS` parameter:
@@ -558,7 +559,7 @@ VGPath path;
 VGfloat pathBias = vgGetParameterf(path, VG_PATH_BIAS);
 ```
 
-#### _Number of Segments_
+#### Number of Segments
 <a name="Number of Segments"></a>
 
 The number of segments stored in the path is queried as an integer value using the `VG_PATH_NUM_SEGMENTS` parameter:
@@ -566,7 +567,7 @@ The number of segments stored in the path is queried as an integer value using t
 VGPath path;
 VGint pathNumSegments = vgGetParameteri(path, VG_PATH_NUM_SEGMENTS);
 ```
-#### _Number of Coordinates_
+#### Number of Coordinates
 <a name="Number of Coordinates"></a>
 
 The total number of specified coordinates (*i*.*e*., those defined in the “Coordinates” column of Table 6) stored in the path is queried as an integer value using the `VG_PATH_NUM_COORDS` parameter:
@@ -575,10 +576,10 @@ VGPath path;
 VGint pathNumCoords = vgGetParameteri(path, VG_PATH_NUM_COORDS);
 ```
 
-### _8.6.4 Querying and Modifying Path Capabilities_
+### 8.6.4 Querying and Modifying Path Capabilities
 <a name="Querying and Modifying Path Capabilities"></a>
 
-#### _vgGetPathCapabilities_
+#### vgGetPathCapabilities
 <a name="vgGetPathCapabilities"></a>
 
 The **vgGetPathCapabilities** function returns the current capabilities of the `path`, as a bitwise OR of `VGPathCapabilities` constants. If an error occurs, 0 is returned.
@@ -592,7 +593,7 @@ VGbitfield vgGetPathCapabilities(VGPath path)
 >`VG_BAD_HANDLE_ERROR`
 > * if `path` is not a valid path handle, or is not shared with the current context
 
-#### _vgRemovePathCapabilities_
+#### vgRemovePathCapabilities
 <a name="vgRemovePathCapabilities"></a>
 
 The **vgRemovePathCapabilities** function requests the set of capabilities specified in the `capabilities` argument to be disabled for the given `path`. The `capabilities` argument is a bitwise OR of the `VGPathCapabilities` values whose removal is requested. Attempting to remove a capability that is already disabled has no effect. Bits of `capabilities` that do not correspond to values from `VGPathCapabilities` have no effect.
@@ -608,10 +609,10 @@ void vgRemovePathCapabilities(VGPath path, VGbitfield capabilities)
 >`VG_BAD_HANDLE_ERROR`
 > * if `path` is not a valid path handle, or is not shared with the current context
 
-### _8.6.5 Copying Data Between Paths_
+### 8.6.5 Copying Data Between Paths
 <a name="Copying Data Between Paths"></a>
 
-#### _vgAppendPath_
+#### vgAppendPath
 <a name="vgAppendPath"></a>
 
 **vgAppendPath** appends a copy of all path segments from `srcPath` onto the end of the existing data in `dstPath`. It is legal for `srcPath` and `dstPath` to be handles to the same path object, in which case the contents of the path are duplicated. If `srcPath` and `dstPath` are handles to distinct path objects, the contents of srcPath will not be affected by the call.
@@ -631,10 +632,10 @@ void vgAppendPath(VGPath dstPath, VGPath srcPath)
 > if `VG_PATH_CAPABILITY_APPEND_FROM` is not enabled for srcPath
 > if `VG_PATH_CAPABILITY_APPEND_TO` is not enabled for dstPath
 
-### _8.6.6 Appending Data to a Path_
+### 8.6.6 Appending Data to a Path
 <a name=" Appending Data to a Path"></a>
 
-#### _vgAppendPathData_
+#### vgAppendPathData
 <a name="vgAppendPathData"></a>
 
 **vgAppendPathData** appends data taken from `pathData` to the given path `dstPath`. The data are formatted using the path format of `dstPath` (as returned by querying the path’s `VG_PATH_FORMAT` parameter using **vgGetParameteri**). The `numSegments` parameter gives the total number of entries in the `pathSegments` array, and must be greater than 0. Legal values for the **pathSegments** array are the values from the `VGPathCommand` enumeration as well as `VG_CLOSE_PATH` and (`VG_CLOSE_PATH` | `VG_RELATIVE`) (which are synonymous).
@@ -661,13 +662,13 @@ const void * pathData)
 > * if `numSegments` is less than or equal to 0
 > * if `pathSegments` contains an illegal command
 
-### _8.6.7 Modifying Path Data_
+### 8.6.7 Modifying Path Data
 <a name=" Modifying Path Data"></a>
 
 Coordinate data in an existing path may be modified, for example to create animation
 effects. Implementations should choose an internal representation for paths that have the `VG_PATH_CAPABILITY_MODIFY` capability enabled that allows for efficient modification of the coordinate data.
 
-#### _vgModifyPathCoords_
+#### vgModifyPathCoords
 <a name="vgModifyPathCoords"></a>
 
 **vgModifyPathCoords** modifies the coordinate data for a contiguous range of segments of `dstPath`, starting at `startIndex` (where 0 is the index of the first path segment) and having length `numSegments`. The data in `pathData` must be formatted in exactly the same manner as the original coordinate data for the given segment range, unless the path has been transformed using **vgTransformPath** or interpolated using **vgInterpolatePath**. In these cases, the path will have been subject to the segment promotion rules specified in those functions.
@@ -697,10 +698,10 @@ const void * pathData)
 > * if `numSegments` is less than or equal to 0
 > * if `startIndex + numSegments` is greater than the number of segments in the path
 
-### _8.6.8 Transforming a Path_
+### 8.6.8 Transforming a Path
 <a name="Transforming a Path"></a>
 
-#### _vgTransformPath_
+#### vgTransformPath
 <a name="vgTransformPath"></a>
 
 **vgTransformPath** appends a transformed copy of `srcPath` to the current contents of
@@ -741,7 +742,7 @@ void vgTransformPath(VGPath dstPath, VGPath srcPath)
 > * if `VG_PATH_CAPABILITY_TRANSFORM_FROM` is not enabled for srcPath
 > * if `VG_PATH_CAPABILITY_TRANSFORM_TO` is not enabled for dstPath
 
-### _8.6.9 Interpolating Between Paths_
+### 8.6.9 Interpolating Between Paths
 <a name="Interpolating Between Paths"></a>
 
 Interpolation takes two compatible paths, in a sense described below, and defines a new
@@ -770,7 +771,7 @@ starting arc type differs from the final arc type, the starting arc type is used
 amount less than 0.5, and the final arc type is used for values greater than or equal to
 0.5. Finally, the coordinates are converted to the data type of the destination.
 
-#### _vgInterpolatePath_
+#### vgInterpolatePath
 <a name="vgInterpolatePath"></a>
 
 The **vgInterpolatePath** function appends a path, defined by interpolation (or
@@ -809,7 +810,7 @@ VGfloat amount)
 > * if `VG_PATH_CAPABILITY_PATH_INTERPOLATE_TO` is not enabled for dstPath
 > * if `VG_PATH_CAPABILITY_PATH_INTERPOLATE_FROM` is not enabled for `startPath` or `endPath`
 
-### _8.6.10 Length of a Path_
+### 8.6.10 Length of a Path
 <a name="Length of a Path"></a>
 
 An approximation to the geometric length of a portion of a path may be obtained by
@@ -817,7 +818,7 @@ calling the **vgPathLength** function. `MOVE_TO` segments and implicit path clos
 Section 8.7.1) do not contribute to the path length. `CLOSE_PATH` segments have the
 same length as a `LINE_TO` segment with the same endpoints.
 
-#### _vgPathLength_
+#### vgPathLength
 <a name="vgPathLength"></a>
 
 The **vgPathLength** function returns the length of a given portion of a path in the user
@@ -841,7 +842,7 @@ VGint startSegment, VGint numSegments);
 > * if `numSegments` is less than or equal to 0
 > * if `(startSegment + numSegments – 1)` is greater than the index of the final path segment
 
-### _8.6.11 Position and Tangent Along a Path_
+### 8.6.11 Position and Tangent Along a Path
 <a name="Position and Tangent Along a Path"></a>
 
 Some path operations, such as the placement and orientation of text along a path, require
@@ -849,7 +850,7 @@ the computation of a set of points along a path as well as a normal (perpendicul
 at each point. The **vgPointAlongPath** function provides points along the path as well
 as normalized tangent vectors (from which normals may easily be derived).
 
-#### _The Tangents of a Path Segment_
+#### The Tangents of a Path Segment
 <a name="The Tangents of a Path Segment"></a>
 
 The tangent at a given point along a path is defined as a vector pointing in the same
@@ -874,7 +875,7 @@ defined tangent, that tangent is used as both the incoming and outgoing tangent.
 searches produced no defined tangent, the incoming and outgoing tangents are both
 assigned the value (1, 0). Tangent vectors are normalized to have unit length.
 
-#### _vgPointAlongPath_
+#### vgPointAlongPath
 <a name="vgPointAlongPath"></a>
 
 The **vgPointAlongPath** function returns the point lying a given distance along a given
@@ -949,7 +950,7 @@ VGfloat * tangentX, VGfloat * tangentY)
 > * if (startSegment + numSegments – 1) is less than 0 or greater than the index of the final path segment
 > * if x, y, tangentX or tangentY is not properly aligned
 
-### _8.6.12 Querying the Bounding Box of a Path_
+### 8.6.12 Querying the Bounding Box of a Path
 <a name="Querying the Bounding Box of a Path"></a>
 
 To draw complex scenes efficiently, it is important to avoid drawing objects that do not appear in the region being drawn. A simple way to determine whether an object may be visible is to determine whether its *bounding box* – an axis-aligned rectangle that is guaranteed to contain the entire object – intersects the drawn region. The **vgPathBounds** and **vgPathTransformedBounds** functions provide bounding box information.
@@ -959,7 +960,7 @@ Two types of bounding boxes may be obtained for a path. The first, obtained by c
 
 The bounding box of a path is defined to contain all points along the path, including isolated points created by `MOVE_TO` segments. The fill rule has no effect on the determination of the bounding box. If the path is to be stroked, the application must adjust the bounding box to take the stroking parameters into account. Note that Miter joins in particular may extend far outside the bounding box.
 
-#### _vgPathBounds_
+#### vgPathBounds
 <a name="vgPathBounds"></a>
 
 The **vgPathBounds** function returns an axis-aligned bounding box that tightly bounds the interior of the given path. Stroking parameters are ignored. If path is empty, `minX` and `minY` are set to 0 and `width` and `height` are set to -1. If `path` contains a single point, `minX` and `minY` are set to the coordinates of the point and `width` and `height` are set to 0.
@@ -981,7 +982,7 @@ VGfloat * width, VGfloat * height)
 > if `VG_PATH_CAPABILITY_PATH_BOUNDS` is not enabled for path
 
 
-#### _vgPathTransformedBounds_
+#### vgPathTransformedBounds
 <a name="vgPathTransformedBounds"></a>
 
 The **vgPathTransformedBounds** function returns an axis-aligned bounding box that is guaranteed to enclose the geometry of the given `path` following transformation by the current path-user-to-surface transform. The returned bounding box is not guaranteed to fit tightly around the path geometry. If `path` is empty, `minX` and `minY` are set to 0 and `width` and `height` are set to -1. If `path` contains a single point, `minX` and `minY` are set to the coordinates of the point and `width` and `height` are set to 0.
@@ -1003,12 +1004,12 @@ VGfloat * width, VGfloat * height)
 > * if minX, minY, width, or height is not properly aligned `VG_PATH_CAPABILITY_ERROR`
 > if `VG_PATH_CAPABILITY_PATH_TRANSFORMED_BOUNDS` is not enabled for path
 
-## _8.7 Interpretation of Paths_
+## 8.7 Interpretation of Paths
 <a name="Interpretation of Paths"></a>
 
 The interpretation of a path, composed of a sequence of one or more subpaths, depends on whether it is to be stroked or filled. For stroked paths, each subpath has stroking parameters applied to it separately, with the dash phase at the end of each subpath used at the beginning of the next subpath. This process results in a set of stroked shapes. The union of these shapes then defines the outline path to be filled. For filled paths, the interior of the path (as defined below) is filled.
 
-### _8.7.1 Filling Paths_
+### 8.7.1 Filling Paths
 <a name="Filling Paths"></a>
 A simple, non-self-intersecting closed path divides the plane into two regions, a bounded *inside* region and an unbounded *outside* region. Note that knowing the orientation of the outermost path (*i*.*e*., clockwise or counter-clockwise) is not necessary to differentiate between the inside and outside regions.
 
@@ -1016,11 +1017,11 @@ A path that self-intersects, or that has multiple overlapping subpaths, requires
 
 The non-zero fill rule says that the point is inside the shape if the resulting sum is not equal to 0. The even/odd rule says that the point is inside the shape if the resulting sum is odd, regardless of sign (*e*.*g*., -7 is odd, 0 is even). Consider the star-shaped path shown in Figure 8 below, indicated with solid lines. The orientation of the lines making up the path is indicated with arrows. An imaginary line to infinity starting in the central region of the star is shown as a dashed line pointing to the right. Two edges of the star cross the line to infinity going left to right, indicated by the downward-pointing arrows. The central region therefore has a count of +2. According to the even/odd rule, it is outside the path, whereas according to the non-zero rule it is inside. Implementations must be able to deal with paths having up to 255 crossings along any line. The behavior of more complex paths is undefined.
 
-<img src="figures/Figure 8.PNG"/>
+![figure08](figures/figure08.png)
 
 *Figure 8: Even/Odd Fill Rule*
 
-#### _Creating Holes in Paths_
+#### Creating Holes in Paths
 <a name="Creating Holes in Paths"></a>
 
 The fill rule is applied with respect to all subpaths simultaneously during filling. Thus, one subpath may be used to create a hole inside an enclosing subpath by defining the two subpaths with opposing orientations (clockwise versus counter-clockwise). Note that the orientation of extremely small paths may depend on the numerical precision of the internal representation of points. Care should be taken to avoid the use of paths that have nearly collapsed to a line or a point.
@@ -1029,8 +1030,8 @@ The relative orientation of subpaths, along with the fill rule, determines wheth
 
 ||_**Even/Old Fil Rule**_|_**Non-Zero Fill Rule**_|
 |-|-------|-------|
-|_**Same Orientation**_|<img src="figures/Figure 9-1.PNG"/>|<img src="figures/Figure 9-2.PNG"/>|
-|_**Opposing Orientation**_|<img src="figures/Figure 9-3.PNG"/>|<img src="figures/Figure 9-4.PNG"/>|
+|_**Same Orientation**_|![figure09](figures/figure09.png)|![figure09a](figures/figure09a.png)|
+|_**Opposing Orientation**_|![figure09b](figures/figure09b.png)|![figure09c](figures/figure09c.png)|
 
 
 #### _Implicit Closure of Filled Subpaths_
@@ -1043,11 +1044,11 @@ When filling a path, any subpaths that do not end with a `CLOSE_PATH` segment co
 
 If filled, this sequence will result in one filled triangle with vertices $\left( 0, 0\right)$, $\left( 10, 10\right)$, and $\left( 10, 0\right)$ and another filled triangle with vertices $\left( 20, 2\right)$, $\left( 30, 12\right)$, and $\left( 30, 2\right)$. Note that the implicit closure of the initial subpath prior to the `MOVE_TO_REL` segment command has no effect on the starting coordinate of the second triangle; it is computed by adding the relative offset $\left( 10, 2\right)$ to the final coordinate of the previous segment $\left( 10, 0\right)$ to obtain $\left( 20, 2\right)$ and is not altered by the (virtual) insertion of the line connecting the first subpath’s final vertex $\left( 10, 0\right)$ to its initial vertex $\left( 0, 0\right)$). Figure 10 illustrates this process, with the resulting filled areas highlighted. When stroking a path, no implicit closure takes place, as shown in Figure 11. Implicit closure affects only the output when filling a path, and does not alter the path data in any way.
 
-![figure10](figures/figure10.PNG)
+![figure10](figures/figure10.png)
 _Figure 10: Implicit Closure of Filled Paths_
 
 
-![figure11](figures/figure11.PNG)
+![figure11](figures/figure11.png)
 _Figure 11: Stroked Paths Have No Implicit Closure_
 
 
@@ -1058,7 +1059,7 @@ Stroking a path consists of “widening” the edges of the path using a straigh
 Conceptually, stroking of a path is performed in two steps. First, the stroke parameters are applied in the user coordinate system to form a new shape representing the end result of dashing, widening the path, and applying the end cap and line join styles. Second, a path is created that defines the outline of this stroked shape. This path is transformed using the path-user-to-surface transformation (possibly involving shape distortions due to non-uniform scaling or shearing). Finally, the resulting path is filled with paint in exactly the same manner as when filling a user-defined path using the non-zero fill rule.
 
 Stroking a path applies a single “layer” of paint, regardless of any intersections between portions of the thickened path. Figure 12 illustrates this principle. A single stroke (above) is drawn with a black color and an alpha value of 50%, compared with two separate strokes (below) drawn with the same color and alpha values. The single stroke produces a shape with a uniform color of 50% gray, as if a single layer of translucent paint has been applied, even where portions of the path overlap one another. By contrast, the separate strokes produce two applications of the translucent paint in the area of overlap, resulting in a darkened area.
-![figure12](figures/figure12.PNG)
+![figure12](figures/figure12.png)
 _Figure 12: Each Stroke Applies a Single Layer of Paint_
 
 
@@ -1077,11 +1078,11 @@ These parameters are set on the current context using the variants of the **vgSe
 #### _End Cap Styles_
 <a name="End_Cap_Styles"></a>
 Figure 13 illustrates the Butt (top), Round (center), and Square (bottom) end cap styles applied to a path consisting of a single line segment. Figure 14 highlights the additional geometry created by the end caps. The Butt end cap style terminates each segment with a line perpendicular to the tangent at each endpoint. The Round end cap style appends a semicircle with a diameter equal to the line width centered around each endpoint. The Square end cap style appends a rectangle with two sides of length equal to the line width perpendicular to the tangent, and two sides of length equal to half the line width parallel to the tangent, at each endpoint. The outgoing tangent is used at the left endpoint and the incoming tangent is used at the right endpoint.
-![figure13](figures/figure13.PNG)
+![figure13](figures/figure13.png)
 _Figure 13: End Cap Styles_
 
 
-![figure14](figures/figure14.PNG)
+![figure14](figures/figure14.png)
 _Figure 14: End Cap Styles with Additional Geometry Highlighted_
 
 
@@ -1090,11 +1091,11 @@ _Figure 14: End Cap Styles with Additional Geometry Highlighted_
 Figure 15 illustrates the Bevel (left), Round (center), and Miter (right) line join styles applied to a pair of line segments. Figure 16 highlights the additional geometry created by the line joins. The Bevel join style appends a triangle with two vertices at the outer endpoints of the two “fattened” lines and a third vertex at the intersection point of the two original lines. The Round join style appends a wedge-shaped portion of a circle, centered at the intersection point of the two original lines, having a radius equal to half the line width. The Miter join style appends a trapezoid with one vertex at the intersection point of the two original lines, two adjacent vertices at the outer endpoints of the two “fattened” lines and a fourth vertex at the extrapolated intersection point of the outer perimeters of the two “fattened” lines.
 
 When stroking using the Miter join style, the _miter length_ (_i.e_., the length between the intersection points of the inner and outer perimeters of the two “fattened” lines) is compared to the product of the user-set miter limit and the line width. If the miter length exceeds this product, the Miter join is not drawn and a Bevel join is substituted.
-![figure15](figures/figure15.PNG)
+![figure15](figures/figure15.png)
 _Figure 15: Line Join Styles_
 
 
-![figure16](figures/figure16.PNG)
+![figure16](figures/figure16.png)
 _Figure 16: Line Join Styles with Additional Geometry Highlighted_
 
 
@@ -1127,7 +1128,7 @@ A dash, or space between dashes, with length less than 0 is treated as having a 
 
 A negative dash phase is equivalent to the positive phase obtained by adding a suitable multiple of the dash pattern length.
 
-![figure17](figures/figure17.PNG)
+![figure17](figures/figure17.png)
 _Figure 17: Dash Pattern and Phase Example_
 
 

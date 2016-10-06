@@ -1,29 +1,24 @@
-# 2 The OpenVG Pipeline
-<a name="chapter02"></a><a name="The_OpenVG_Pipeline"></a>
+# 2 The OpenVG Pipeline <a name="chapter02"></a><a name="The_OpenVG_Pipeline"></a>
 This section defines the OpenVG pipeline mechanism by which primitives are rendered. Implementations are not required to match the ideal pipeline stage-for-stage; they may take any approach to rendering so long as the final results match the results of the ideal pipeline within the tolerances defined by the conformance testing process. The OpenVG pipeline supports both single-sampled and multisampled surfaces (see Section 2.9).
 
 Figure 1 below provides an overview of the OpenVG pipeline, focusing on the various steps involved in drawing a thick, dashed line into a scene using a radial gradient paint.
 
-![Alt text](https://github.com/Ajou-Khronies/OpenVG_1.1_Spec/blob/master/figures/figure1.PNG?raw=true)
+![figure01](figures/figure01.png)
 
 _Figure 1: The OpenVG Pipeline_
 
-## _2.1 Stage 1: Path, Transformation, Stroke, and Paint_
-<a name="Stage_1_Path_Transformation_Stroke_and_Paint"></a>
+## _2.1 Stage 1: Path, Transformation, Stroke, and Paint_ <a name="Stage_1_Path_Transformation_Stroke_and_Paint"></a>
 The application defines the path to be drawn, and sets any transformation, stroke, and paint parameters or leaves them at their default settings. When all parameters have been set, the application initiates the rendering process by calling **vgDrawPath**, indicating whether the path is to be filled, stroked, or both. If the path is to be both filled and stroked, the remainder of the pipeline is invoked twice in a serial fashion, first to fill and then to stroke the path.
 
 If an image is being drawn (via the **vgDrawImage** function), the current path is set to a rectangle bounding the image.
 
-## _2.2 Stage 2: Stroked Path Generation_
-<a name="Stage_2_Stroked_Path_Generation"></a>
+## _2.2 Stage 2: Stroked Path Generation_ <a name="Stage_2_Stroked_Path_Generation"></a>
 If the path is to be stroked, the stroke parameters are applied in the user coordinate system to generate a new path that describes the stroked geometry. This path is then substituted for the original path in the remainder of the pipeline, and the fill rule is set to non-zero.
 
-## _2.3 Stage 3: Transformation_
-<a name="Stage_3_Transformation"></a>
+## _2.3 Stage 3: Transformation_ <a name="Stage_3_Transformation"></a>
 The current path-user-to-surface transformation is applied to the geometry of the current path, producing drawing surface coordinates. For an image, the outline of the image is transformed using the image-user-to-surface transformation. Non-uniform transformations may result in skewed stroke outlines.
 
-## _2.4 Stage 4: Rasterization_
-<a name="Stage_4_Rasterization"></a>
+## _2.4 Stage 4: Rasterization_ <a name="Stage_4_Rasterization"></a>
 A coverage value is computed at pixels affected by the current path using a filtering process, and saved for use in the antialiasing step.
 
 Conceptually, a set of sample positions are evaluated for inclusion within the path. At each pixel center that is no more than 1½ pixels away from some portion of the path geometry, a reconstruction filter is applied to the binary inclusion values at nearby sample points to obtain a filtered coverage value for the pixel. If only a single sample per pixel is evaluated, the sample position must be coincident with the pixel center. Note that for a box filter (a filter that gives equal positive weight to all samples within a rectangle centered on the pixel center, and zero weight elsewhere), this filtering process amounts to estimating the area of the intersection of the path geometry with the filter rectangle.
@@ -32,28 +27,23 @@ For a single-sampled surface, if antialiasing is disabled only pixel centers are
 
 In the case where a sample point lies exactly on the boundary of a path, the implementation must enforce a consistent “tie-breaking” rule. For any two paths that share a common boundary segment, but whose interiors lie on opposite sides of the segment, a sample point that lies exactly on the boundary must be considered to be included in exactly one of the two paths. If the interiors of the two paths lie on the same side of the common segment, the sample point must belong to both paths, or neither path. Note that the common boundary segment must be specified in exactly the same manner for both paths (i.e., with bit-for-bit identical control point values, scale and bias, and transformation matrix settings, but possibly with control points in reverse order) for this guarantee to hold.
 
-## _2.5 Stage 5: Clipping and Masking_
-<a name="Stage_5_Clipping_and_Masking"></a>
+## _2.5 Stage 5: Clipping and Masking_ <a name="Stage_5_Clipping_and_Masking"></a>
 Pixels not lying within the bounds of the drawing surface, and (if scissoring is enabled) within the union of the current set of scissor rectangles are assigned a coverage value of 0.
 
 An application-specified mask image is used to modify the coverage values generated by the previous stage. Each coverage value is multiplied by the mask value for the corresponding pixel to obtain a masked coverage value. If the resulting coverage value is zero, the remainder of the pipeline is skipped.
 
-## _2.6 Stage 6: Paint Generation_
-<a name="Stage_6_Paint_Generation"></a>
+## _2.6 Stage 6: Paint Generation_ <a name="Stage_6_Paint_Generation"></a>
 At each pixel of the drawing surface, the relevant current paint (depending on whether the original path was to be filled or stroked) is used to define a color and an alpha value. For gradient and pattern paints, the paint-to-user transformation is concatenated with the path-user-to-surface transformation to define the paint transformation that will geometrically transform the paint. Paint generation may be skipped for operations that do not utilize paint values.
 
 For multisampled drawing surfaces, implementations may perform paint generation either at every sample, or once per pixel at the pixel center. The same approach must be used for every primitive drawn to a given drawing surface.
 
-## _2.7 Stage 7: Image Interpolation_
-<a name="Stage_7_Image_Interpolation"></a>
+## _2.7 Stage 7: Image Interpolation_ <a name="Stage_7_Image_Interpolation"></a>
 If an image is being drawn, an image color and alpha value is computed at each pixel by interpolating image values using the inverse of the current image-user-to-surface transformation. The results are combined with the paint color and alpha values according to the current image drawing mode. If image drawing is not taking place, the results from the preceding stage are passed through unchanged.
 
-## _2.8 Stage 8: Color Transformation, Blending, and Antialiasing_
-<a name="Stage_8_Color_Transformation_Blending_and_Antialiasing"></a>
+## _2.8 Stage 8: Color Transformation, Blending, and Antialiasing_ <a name="Stage_8_Color_Transformation_Blending_and_Antialiasing"></a>
 At each pixel, the source color and alpha values from the preceding stage (which may be the paint color and alpha values when drawing path data or when using the “stencil” image drawing mode, or interpolated image color and alpha values when drawing an image in any of the other drawing modes) are passed through an optional color transformation and converted into the destination color space. The resulting colors are blended with the corresponding destination color and alpha values according to the current blending rule. A special blending rule is used when drawing an image using the “stencil” image drawing mode. The computed coverage value from stage 5 is used to interpolate between the blended result and the previously assigned color at the pixel (preferably in a linear color space) to produce an antialiased result.
 
-## _2.9 Multisampling_
-<a name="Multisampling"></a>
+## _2.9 Multisampling_ <a name="Multisampling"></a>
 Some implementations may provide the option to obtain drawing surfaces that support antialiasing using multisampling. For multisampled surfaces, rasterization occurs at a number of sample points within each pixel. Rather than applying a filter to resolve the coverage at various sample points into a single value once a single primitive has been fully rasterized, the coverage values at each sample point are stored until all primitives for the current frame are complete. When the application requests a buffer swap, the multisampled buffer is resolved into a buffer with a single color per pixel in an implementation-dependent manner.
 
 The determination of whether a sample falls inside a geometric primitive when rendering to a multisampled surface is performed in the same manner as for pixel rendering in nonantialiased mode, only with inclusion evaluated at multiple subpixel sample positions rather than at pixel centers only. This ensures that rendered geometry affects samples in a consistent manner. In particular, geometric primitives that collectively cover an entire pixel must result in all subpixel samples belonging to that pixel being assigned to one of the primitives.
