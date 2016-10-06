@@ -34,7 +34,7 @@ $G^1$ Smooth quadratic or cubic segments implicitly define their first internal 
 
 $G^1$ smoothness at the initial point of a quadratic or cubic segment may be guaranteed by suitable placement of the first internal control point $(x_1, y_1)$ of the following segment. Given a previous quadratic or cubic segment with an internal control point $(px, py)$ and final endpoint $(ox, oy)$, we compute $(x_1, y_1)$ as $(2*ox – px, 2*oy – py)$ (_i.e.,_ the reflection of the point $(px, py)$ about the point $(ox, oy)$). For segments of the same type, this will provide $C^1$ smoothness (see the next section).
 
-![Figure4](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/0b3d69e55090b1dd337328b0c97e582cfa750746/figures/Figure_4.png)
+![figure04](figures/figure04.png)
 _Figure 4: Smooth Curve Construction_
 
 ###_8.3.4 **$C^1$** Smooth Segments_
@@ -87,7 +87,7 @@ If no elliptical arc exists with the given parameters because the endpoints are 
 
 Notes on the mathematics of ellipses are provided in Appendix A (Section 18).
 
-![Figure05](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/1e06fb916951c386c9ea043e03c25ad8116c411c/figures/figure05.png)
+![figure05](figures/figure05.png)
 _Figure 5: Elliptical Arcs_
 
 ##_8.5 The Standard Path Format_
@@ -121,6 +121,7 @@ In order to define the semantics of each segment command type, we define three r
 Figure 6 illustrates the locations of these points at the end of a sequence of segment commands `{ MOVE_TO, LINE_TO, CUBIC_TO }`.
 
 <img src="figures/Figure 6.PNG"/>
+![figure06](figures/figure06.png)
 
 *Figure 6: Segment Reference Points*
 
@@ -197,7 +198,7 @@ Segment type markers are defined as 8-bit integers, with the leading 3 bits rese
 
 For the `CLOSE_PATH` segment command, the value of the Abs/Rel bit is ignored.
 
-<img src="figures/Figure 7.PNG"/>
+![figure07](figures/figure07.png)
 
 *Figure 7: Segment Type Marker Layout*
 
@@ -1016,7 +1017,7 @@ A path that self-intersects, or that has multiple overlapping subpaths, requires
 
 The non-zero fill rule says that the point is inside the shape if the resulting sum is not equal to 0. The even/odd rule says that the point is inside the shape if the resulting sum is odd, regardless of sign (*e*.*g*., -7 is odd, 0 is even). Consider the star-shaped path shown in Figure 8 below, indicated with solid lines. The orientation of the lines making up the path is indicated with arrows. An imaginary line to infinity starting in the central region of the star is shown as a dashed line pointing to the right. Two edges of the star cross the line to infinity going left to right, indicated by the downward-pointing arrows. The central region therefore has a count of +2. According to the even/odd rule, it is outside the path, whereas according to the non-zero rule it is inside. Implementations must be able to deal with paths having up to 255 crossings along any line. The behavior of more complex paths is undefined.
 
-<img src="figures/Figure 8.PNG"/>
+![figure08](figures/figure08.png)
 
 *Figure 8: Even/Odd Fill Rule*
 
@@ -1029,8 +1030,8 @@ The relative orientation of subpaths, along with the fill rule, determines wheth
 
 ||_**Even/Old Fil Rule**_|_**Non-Zero Fill Rule**_|
 |-|-------|-------|
-|_**Same Orientation**_|<img src="figures/Figure 9-1.PNG"/>|<img src="figures/Figure 9-2.PNG"/>|
-|_**Opposing Orientation**_|<img src="figures/Figure 9-3.PNG"/>|<img src="figures/Figure 9-4.PNG"/>|
+|_**Same Orientation**_|![figure09](figures/figure09.png)|![figure09a](figures/figure09a.png)|
+|_**Opposing Orientation**_|![figure09b](figures/figure09b.png)|![figure09c](figures/figure09c.png)|
 
 
 #### _Implicit Closure of Filled Subpaths_
@@ -1043,11 +1044,11 @@ When filling a path, any subpaths that do not end with a `CLOSE_PATH` segment co
 
 If filled, this sequence will result in one filled triangle with vertices $\left( 0, 0\right)$, $\left( 10, 10\right)$, and $\left( 10, 0\right)$ and another filled triangle with vertices $\left( 20, 2\right)$, $\left( 30, 12\right)$, and $\left( 30, 2\right)$. Note that the implicit closure of the initial subpath prior to the `MOVE_TO_REL` segment command has no effect on the starting coordinate of the second triangle; it is computed by adding the relative offset $\left( 10, 2\right)$ to the final coordinate of the previous segment $\left( 10, 0\right)$ to obtain $\left( 20, 2\right)$ and is not altered by the (virtual) insertion of the line connecting the first subpath’s final vertex $\left( 10, 0\right)$ to its initial vertex $\left( 0, 0\right)$). Figure 10 illustrates this process, with the resulting filled areas highlighted. When stroking a path, no implicit closure takes place, as shown in Figure 11. Implicit closure affects only the output when filling a path, and does not alter the path data in any way.
 
-![figure10](figures/figure10.PNG)
+![figure10](figures/figure10.png)
 _Figure 10: Implicit Closure of Filled Paths_
 
 
-![figure11](figures/figure11.PNG)
+![figure11](figures/figure11.png)
 _Figure 11: Stroked Paths Have No Implicit Closure_
 
 
@@ -1058,7 +1059,7 @@ Stroking a path consists of “widening” the edges of the path using a straigh
 Conceptually, stroking of a path is performed in two steps. First, the stroke parameters are applied in the user coordinate system to form a new shape representing the end result of dashing, widening the path, and applying the end cap and line join styles. Second, a path is created that defines the outline of this stroked shape. This path is transformed using the path-user-to-surface transformation (possibly involving shape distortions due to non-uniform scaling or shearing). Finally, the resulting path is filled with paint in exactly the same manner as when filling a user-defined path using the non-zero fill rule.
 
 Stroking a path applies a single “layer” of paint, regardless of any intersections between portions of the thickened path. Figure 12 illustrates this principle. A single stroke (above) is drawn with a black color and an alpha value of 50%, compared with two separate strokes (below) drawn with the same color and alpha values. The single stroke produces a shape with a uniform color of 50% gray, as if a single layer of translucent paint has been applied, even where portions of the path overlap one another. By contrast, the separate strokes produce two applications of the translucent paint in the area of overlap, resulting in a darkened area.
-![figure12](figures/figure12.PNG)
+![figure12](figures/figure12.png)
 _Figure 12: Each Stroke Applies a Single Layer of Paint_
 
 
@@ -1077,11 +1078,11 @@ These parameters are set on the current context using the variants of the **vgSe
 #### _End Cap Styles_
 <a name="End_Cap_Styles"></a>
 Figure 13 illustrates the Butt (top), Round (center), and Square (bottom) end cap styles applied to a path consisting of a single line segment. Figure 14 highlights the additional geometry created by the end caps. The Butt end cap style terminates each segment with a line perpendicular to the tangent at each endpoint. The Round end cap style appends a semicircle with a diameter equal to the line width centered around each endpoint. The Square end cap style appends a rectangle with two sides of length equal to the line width perpendicular to the tangent, and two sides of length equal to half the line width parallel to the tangent, at each endpoint. The outgoing tangent is used at the left endpoint and the incoming tangent is used at the right endpoint.
-![figure13](figures/figure13.PNG)
+![figure13](figures/figure13.png)
 _Figure 13: End Cap Styles_
 
 
-![figure14](figures/figure14.PNG)
+![figure14](figures/figure14.png)
 _Figure 14: End Cap Styles with Additional Geometry Highlighted_
 
 
@@ -1090,11 +1091,11 @@ _Figure 14: End Cap Styles with Additional Geometry Highlighted_
 Figure 15 illustrates the Bevel (left), Round (center), and Miter (right) line join styles applied to a pair of line segments. Figure 16 highlights the additional geometry created by the line joins. The Bevel join style appends a triangle with two vertices at the outer endpoints of the two “fattened” lines and a third vertex at the intersection point of the two original lines. The Round join style appends a wedge-shaped portion of a circle, centered at the intersection point of the two original lines, having a radius equal to half the line width. The Miter join style appends a trapezoid with one vertex at the intersection point of the two original lines, two adjacent vertices at the outer endpoints of the two “fattened” lines and a fourth vertex at the extrapolated intersection point of the outer perimeters of the two “fattened” lines.
 
 When stroking using the Miter join style, the _miter length_ (_i.e_., the length between the intersection points of the inner and outer perimeters of the two “fattened” lines) is compared to the product of the user-set miter limit and the line width. If the miter length exceeds this product, the Miter join is not drawn and a Bevel join is substituted.
-![figure15](figures/figure15.PNG)
+![figure15](figures/figure15.png)
 _Figure 15: Line Join Styles_
 
 
-![figure16](figures/figure16.PNG)
+![figure16](figures/figure16.png)
 _Figure 16: Line Join Styles with Additional Geometry Highlighted_
 
 
@@ -1127,7 +1128,7 @@ A dash, or space between dashes, with length less than 0 is treated as having a 
 
 A negative dash phase is equivalent to the positive phase obtained by adding a suitable multiple of the dash pattern length.
 
-![figure17](figures/figure17.PNG)
+![figure17](figures/figure17.png)
 _Figure 17: Dash Pattern and Phase Example_
 
 

@@ -4,7 +4,7 @@ This section defines the OpenVG pipeline mechanism by which primitives are rende
 
 Figure 1 below provides an overview of the OpenVG pipeline, focusing on the various steps involved in drawing a thick, dashed line into a scene using a radial gradient paint.
 
-![Alt text](https://github.com/Ajou-Khronies/OpenVG_1.1_Spec/blob/master/figures/figure1.PNG?raw=true)
+![figure01](figures/figure01.png)
 
 _Figure 1: The OpenVG Pipeline_
 

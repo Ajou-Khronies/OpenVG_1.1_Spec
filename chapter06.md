@@ -65,7 +65,8 @@ The pixel layout of the display device associated with the current drawing surfa
 
 To provide the renderer with a pixel layout hint, use **vgSeti** with a `paramType` value of `VG_PIXEL_LAYOUT` and a value from the `VGPixelLayout` enumeration. The value `VG_PIXEL_LAYOUT_UNKNOWN` disables any optimizations based on pixel layout, treating the color elements of a pixel as geometrically coincident. Reading back the value of `VG_PIXEL_LAYOUT` with **vgGet** simply returns the value set by the application or the default value and does not reflect the properties of the drawing surface.
 
-![Figure 2](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/0b3d69e55090b1dd337328b0c97e582cfa750746/figures/Figure_2.png)
+![figure02](figures/figure02.png)
+
 *_Figure 2: `VGPixelLayout` Values_*
 
 ##_6.3 Coordinate Systems and Transformations_
@@ -90,7 +91,8 @@ Geometry is defined in the user coordinate system, and is ultimately transformed
 <a name="Homogeneous_Coordinates"></a>
 Homogeneous coordinates are used in order to allow translation factors to be included in the affine matrix formulation, as well as to allow perspective effects for images. In homogeneous coordinates, a two-dimensional point (x, y) is represented by the three- dimensional column vector [x, y, 1]T. The same point may be equivalently represented by the vector [s*x, s*y, s]T for any non-zero scale factor s. More detailed explanations of the use of homogeneous coordinates may be found in most standard computer graphics textbooks, for example [FvDFH95].
 
-![Figure 3](https://raw.githubusercontent.com/Ajou-Khronies/OpenVG_1.1_Spec/0b3d69e55090b1dd337328b0c97e582cfa750746/figures/Figure_3.png)
+![figure03](figures/figure03.png)
+
 _Figure 3: Coordinates, Transformation, Clipping, and Scissoring_
 
 ###_6.5.2 Affine Transformations_
