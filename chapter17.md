@@ -32,7 +32,7 @@ typedef enum {
 ## 17.1 Higher-level Geometric Primitives
 <a name="Higher-level_Geometric_Primitives"> </a>
 
-The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, BÃ©zier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
+The `VGU` library contains functions that allow applications to specify a number of higherlevel geometric primitives to be appended to a path. Each primitive is immediately reduced to a series of line segments, BAⓒzier curves, and arcs. Input coordinates are mapped to input values for the **vgAppendPathData** command by subtracting the path's bias and dividing by its scale value. Coordinates may overflow silently if the resulting values fall outside the range defined by the path datatype.
 
 ### 17.1.1 Lines
 <a name="Lines"> </a>
@@ -140,13 +140,13 @@ The **vguRoundRect** function appends an axis-aligned round-cornered rectangle w
 ROUNDRECT(x, y, w, h, arcWidth, arcHeight):
 
 MOVE_TO_ABS (x + arcWidth/2), y
-HLINE_TO_REL width â€“ arcWidth
+HLINE_TO_REL width a€“ arcWidth
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, arcWidth/2, arcHeight/2
-VLINE_TO_REL height â€“ arcHeight
+VLINE_TO_REL height a€“ arcHeight
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, -arcWidth/2, arcHeight/2
-HLINE_TO_REL -(width â€“ arcWidth)
+HLINE_TO_REL -(width a€“ arcWidth)
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, -arcWidth/2, -arcHeight/2
-VLINE_TO_REL -(height â€“ arcHeight)
+VLINE_TO_REL -(height a€“ arcHeight)
 SCCWARC_TO_REL arcWidth/2, arcHeight/2, 0, arcWidth/2, -arcHeight/2
 CLOSE_PATH
 ```
@@ -163,7 +163,7 @@ If `arcWidth` is less than 0, it is clamped to 0. If `arcWidth` is greater than 
 > `VGU_ILLEGAL_ARGUMENT_ERROR`
 > * if `width` or `height` is less than or equal to 0
 
-<img src="figures/figure28.png"/>
+![figure28](figures/figure28.png)
 _Figure 28: Round Rectangle parameters_
 
 ### 17.1.5 Ellipses
@@ -209,7 +209,7 @@ The `VGUArcType` enumeration defines three values to control the style of arcs d
 `VGU_ARC_CHORD` - arc, plus line between arc endpoints
 `VGU_ARC_PIE`  - arc, plus lines from each endpoint to the ellipse center.
 
-<img src="figures/figure29.png"/>
+![figure29](figures/figure29.png)
 _Figure 29: `VGUArcType` Value_
 
 #### vguArc
@@ -231,7 +231,7 @@ if (angleExtent > 0) {
   SCCWARC_TO_ABS w/2, h/2, 0, x+cos(last)*w/2, y+sin(last)*h/2
 }
 else {
-  angle = startAngle â€“ 180
+  angle = startAngle a€“ 180
   while (angle > last) {
     SCWARC_TO_ABS w/2, h/2, 0, x+cos(angle)*w/2, y+sin(angle)*h/2
     angle -= 180
@@ -261,7 +261,7 @@ VGUErrorCode vguArc(VGPath path, VGfloat x, VGfloat y, VGfloat width, VGfloat he
 > * if `arcType` is not one of the values from the `VGUArcType` enumeration
 
 
-<img src="figures/figure30.png"/>
+![figure30](figures/figure30.png)
 _Figure 30: **VGUArcType** Paramters_
 
 ## 17.2 Image Warping

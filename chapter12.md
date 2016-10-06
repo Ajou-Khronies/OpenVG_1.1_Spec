@@ -194,7 +194,7 @@ void vgConvolve(VGImage dst, VGImage src,
                 VGTilingMode tilingMode)
 ```
 
-<img src="figures/figure27.PNG"/>
+![figure27](figures/figure27.png)
 
 > ERRORS
 >
