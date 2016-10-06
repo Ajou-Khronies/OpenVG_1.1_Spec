@@ -2,7 +2,7 @@
 
 Image filters allow images to be modified and/or combined using a variety of imaging operations. Operations are carried out using a bit depth greater than or equal to the largest bit depth of the supplied images. The lower-left corners of all source and destination images are aligned. The destination area to be written is the intersection of the source and destination image areas. The entire source image area is used as the filter input. The source and destination images involved in the filter operation must not overlap (i.e., have any pixels in common within any common ancestor image). Source and destination images may have a common ancestor as long as they occupy disjoint areas within that area.
 
-## <a name="Format_hormalization"></a> 12.1 _Format Normalization_
+## <a name="Format_Normalization"></a> 12.1 _Format Normalization_
 
 A series of steps are carried out on application-supplied source images in order to produce normalized source images for filtering. In practice, these normalizations may be combined with the filter operations themselves for efficiency.
 
@@ -11,7 +11,7 @@ The source pixels are converted to one of `sRGBA`, `sRGBA_PRE`, `lRGBA`, or `lRG
 1. Source color and alpha values are scaled linearly to lie in a [0, 1] range. The exact precision of the internal representation is implementation-dependent.
 2. If the source image has premultiplied alpha, the alpha values are divided out of each source color channel, and stored for later use. If the source image has no alpha channel, an alpha value of 1 is added to each pixel.
 3. If the source pixel is in a grayscale format (`lL` or `sL`), it is converted to an RGB format (`lRGB` or `sRGB`, respectively) by replication.
-4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`¡æ`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`¡æ`sRGBA`).
+4. If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_TRUE`, and the source pixel is in non-linear format, it is converted into the corresponding linear format (`sRGBA`$\rightarrow$`lRGBA`). If the `VG_FILTER_FORMAT_LINEAR` parameter is set to `VG_FALSE`, and the source pixel is in linear format, it is converted into the corresponding non-linear format (`lRGBA`$\rightarrow$`sRGBA`).
 5. If the `VG_FILTER_FORMAT_PREMULTIPLIED` parameter is equal to `VG_TRUE`, each source color channel is multiplied by the corresponding alpha value. Otherwise, the color channels are left undisturbed.
 
 An implementation may collapse steps algebraically; for example, if no conversion is to take place in step 4, the division and multiplication by alpha in steps 2 and 5 may be implemented as a no-op.
@@ -59,7 +59,7 @@ $$
   R_{dst} \newline
   G_{dst} \newline
   B_{dst} \newline
-  \alpha_{dst} 
+  \alpha_{dst}
   \end{matrix}
 \right] =
 \left[
@@ -67,7 +67,7 @@ $$
   m_{00} & m_{01} & m_{02} & m_{03} \newline
   m_{10} & m_{11} & m_{12} & m_{13} \newline
   m_{20} & m_{21} & m_{22} & m_{23} \newline
-  m_{30} & m_{31} & m_{32} & m_{33} 
+  m_{30} & m_{31} & m_{32} & m_{33}
   \end{matrix}  
 \right] \cdot
 \left[
@@ -75,7 +75,7 @@ $$
   R_{src} \newline
   G_{src} \newline
   B_{src} \newline
-  \alpha_{src} 
+  \alpha_{src}
   \end{matrix}
 \right] +
 \left[
@@ -83,7 +83,7 @@ $$
   m_{04} \newline
   m_{14} \newline
   m_{24} \newline
-  m_{34} 
+  m_{34}
   \end{matrix}
 \right]
 $$$$
@@ -194,7 +194,7 @@ void vgConvolve(VGImage dst, VGImage src,
                 VGTilingMode tilingMode)
 ```
 
-![figure27](figures/figure27.png)
+<img src="figures/figure27.PNG"/>
 
 > ERRORS
 >
@@ -318,7 +318,7 @@ current context
 > ? if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
-## <a name="Lookup Tables"></a> _12.5 Lookup Tables_
+## <a name="Lookup_Tables"></a> _12.5 Lookup Tables_
 
 #### <a name="vgLookup"></a> _vgLookup_
 
@@ -393,4 +393,3 @@ enumeration
 > ? if `lookupTable` is NULL
 >
 > ? if `lookupTable` is not properly aligned
-
