@@ -1,7 +1,5 @@
-# 23 Indices
-<a name="chapter23"><a> <a name="Indices"><a>
-#### Index of Tables
-<a name="Index_of_Tables"><a>
+# 23 Indices<a name="chapter23"><a> <a name="Indices"><a>
+#### Index of Tables<a name="Index_of_Tables"><a>
 Table 1: Naming and Typographical Conventions - 12
 Table 2: Pixel Format Conversions - 23
 Table 3: State Elements of a Context - 29

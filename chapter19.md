@@ -1,9 +1,7 @@
-# 19 Appendix B: Header files
-<a name="chapter19"> </a> <a name="Appendix_B"> </a> <a name="Header_files"> </a>
+# 19 Appendix B: Header files<a name="chapter19"> </a> <a name="Appendix_B"> </a> <a name="Header_files"> </a>
 This section defines minimal C language header files for the type definitions and functions of OpenVG and the VGU utility library. The actual header files provided by a platform vendor may differ from those shown here.
 
-#### openvg.h
-<a name="openvg_h"> </a>
+#### openvg.h<a name="openvg_h"> </a>
 ```C
 /**************************************************************************
 * *
@@ -690,8 +688,7 @@ VG_API_CALL const VGubyte * VG_APIENTRY
 #endif /* _OPENVG_H */
 ```
 
-#### vgu.h
-<a name="vgu_h"> </a>
+#### vgu.h<a name="vgu_h"> </a>
 
 ```C
 /**************************************************************************

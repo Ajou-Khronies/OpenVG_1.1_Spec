@@ -1,5 +1,4 @@
-# 21 Document History
-<a name="chapter21"> </a> <a name="Document_History"> </a>
+# 21 Document History<a name="chapter21"> </a> <a name="Document_History"> </a>
 Version 1.1 ratified December 2008
 
 Changes from version 1.0.1 to version 1.1 (by section number):
