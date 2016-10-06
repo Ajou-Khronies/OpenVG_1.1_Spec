@@ -29,6 +29,9 @@ The context is responsible for maintaining the API state, as shown in Table 3.
 |Image Mode| Image/paint combination function|
 |Scissoring |Current scissoring rectangles and enable/disable |
 |Stroke |Stroke parameters|
+
+|State Element| Description|
+|---|---|
 |Pixel and Screen layout| Pixel layout information|
 |Tile fill color |Color for FILL tiling mode|
 |Clear color |Color for fast clear|
@@ -157,3 +160,4 @@ The **vgFinish** function forces all outstanding requests on the current context
 ```C
 void vgFinish(void)
 ```
+<div style="page-break-after: always;"></div>
