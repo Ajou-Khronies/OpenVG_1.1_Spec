@@ -126,21 +126,20 @@ void vgColorMatrix(VGImage dst, VGImage src,
 > ERRORS
 >
 > `VG_BAD_HANDLE_ERROR`
->
-? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either dst or src is currently a rendering target
+> - if either dst or src is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `matrix` is NULL
+> - if `matrix` is NULL
 >
-> ? if `matrix` is not properly aligned
+> - if `matrix` is not properly aligned
 
 ## <a name="Convolution"></a> _12.4 Convolution_
 
@@ -180,7 +179,7 @@ $$
 s(\sum_{0\le i\lt w}\sum_{0\le j\lt h} k_{(w-i-1),(h-j-1)}p(x+i-shiftX,y+j-shiftY))+b,
 $$
 
-where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w?i?1, h?j?1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w ? 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
+where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w-i-1, h-j-1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w - 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
 
 The operation is applied to all channels (color and alpha) independently. Version 1.1
 
@@ -200,26 +199,26 @@ void vgConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> - if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_KERNEL_SIZE`
 >
-> ? if `kernel` is NULL
+> - if `kernel` is NULL
 >
-> ? if `kernel` is not properly aligned
+> - if `kernel` is not properly aligned
 >
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
+> - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgSeparableConvolve"></a> _vgSeparableConvolve_
@@ -232,7 +231,7 @@ The output pixel $(x, y)$ is defined as:
 
 
 
-where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w?i?1)$ and $(h?j?1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
+where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w-i-1)$ and $(h-j-1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
 
 ```c
 void vgSeparableConvolve(VGImage dst, VGImage src,
@@ -249,26 +248,26 @@ void vgSeparableConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> - if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_SEPARABLE_KERNEL_SIZE`
 >
-> ? if `kernelX` or `kernelY` is NULL
+> - if `kernelX` or `kernelY` is NULL
 >
-> ? if `kernelX` or `kernelY` is not properly aligned
+> - if `kernelX` or `kernelY` is not properly aligned
 >
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
+> - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgGaussianBlur"></a> _vgGaussianBlur_
@@ -300,22 +299,22 @@ void vgGaussianBlur(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
+> - if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
 >
 > than `VG_MAX_GAUSSIAN_STD_DEVIATION`
 >
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
+> - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 ## <a name="Lookup Tables"></a> _12.5 Lookup Tables_
@@ -342,18 +341,18 @@ void vgLookup(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if any pointer parameter is NULL
+> - if any pointer parameter is NULL
 
 #### <a name="vgLookupSingle"></a> _vgLookupSingle_
 
@@ -375,22 +374,22 @@ void vgLookupSingle(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
+> - if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
 `VG_GREEN`, `VG_BLUE` or `VG_ALPHA` from the `VGImageChannel`
 enumeration
 >
-> ? if `lookupTable` is NULL
+> - if `lookupTable` is NULL
 >
-> ? if `lookupTable` is not properly aligned
+> - if `lookupTable` is not properly aligned
 
