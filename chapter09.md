@@ -387,15 +387,15 @@ Figure 21 shows the same square painted with radial gradients with centered and 
 
 All the gradients shown in this section utilize a color ramp with stops at offsets 0.0,0.33, 0.66, and 1.0 colored white, red, green, and blue, respectively, as shown in Figure22.
 
-<img src="figures/figure20.png"/>
+![figure20](figures/figure20.png)
 
 Figure 20: Linear Gradients
 
-<img src="figures/figure21.png"/>
+![figure21](figures/figure21.png)
 
 Figure 21: Centered and Non-Centered Radial Gradients
 
-<img src="figures/figure22.png"/>
+![figure22](figures/figure22.png)
 
 Figure 22: Color Ramp used for Gradient Examples
 
