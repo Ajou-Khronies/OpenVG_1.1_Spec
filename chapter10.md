@@ -477,7 +477,7 @@ Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` pain
 
 Note that the use of a source image having a linear pixel format (e.g., lRGB_888) will result in a brightened output due to the fact that the paint values are not converted froms RGB to linear, yet the results are treated as linear. Therefore the use of a linear sourceimage in this mode is recommended only for special effects.
 
-#### VG_DRAW_IMAGE_STENCIL
+#### VG_DRAW_IMAGE_STENCIL<a name="VG_DRAW_IMAGE_STENCIL"></a>
 
 When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_STENCIL`, theimage being drawn acts as a stencil through which the current paint is applied. Thisallows an image to take the place of a geometric path definition in some cases, such asdrawing text glyphs. A special set of blending equations allows the red, green, and bluechannels to be blended using distinct alpha values taken from the image. This featureallows stencils to take advantage of sub-pixel effects on LCD displays.
 
