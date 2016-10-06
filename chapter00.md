@@ -1,4 +1,4 @@
-<img src="figures/OpenVG.png"/>
+![OpenVG](figures/OpenVG.png)
 
 OpenVG Specification Version 1.1
 
@@ -12,8 +12,8 @@ Editors
 * Robert J. Simpson, AMD
 
 <div style="page-break-after: always;"> </div>
-# Table of Contents
-<a name="table-of-contents"> </a>
+# <a name="table-of-contents"></a> Table of Contents
+
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
