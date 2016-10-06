@@ -260,7 +260,7 @@ One way to evaluate the gradient function efficiently is to rewrite it in the fo
 $${ g }_{ y }\left( x \right) =\left( Ax+B \right) +\sqrt { C{ x }^{ 2 }+Dx+E }$$
 and to use forward differencing of $Ax+B$ and $C{ x }^{ 2 }+Dx+E$ to evaluate it incrementally along a scanline with several additions and a single square root per pixel.
 
-![figure18](figures/figure18.PNG)
+![figure18](figures/figure18.png)
 _Figure 18: Radial Gradient Function_
 
 #### _Setting Radial Gradient Parameters_<a name="Setting_Radial_Gradient_Parameters"></a>
@@ -324,7 +324,7 @@ In repeat mode, the color values defined between 0 and 1 are repeated indefinite
 In reflect mode, the color values defined between 0 and 1 are repeated indefinitely in both directions, but with alternate copies of the range reversed. A gradient value of 1.2 will receive the same color as a gradient value of 0.8, since 0.8 = 1.0 – 0.2 and 1.2 = 1.0 + 0.2. A gradient value of 2.4 will receive the same color as a gradient value of 0.4.
 
 The color ramp pad modes are illustrated schematically in Figure 19.
-![figure19](figures/figure19.PNG)
+![figure19](figures/figure19.png)
 _Figure 19: Color Ramp Pad Modes_
 
 #### _Setting Color Ramp Parameters_<a name="Setting_Color_Ramp_Parameters"></a>
