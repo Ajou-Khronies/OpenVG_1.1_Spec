@@ -519,7 +519,7 @@ $$$$
 \alpha_{dst} \leftarrow \alpha_{tmp}
 $$
 
-10.9 Reading and Writing Drawing Surface Pixels<a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
+## 10.9 Reading and Writing Drawing Surface Pixels<a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
 
 Several functions are provided to read and write pixels on the drawing surface directly,without applying transformations, masking, or blending. Table 13 below summarizes the `OpenVG` functions that copy between sources and destinations in application memory,`VGImage` handles, and the drawing surface.
 
