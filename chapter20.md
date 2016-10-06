@@ -1,5 +1,4 @@
-# 20 Bibliography
-<a name="chapter20"> </a> <a name="Bibliography"> </a>
+# 20 Bibliography<a name="chapter20"> </a> <a name="Bibliography"> </a>
 **ADOB99** <a name="ADOB99"></a> Adobe Systems Incorporated: PostScript Language Reference Manual (third edition), Addison-Wesley, Reading, MA, 1999.
 
 **ADOB06a** <a name="ADOB06a"></a>Adobe Systems Incorporated: PDF Reference (sixth edition): http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference.pdf

@@ -133,8 +133,7 @@ findEllipses(double rh, double rv, double rot,
 }
 ```
 
-## 18.5 Implicit Representation of an Ellipse
-<a name="Implicit_Representation_of_an_Ellipse"> </a>
+## 18.5 Implicit Representation of an Ellipse<a name="Implicit_Representation_of_an_Ellipse"> </a>
 An ellipse (or any conic section) may be written in the implicit form:
 $$
 A x^2 + B x y + C y^2 + D x + E y + F = 0
@@ -184,8 +183,7 @@ $$
 rh  = \frac{1}{\sqrt{A'}}, \quad rv  = \frac{1}{\sqrt{C'}}
 $$
 
-## 18.6 Transformation of Ellipses
-<a name="Transformation of Ellipses"> </a>
+## 18.6 Transformation of Ellipses<a name="Transformation of Ellipses"> </a>
 As previously noted, an ellipse may be viewed as the result of a scale, rotation, and translation applied to the unit circle:
 $$
 \left [ \begin{matrix} x \\ y \\ 1 \end{matrix} \right ] =

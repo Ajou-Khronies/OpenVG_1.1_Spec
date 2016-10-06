@@ -1,8 +1,6 @@
-# 14 Querying Hardware Capabilities
-<a name="Chapter14"></a> <a name="Querying_Hardware_Capabilities"></a>
+# 14 Querying Hardware Capabilities<a name="Chapter14"></a> <a name="Querying_Hardware_Capabilities"></a>
 OpenVG implementations may vary considerably in their performance characteristics. A simple hardware query mechanism is provided to allow applications to make informed choices regarding data representations, in order to maximize their chances of obtaining hardware-accelerated performance. Currently, OpenVG provides hardware queries for image formats and path datatypes.
-#### _VGHardwareQueryType_
-<a name="VGHardwareQueryType"></a>
+#### _VGHardwareQueryType_<a name="VGHardwareQueryType"></a>
 The `VGHardwareQueryType` enumeration defines the set of possible hardware queries. Currently these are restricted to queries regarding image formats and path datatypes.
 ```C
 typedef enum {
@@ -11,8 +9,7 @@ typedef enum {
 } VGHardwareQueryType;
 ```
 
-#### _VGHardwareQueryResult_
-<a name="VGHardwareQueryResult"></a>
+#### _VGHardwareQueryResult_<a name="VGHardwareQueryResult"></a>
 The VGHardwareQueryResult enumeration defines the return values from a hardware query, indicating whether or not the item being queried is hardware accelerated.
 
 ```C
@@ -22,8 +19,7 @@ typedef enum {
 } VGHardwareQueryResult;
 ```
 
-#### _vgHardwareQuery_
-<a name="vgHardwareQuery"></a>
+#### _vgHardwareQuery_<a name="vgHardwareQuery"></a>
 The `vgHardwareQuery` function returns a value indicating whether a given setting of a property of a type given by key is generally accelerated in hardware on the currently running OpenVG implementation.
 The return value will be one of the values `VG_HARDWARE_ACCELERATED` or `VG_HARDWARE_UNACCELERATED`, taken from the `VGHardwareQueryResult` enumeration. The legal values for the setting parameter depend on the value of the key parameter, as indicated by Table 17.
 

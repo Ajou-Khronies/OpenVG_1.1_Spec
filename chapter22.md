@@ -1,6 +1,4 @@
-# 22 Acknowledgments
-<a name="chapter22"></a>
-<a name="Acknowledgments"> </a>
+# 22 Acknowledgments<a name="chapter22"></a><a name="Acknowledgments"> </a>
 
 This specification and the accompanying conformance test suite were developed by the
 Khronos OpenVG working group:
