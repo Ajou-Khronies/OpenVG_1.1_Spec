@@ -165,7 +165,7 @@ When a new OpenVG context is created, it contains default values as shown in Tab
 | `VG_SCREEN_LAYOUT`| `VGPixelLayout` |Layout of the drawing surface|
 | `VG_FILTER_FORMAT_LINEAR` |`VGboolean`| `VG_FALSE` (disabled)|
 | `VG_FILTER_FORMAT_ PREMULTIPLIED`| `VGboolean`| `VG_FALSE` (disabled) |
-|`VG_FILTER_CHANNEL_MASK`| `VGbitfield`| (`VG_RED`  \|` VG_GREEN` \| `VG_BLUE` \| `VG_ALPHA`) |
+|`VG_FILTER_CHANNEL_MASK`| `VGbitfield`| (`VG_RED` &#124; ` VG_GREEN` &#124;  `VG_BLUE` &#124; `VG_ALPHA`) |
 
 _Table 4: Default Parameter Values for a Context_
 
