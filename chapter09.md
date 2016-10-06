@@ -12,7 +12,7 @@ The OpenVG context stores two paint definitions at a time, one to be applied to 
 
 #### _VGPaint_<a name="VGPaint"></a>
 `VGPaint` represents an opaque handle to a paint object. A `VGPaint` object is _live_; changes to a `VGPaint` object (using `vgSetParameter`, or by altering an attached pattern image) attached to a context will immediately affect drawing calls on that context. If a `VGPaint` object is accessed from multiple threads, the application must ensure (using **vgFinish** along with application-level synchronization primitives) that the paint definition is not altered from one context while another context may still be using it for drawing.
-```
+```c
 typedef VGHandle VGPaint;
 ```
 
@@ -21,13 +21,13 @@ typedef VGHandle VGPaint;
 #### _vgCreatePaint_<a name="vgCreatePaint"></a>
 **vgCreatePaint** creates a new paint object that is initialized to a set of default values and returns a `VGPaint` handle to it. If insufficient memory is available to allocate a
 new object, `VG_INVALID_HANDLE` is returned.
-```
+```c
 VGPaint vgCreatePaint(void)
 ```
 
 #### _vgDestroyPaint_<a name="vgDestroyPaint"></a>
 The resources associated with a paint object may be deallocated by calling **vgDestroyPaint**. Following the call, the `paint` handle is no longer valid in any of the contexts that shared it. If the paint object is currently active in a drawing context, the context continues to access it until it is replaced or the context is destroyed.
-```
+```c
 void vgDestroyPaint(VGPaint paint)
 ```
 
@@ -40,7 +40,7 @@ void vgDestroyPaint(VGPaint paint)
 
 #### _vgSetPaint_<a name="vgSetPaint"></a>
 Paint definitions are set on the current context using the **vgSetPaint** function. The `paintModes` argument is a bitwise OR of values from the `VGPaintMode` enumeration, determining whether the paint object is to be used for filling (`VG_FILL_PATH`), stroking (`VG_STROKE_PATH`), or both (`VG_FILL_PATH` | `VG_STROKE_PATH`). The current `paint` replaces the previously set paint object, if any, for the given paint mode or modes. If `paint` is equal to `VG_INVALID_HANDLE`, the previously set paint object for the given mode (if present) is removed and the paint settings are restored to their default values.
-```
+```c
 void vgSetPaint(VGPaint paint, VGbitfield paintModes)
 ```
 
@@ -54,7 +54,7 @@ void vgSetPaint(VGPaint paint, VGbitfield paintModes)
 
 #### _vgGetPaint_<a name="vgGetPaint"></a>
 The **vgGetPaint** function returns the paint object currently set for the given `paintMode`, or `VG_INVALID_HANDLE` if an error occurs or if no paint object is set (_i.e_., the default paint is present) on the given context with the given `paintMode`.
-```
+```c
 VGPaint vgGetPaint(VGPaintMode paintMode)
 ```
 
@@ -69,7 +69,7 @@ Paint functionality is controlled by a number of paint parameters that are store
 #### _VGPaintParamType_<a name="VGPaintParamType"></a>
 Values from the `VGPaintParamType` enumeration may be used as the `paramType` argument to **vgSetParameter** and **vgGetParameter** to set and query various features of a paint object:
 
-```
+```c
 typedef enum {
   /* Color paint parameters */
   VG_PAINT_TYPE = 0x1A00,
@@ -105,7 +105,7 @@ _Table 10: VGPaintParamType Defaults_
 
 #### _VGPaintType_<a name="VGPaintType"></a>
 The `VGPaintType` enumeration is used to supply values for the `VG_PAINT_TYPE` paint parameter to determine the type of paint to be applied.
-```
+```c
 typedef enum {
   VG_PAINT_TYPE_COLOR = 0x1B00,
   VG_PAINT_TYPE_LINEAR_GRADIENT = 0x1B01,
@@ -121,7 +121,7 @@ Color paint uses a fixed color and alpha for all pixels. An alpha value of 1 pro
 To enable color paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_COLOR`.
 
 The **vgSetParameterfv** function allows the color and alpha values to be set using the `VG_PAINT_COLOR` paint parameter to values between 0 and 1. Values outside this range are interpreted as the nearest endpoint of the range.
-```
+```c
 VGfloat fill_red, fill_green, fill_blue, fill_alpha;
 VGfloat stroke_red, stroke_green, stroke_blue, stroke_alpha;
 VGPaint myFillPaint, myStrokePaint;
@@ -143,7 +143,7 @@ vgSetParameterfv(myStrokePaint, VG_PAINT_COLOR, 4, stroke_RGBA);
 ```
 #### _vgSetColor_<a name="vgSetColor"></a>
 As a shorthand, the **vgSetColor** function allows the `VG_PAINT_COLOR` parameter of a given `paint` object to be set using a 32-bit non-premultiplied `sRGBA_8888` representation (see Section 10.210.2). The `rgba` parameter is a `VGuint` with 8 bits of red starting at the most significant bit, followed by 8 bits each of green, blue, and alpha. Each color or alpha channel value is conceptually divided by 255.0f to obtain a value between 0 and 1.
-```
+```c
 void vgSetColor(VGPaint paint, VGuint rgba)
 ```
 > **_ERRORS_**
@@ -152,13 +152,13 @@ void vgSetColor(VGPaint paint, VGuint rgba)
 > * if `paint` is not a valid paint handle, or is not shared with the current context
 
 The code:
-```
+```c
 VGPaint paint;
 VGuint rgba;
 vgSetColor(paint, rgba)
 ```
 is equivalent to the code:
-```
+```c
 VGfloat rgba_f[4];
 rgba_f[0] = ((rgba >> 24) & 0xff)/255.0f;
 rgba_f[1] = ((rgba >> 16) & 0xff)/255.0f;
@@ -169,7 +169,7 @@ vgSetParameterfv(paint, VG_PAINT_COLOR, 4, rgba_f);
 
 #### _vgGetColor_<a name="vgGetColor"></a>
 The current setting of the `VG_PAINT_COLOR` parameter on a given `paint` object may be queried as a 32-bit non-premultiplied `sRGBA_8888` value. Each color channel or alpha value is clamped to the range [0, 1] , multiplied by 255, and rounded to obtain an 8-bit integer; the resulting values are packed into a 32-bit value in the same format as for **vgSetColor**.
-```
+```c
 VGuint vgGetColor(VGPaint paint)
 ```
 
@@ -179,13 +179,13 @@ VGuint vgGetColor(VGPaint paint)
 > * if `paint` is not a valid paint handle, or is not shared with the current context
 
 The code:
-```
+```c
 VGPaint paint;
 VGuint rgba;
 rgba = vgGetColor(paint);
 ```
 is equivalent to the code:
-```
+```c
 #define CLAMP(x) ((x) < 0.0f ? 0.0f : ((x) > 1.0f ? 1.0f : (x)))
 
 VGfloat rgba_f[4];
@@ -221,7 +221,7 @@ where $\Delta x=x1-x0$ and $\Delta y=y1-y0$. If the points $\left( x0,y0 \right)
 #### _Setting Linear Gradient Parameters_<a name="Setting_Linear_Gradient_Parameters"></a>
 To enable linear gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_LINEAR_GRADIENT`.
 The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order { $x0,y0,x1,y1$ }.
-```
+```c
 VGfloat fill_x0, fill_y0, fill_x1, fill_y1;
 VGfloat stroke_x0, stroke_y0, stroke_x1, stroke_y1;
 VGPaint myFillPaint, myStrokePaint;
@@ -268,7 +268,7 @@ To enable radial gradient paint, use **vgSetParameteri** to set the paint type t
 
 If $\left(fx,fy\right)$ lies outside the circumference of the circle, the intersection of the line from the center to the focal point with the circumference of the circle is used as the focal point in place of the specified point. To avoid a division by 0, the implementation may move the focal point along the line towards the center of the circle by an amount sufficient to avoid numerical instability, provided the new location lies at a distance of at least .99r from the circle center. The following code illustrates the setting of radial gradient parameters:
 
-```
+```c
 VGPaint myFillPaint, myStrokePaint;
 VGfloat fill_cx, fill_cy, fill_fx, fill_fy, fill_r;
 VGfloat stroke_cx, stroke_cy, stroke_fx, stroke_fy, stroke_r;
@@ -299,7 +299,7 @@ Color and alpha values at offset values between the stops are defined by means o
 
 #### _VG_MAX_COLOR_RAMP_STOPS_<a name="VG_MAX_COLOR_RAMP_STOPS"></a>
 The `VG_MAX_COLOR_RAMP_STOPS` parameter contains the maximum number of gradient stops supported by the OpenVG implementation. All implementations must support at least 32 stops. If there is no implementation-defined limit, a value of `VG_MAXINT` may be returned. Implicitly defined stops at offsets 0 and 1 are not counted against this maximum. The value may be retrieved by calling **vgGeti**:
-```
+```c
 VGint maxStops = vgGeti(VG_MAX_COLOR_RAMP_STOPS);
 ```
 
@@ -309,7 +309,7 @@ The application may only define stops with offsets between 0 and 1. Spread modes
 * `VG_COLOR_RAMP_SPREAD_REPEAT` – repeat stops
 * `VG_COLOR_RAMP_SPREAD_REFLECT` – repeat stops in reflected order
 
-```
+```c
 typedef enum {
   VG_COLOR_RAMP_SPREAD_PAD = 0x1C00,
   VG_COLOR_RAMP_SPREAD_REPEAT = 0x1C01,
@@ -329,7 +329,7 @@ _Figure 19: Color Ramp Pad Modes_
 
 #### _Setting Color Ramp Parameters_<a name="Setting_Color_Ramp_Parameters"></a>
 Color ramp parameters are set using **vgSetParameter**. The `VG_PAINT_COLOR_RAMP_SPREAD_MODE` parameter controls the spread mode using a value from the `VGColorRampSpreadMode` enumeration. The `VG_PAINT_COLOR_RAMP_PREMULTIPLIED` parameter takes a `VGboolean` value and controls whether color and alpha values are interpolated in premultiplied or non-premultiplied form. The `VG_PAINT_COLOR_RAMP_STOPS` parameter takes an array of floating-point values giving the offsets and colors of the stops, in order. Each stop is defined by a floating-point offset value and four floating-point values containing the sRGBA color and alpha value associated with each stop, in the form of a non-premultiplied $\left( R,G,B,\alpha \right)$ quad. The **vgSetParameter** function will generate an error if the number of values submitted is not a multiple of 5 (zero is acceptable). Up to `VG_MAX_COLOR_RAMP_STOPS` 5-tuples may be set. If more than `VG_MAX_COLOR_RAMP_STOPS` 5-tuples are specified, those beyond the first `VG_MAX_COLOR_RAMP_STOPS` are discarded immediately (and will not be returned by **vgGetParameter**).
-```
+```c
 VGPaint myFillPaint, myStrokePaint;
 
 VGColorRampSpreadMode fill_spreadMode;
