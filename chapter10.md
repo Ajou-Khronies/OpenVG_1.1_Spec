@@ -353,14 +353,39 @@ void vgGetImageSubData(VGImage image,
 > * if data is not properly aligned
 
 ## 10.6 Child Images<a name="Child_Images"></a>
+A _child image_ is an image that shares physical storage with a portion of an existing image, known as its _parent_. An image may have any number of children, but each image has only one parent (that may be itself). An _ancestor_ of an image is defined as the image itself, its parent, its parent's parent, etc. By definition, a pair of images are said to be _related_ if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected in all other images to which it is related.
 
-A child image is an image that shares physical storage with a portion of an existingimage, known as its parent. An image may have any number of children, but each imagehas only one parent (that may be itself). An ancestor of an image is defined as the imageitself, its parent, its parentâ€™s parent, etc. By definition, a pair of images are said to be related if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected in all other images to which it is related.
-
-A child image remains valid even following a call to `vgDestroyImage` on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
+A child image remains valid even following a call to **vgDestroyImage** on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
 
 A child image may not be used as a rendering target. A parent image may not be used asa rendering target until all the child images derived from it have been destroyed.
 
+#### _vgChildImage_<a name="vgChildImage"></a>
+The **vgChildImage** function returns a new `VGImage` handle that refers to a portion of the `parent` image. The region is given by the intersection of the bounds of the parent image with the rectangle beginning at pixel (`x, y`) with dimensions `width` and `height`, which must define a positive region contained entirely within `parent`.
+```C
+VGImage vgChildImage(VGImage parent,
+		     VGint x, VGint y, VGint width, VGint height)
+```
+> **_ERRORS_**
+>
+> `VG_BAD_HANDLE_ERROR`
+> * if `parent` is not a valid image handle, or is not shared with the current context
+>
+> `VG_IMAGE_IN_USE_ERROR`
+> * if `parent` is currently a rendering target
+>
+> `VG_UNSUPPORTED_IMAGE_FORMAT_ERROR`
+> * if dataFormat is not a valid value from the VGImageFormat enumeration
+>
+> `VG_ILLEGAL_ARGUMENT_ERROR`
+> * if `x` is less than 0 or greater than or equal to the parent width
+> * if `y` is less than 0 or greater than or equal to the parent height
+> * if `width` or `height` is less than or equal to 0
+> * if `x + width` is greater than the parent width
+> * if `y + height` is greater than the parent height
 
+
+#### _vgGetParent_<a name="vgGetParent"></a>
+The **vgGetParent** function returns the closest valid ancestor (_i.e_., one that has not been the target of a **vgDestroyImage** call) of the given `image`. If `image` has no ancestors, `image` is returned. The following pseudocode sequence illustrates this behavior.
 ```c
 VGImage A = vgCreateImage(...); // Create a new image A
 VGImage B = vgChildImage(A, ...); // Make B a child of A
@@ -380,10 +405,10 @@ VGImage vgGetParent(VGImage image)
 
 > **_ERRORS_**
 > `VG_BAD_HANDLE_ERROR`
-> * if image is not a valid image handle, or is not shared with the current context
+> * if `image` is not a valid image handle, or is not shared with the current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
-> * if image is currently a rendering target
+> * if `image` is currently a rendering target
 
 ## 10.7 Copying Pixels Between Images<a name="Copying_Pixels_Between_Images"></a>
 

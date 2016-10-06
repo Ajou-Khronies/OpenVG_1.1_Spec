@@ -28,5 +28,3 @@
 	- [9.4 Pattern Paint](#Pattern_Paint)
 		- [vgPaintPattern](#vgPaintPattern)
 		- [9.4.1 Pattern Tiling](#Pattern_Tiling)
-			- [VGTilingMode](#VGTilingMode)
-			- [Setting the Pattern Tiling Mode](#Setting_the_Pattern_Tiling_Mode)
