@@ -1,8 +1,10 @@
-# <a name="chapter11"></a><a name="Text"></a> 11 Text
+<a name="chapter11"></a><a name="Text"></a>
+# 11 Text
 
 Several classes of applications were considered in order to determining the set of features supported by the OpenVG text rendering API. E-book readers, scalable user interfaces with text-driven menus, and SVG viewers used to display textintensive content rely on high-quality text rendering using well-hinted fonts. For these applications, the use of unhinted outlines, or the use of hardwareaccelerated glyph scaling that does not support hints, would be detrimental to application rendering quality. Gaming applications that use special custom fonts, applications where text is rotated or placed along a path, or SVG viewers where unhinted SVG fonts are specified are less sensitive to the use of unhinted fonts for text rendering and may benefit from hardware-accelerated glyph scaling. These application requirements made it clear that OpenVG must provide a fast, low-level hardware-accelerated API that is capable of supporting both hinted and unhinted vector glyph outlines, as well as glyphs represented as bitmaps.
 
-## <a name="Text_Rendering"></a> _11.1 Text Rendering_
+<a name="Text_Rendering"></a>
+## _11.1 Text Rendering_
 
 The process of text rendering involves the following steps:
 
@@ -18,24 +20,26 @@ OpenVG provides a mechanism to allow applications to define a `VGFont` object as
 
 OpenVG can assist applications in text composition by hardware-accelerating glyph positioning calculations; however, the text layout and positioning are the responsibilities of the application.
 
-## <a name="Font_Terminology"></a> _11.2 Font Terminology_
+<a name="Font_Terminology"></a>
+## _11.2 Font Terminology_
 
 In typesetting literature, and throughout this chapter, the terms _character_ and _glyph_ are sometimes used interchangeably to refer to a single letter, number, punctuation mark, accent, or symbol in a string of text, or in a font or a typeface. In strict terms, the term “character” refers to a computer code representing the unit of text content (_e.g._, a symbol from a particular alphabet – a Latin character, Chinese character, etc.) while the term “glyph” refers to the unit of text display defining an image of a character or group of characters (ligature). Each character may be represented by many different glyphs from multiple typefaces having different styles. In complex scripts, a character can change its appearance depending on its position in a word and on adjacent characters, and can be associated with more than one glyph of the same font.
 
 When fonts are scaled to a small size, there may not be enough pixels to display all the subtleties of the typeface design. Some features of the glyphs may be severely distorted, or may even completely disappear at small sizes. In order to make sure that the original design and legibility of a typeface is preserved, fonts typically contain additional data – a set of special instructions that are executed when a font is scaled to a particular size, known as _hints_. In TrueType and OpenType font formats, the hints are special byte-code instructions that are interpreted and executed by the rasterizer. Hints allow font developers to control the alignment of the outline data points with the pixel grid of the output device to ensure that glyph outlines are always rendered faithfully to the original design.
 
-## <a name="Glyph_Positioning_and_Text_Layout"></a> _11.3 Glyph Positioning and Text Layout_
+<a name="Glyph_Positioning_and_Text_Layout"></a>
+## _11.3 Glyph Positioning and Text Layout_
 
 Scalable fonts define glyphs using vector outlines and additional set of data, such as hinting instructions, font and glyph metrics, etc. A typical glyph would be defined as presented in Figure 23 below:
 
+<a name="figure23"></a> 
 ![figure23](figures/figure23.png)
 
 The glyph origin is not always located at the glyph boundary. Glyphs from various custom or script fonts may have swashes and ornamental design with the glyph origin located inside the bounding box, as can be seen (see letter 'p') in the following
-
-![figure23a](figures/figure23a.png)
-
+<a name="figure23a"></a> ![figure23a](figures/figure23a.png)
 The complexity of text rendering and composition depends on language scripts. In many simple scripts (such as western and eastern European languages) text is composed by simply planking glyphs next to each other along the horizontal baseline. Each scaled and rendered glyph is positioned in such a way that the current glyph origin is located at the same point that is defined by the “advance width”, or _escapement_ of the previous character (see Figure 24 below).
 
+<a name="figure24"></a>
 ![figure24](figures/figure24.png)
 
 The next glyph origin must be calculated using the escapement for the current glyph. Note that vector defined by two points [glyph_origin, escapement] must be subjected to the same matrix transformation that is applied to a glyph outline when the glyph is scaled. This operation is equivalent to calling the function:
@@ -48,12 +52,14 @@ The glyph origin is stored in the `VG_GLYPH_ORIGIN` parameter of the OpenVG stat
 
 In some cases, the text composition requires that glyph layout and positioning be adjusted along the baseline (using kerning) to account for the difference in appearance of different glyphs and to achieve uniform typographic color (optical density) of the text (see Figure 25 below).
 
+<a name="figure25"></a>
 ![figure25](figures/figure25.png)
 
 When two or more language scripts are used in the same text fragment, multiple adjustments for glyph positioning may be required. For example, Latin scripts have lowercase characters that have features descending below the text baseline, while Asian scripts typically have glyphs positioned on the baseline. When combining characters from these two scripts the position of the baseline for Asian characters should be adjusted.
 
 Some complex scripts require glyph positioning be adjusted in both directions. Figure 26 below demonstrates text layout in a complex (Arabic) script, involving diagonal writing, ligatures and glyph substitutions. A sequence of characters (right, reading right to left) is combined to form a resulting Urdu word (left) which is displayed in the “Nastaliq” style.
 
+<a name="figure26"></a>
 ![figure26](figures/figure26.png)
 
 Therefore, when a text composition involves support for complex scripts, the inter-character spacing between each pair of glyphs in a text string may have to be defined using the _escapement_ for the current glyph [i], and the additional _adjustment_ vector for the pair of glyphs [i, i+1]. The new glyph origin calculation for the glyph [i+1] is equivalent to performing the following operation:
@@ -63,13 +69,16 @@ vgTranslate((escapement.x[i] + adjustment.x[i]),
             (escapement.y[i] + adjustment.y[i]));
 ```
 
-## <a name="Fonts_in_OpenVG"></a> _11.4 Fonts in OpenVG_
+<a name="Fonts_in_OpenVG"></a>
+## _11.4 Fonts in OpenVG_
 
-### <a name="VGFont_Objects_and_Glyph_Mapping"></a> _11.4.1 VGFont Objects and Glyph Mapping_
+<a name="VGFont_Objects_and_Glyph_Mapping"></a>
+### _11.4.1 VGFont Objects and Glyph Mapping_
 
 OpenVG provides `VGFont` objects to assist applications with text rendering. Each VGFont object defines a collection of glyphs. Glyphs in OpenVG can be represented either using `VGPath` or `VGImage` data. `VGFont` objects are created by an application, and can contain either a full set of glyphs or a subset of glyphs of an original font. `VGFont` objects do not contain any metric or layout information; instead, applications are responsible for all text layout operations using the information provided by the original fonts.
 
-#### <a name="VGFont"></a> _VGFont_
+<a name="VGFont"></a>
+#### _VGFont_
 
 A `VGFont` is an opaque handle to a font object.
 
@@ -77,7 +86,8 @@ A `VGFont` is an opaque handle to a font object.
 typedef VGHandle VGFont;
 ```
 
-#### <a name="Glyph_Mapping"></a> _Glyph Mapping_
+<a name="Glyph_Mapping"></a>
+#### _Glyph Mapping_
 
 Glyphs in a VGFont are identified by a glyph index, which is an arbitrary number assigned to a glyph when it is created. This mapping mechanism is similar to the glyph mapping used in standard font formats, such as TrueType or OpenType fonts, where each glyph is assigned an index that is mapped to a particular character code using a separate mapping table. The semantics of the mapping are application-dependent. Possible mappings include:
 
@@ -94,11 +104,13 @@ OpenVG applications may re-use native glyph indices from an original TrueType or
 
 OpenVG applications may assign arbitrary numbers as glyph indices. This may be beneficial for special purpose fonts that have a limited number of glyphs (_e.g._, SVG fonts).
 
-### <a name="Managing_VGFont_Objects"></a> _11.4.2 Managing VGFont Objects_
+<a name="Managing_VGFont_Objects"></a>
+### _11.4.2 Managing VGFont Objects_
 
 `VGFont` objects are created and destroyed using the **vgCreateFont** and **vgDestroyFont** functions. Font glyphs may be added, deleted, or replaced after the font has been created.
 
-#### <a name="vgCreateFont"></a> _vgCreateFont_
+<a name="vgCreateFont"></a>
+#### _vgCreateFont_
 
 **vgCreateFont** creates a new font object and returns a `VGFont` handle to it. The `glyphCapacityHint` argument provides a hint as to the capacity of a `VGFont`, _i.e._, the total number of glyphs that this `VGFont` object will be required to accept. A value of 0 indicates that the value is unknown. If an error occurs during execution, `VG_INVALID_HANDLE` is returned.
 
@@ -107,8 +119,8 @@ VGFont vgCreateFont (VGint glyphCapacityHint);
 ```
 
 
-
-#### <a name="vgDestroyFont"></a> _vgDestroyFont_
+<a name="vgDestroyFont"></a>
+#### _vgDestroyFont_
 
 **vgDestroyFont** destroys the VGFont object pointed to by the font argument.
 
@@ -119,9 +131,11 @@ void vgDestroyFont (VGFont font);
 ```
 
 
-### <a name="Querying_VGFont_Objects"></a> _11.4.3 Querying VGFont Objects_
+<a name="Querying_VGFont_Objects"></a>
+### _11.4.3 Querying VGFont Objects_
 
-#### <a name="VGFontParamType"></a> _VGFontParamType_
+<a name="VGFontParamType"></a>
+#### _VGFontParamType_
 
 Values from the `VGFontParamType` enumeration can be used as the `paramType` argument to **vgGetParameter** to query font features. All of the parameters defined by `VGFontParamType` are read-only. In the current specification, the single value `VG_FONT_NUM_GLYPHS` is defined.
 
@@ -136,7 +150,8 @@ Parameter                   | Datatype
 `VG_FONT_NUM_GLYPHS`        | `VGint`
 _Table 14: `VGFontParamType` Datatypes_
 
-#### <a name="Number_of_Glyphs"></a> _Number of Glyphs_
+<a name="Number_of_Glyphs"></a>
+#### _Number of Glyphs_
 
 The actual number of glyphs in a font (not the hinted capacity) is queried using the `VG_FONT_NUM_GLYPHS` parameter.
 
@@ -145,7 +160,8 @@ VGFont font;
 VGint numGlyphs = vgGetParameteri(font, VG_FONT_NUM_GLYPHS);
 ```
 
-### <a name="Adding_and_Modifying_Glyphs_in_VGFonts"></a> _11.4.4 Adding and Modifying Glyphs in VGFonts_
+<a name="Adding_and_Modifying_Glyphs_in_VGFonts"></a>
+### _11.4.4 Adding and Modifying Glyphs in VGFonts_
 
 `VGFonts` are collections of glyph data and may have glyphs represented using `VGPath` objects (for vector outline fonts) or `VGImage` objects (for bitmap fonts). `VGFont` may be created for a particular target text size, where the glyphs can be defined using either scaled and hinted outlines or embedded bitmaps. The **vgSetGlyphToPath**, **vgSetGlyphToImage**, and **vgClearGlyph** functions are provided to add and/or modify glyphs in a `VGFont`.
 
@@ -164,7 +180,8 @@ baselines of text.
 
 If a path object defines a scaled and hinted glyph outline, its `scale` parameter should be set to 1. Since the process of scaling and hinting of original glyph outlines is based on fitting the outline contour's control points to the pixel grid of the destination surface, applying affine transformations to a path (other than translations mapped to the pixel grid in surface coordinate system) may reduce glyph legibility and should be avoided as much as possible.
 
-#### <a name="vgSetGlyphToPath"></a> _vgSetGlyphToPath_
+<a name="vgSetGlyphToPath"></a>
+#### _vgSetGlyphToPath_
 
 **vgSetGlyphToPath** creates a new glyph and assigns the given `path` to a glyph associated with the `glyphIndex` in a font object. The `glyphOrigin` argument defines the coordinates of the glyph origin within the path, and the `escapement` parameter determines the advance width for this glyph (see Figure 24). Both `glyphOrigin` and `escapement` coordinates are defined in the same coordinate system as the path. For glyphs that have no visual representation (_e.g._, the <space> character), a value of `VG_INVALID_HANDLE` is used for path. The reference count for the path is incremented.
 
@@ -193,7 +210,8 @@ with the current context
 > – if the pointer to `glyphOrigin` or `escapement` is NULL or is not properly
 aligned
 
-#### <a name="vgSetGlyphToImage"></a> _vgSetGlyphToImage_
+<a name="vgSetGlyphToImage"></a>
+#### _vgSetGlyphToImage_
 
 **vgSetGlyphToImage** creates a new glyph and assigns the given `image` into a glyph associated with the `glyphIndex` in a font object. The `glyphOrigin` argument defines the coordinates of the glyph origin within the image, and the `escapement` parameter determines the advance width for this glyph (see Figure 24). Both `glyphOrigin` and `escapement` coordinates are defined in the image coordinate system. Applying transformations to an image (other than translations mapped to pixel grid in surface coordinate system) should be avoided as much as possible. For glyphs that have no visual representation (_e.g._, the <space> character), a value of `VG_INVALID_HANDLE` is used for image. The reference count for the `image` is incremented.
 
@@ -221,7 +239,8 @@ aligned
 >
 > – if `image` is currently a rendering target
 
-#### <a name="vgClearGlyph"></a> _vgClearGlyph_
+<a name="vgClearGlyph"></a>
+#### _vgClearGlyph_
 
 **vgClearGlyph** deletes the glyph defined by a `glyphIndex` parameter from a font. The reference count for the `VGPath` or `VGImage` object to which the glyph was previously set is decremented, and the object's resources are released if the count has fallen to 0.
 
@@ -238,7 +257,8 @@ void vgClearGlyph (VGFont font, VGuint glyphIndex);
 >
 > – if `glyphIndex` is not defined for the `font`
 
-### <a name="Font_Sharing"></a> _11.4.5 Font Sharing_
+<a name="Font_Sharing"></a>
+### _11.4.5 Font Sharing_
 
 Mobile platforms usually provide a limited number of resident fonts. These fonts are available for use by any application that is running on a device, and the same font could be used by more than one application utilizing OpenVG. The sharing of `VGFont` objects may increase the efficiency of using OpenVG memory and other resources.
 
@@ -255,11 +275,12 @@ in the `VGFont` object.
 
 In order to avoid additional complexity associated with character-to-glyph mapping, it is recommended that shared `VGFont` objects utilize character-toglyph mappings based on either Unicode or native OpenType/TrueType glyph indices., as the use of custom glyph indices requires maintaining a standalone character-to glyph mapping table for each `VGFont` object.
 
-## <a name="Text_Layout_and_Rendering"></a> _11.5 Text Layout and Rendering_
-
+<a name="Text_Layout_and_Rendering"></a>
+## _11.5 Text Layout and Rendering_
 OpenVG provides a dedicated glyph rendering API to assist applications in compositing, layout, and rendering of text. Implementations may apply specific optimizations for rendering of glyphs. For example, auto-hinting algorithms that attempt to “snap” glyph outlines to the pixel grid may be used to improve the quality of text rendering for `VGFont` objects that contain unhinted glyph outlines. Autohinting may not be appropriate for animated text or when precise glyph placement is required.
 
-#### <a name="vgDrawGlyph"></a> _vgDrawGlyph_
+<a name="vgDrawGlyph"></a>
+#### _vgDrawGlyph_
 
 **vgDrawGlyph** renders a glyph defined by the `glyphIndex` using the given `font` object. The user space position of the glyph (the point where the glyph origin will be placed) is determined by value of `VG_GLYPH_ORIGIN`.
 
@@ -287,7 +308,8 @@ void vgDrawGlyph(VGFont font, VGuint glyphIndex,
 > – if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode`
 enumeration, or 0
 
-#### <a name="vgDrawGlyphs"></a> _vgDrawGlyphs_
+<a name="vgDrawGlyphs"></a>
+#### _vgDrawGlyphs_
 
 **vgDrawGlyphs** renders a sequence of glyphs defined by the array pointed to by `glyphIndices` using the given `font` object. The values in the `adjustments_x` and `adjustments_y` arrays define positional adjustment values for each pair of glyphs defined by the `glyphIndices` array. The `glyphCount` parameter defines the number of elements in the `glyphIndices` and `adjustments_x` and `adjustments_y` arrays. The adjustment values defined in these arrays may represent kerning or other positional adjustments required for each pair of glyphs. If no adjustments for glyph positioning in a particular axis are required (all horizontal and/or vertical adjustments are zero), `NULL` pointers may be passed for either or both of `adjustment_x` and `adjustment_y`. The adjustments values should be defined in the same coordinate system as the font glyphs; if the glyphs are defined by path objects with path data scaled (_e.g._, by a factor of 1/units-per-EM), the values in the `adjustment_x` and `adjustment_y` arrays are scaled using the same scale factor.
 
@@ -314,21 +336,16 @@ void vgDrawGlyphs(VGFont font,
 > `VG_BAD_HANDLE_ERROR`
 >
 > – if font is not a valid font handle, or is not shared with the current context
-VG_ILLEGAL_ARGUMENT_ERROR
+> `VG_ILLEGAL_ARGUMENT_ERROR`
 >
 > – if glyphCount is zero or a negative value
 >
-> – if the pointer to the glyphIndices array is NULL or is not properly
-aligned
+> – if the pointer to the glyphIndices array is NULL or is not properly aligned
 >
-> – if a pointer to either of the adjustments_x or adjustments_y arrays are
-non-NULL and are not properly aligned
+> – if a pointer to either of the adjustments_x or adjustments_y arrays are non-NULL and are not properly aligned
 >
 > – if any of the glyphIndices has not been defined in a given font object
 >
-> – if paintModes is not a valid bitwise OR of values from the VGPaintMode
-enumeration, or 0
+> – if paintModes is not a valid bitwise OR of values from the VGPaintMode enumeration, or 0
 
 <div style="page-break-after: always;"> </div>
-
-

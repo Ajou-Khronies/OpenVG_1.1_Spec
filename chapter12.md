@@ -1,8 +1,11 @@
-# <a name="chapter12"></a><a name="Image Filters"></a> 12 Image Filters
+
+<a name="chapter12"></a><a name="Image Filters"></a>
+# 12 Image Filters
 
 Image filters allow images to be modified and/or combined using a variety of imaging operations. Operations are carried out using a bit depth greater than or equal to the largest bit depth of the supplied images. The lower-left corners of all source and destination images are aligned. The destination area to be written is the intersection of the source and destination image areas. The entire source image area is used as the filter input. The source and destination images involved in the filter operation must not overlap (i.e., have any pixels in common within any common ancestor image). Source and destination images may have a common ancestor as long as they occupy disjoint areas within that area.
 
-## <a name="Format_Normalization"></a> 12.1 _Format Normalization_
+<a name="Format_Normalization"></a>
+## 12.1 _Format Normalization_
 
 A series of steps are carried out on application-supplied source images in order to produce normalized source images for filtering. In practice, these normalizations may be combined with the filter operations themselves for efficiency.
 
@@ -20,9 +23,11 @@ The resulting pixel will be in `sRGBA`, `sRGBA_PRE`, `lRGBA`, or `lRGBA_PRE` for
 
 Finally, the filtered pixels are converted into the destination format using the normal pixel format conversion rules, as described in section 3.4. Premultiplied alpha values are divided out prior to color-space conversion, and restored afterwards if necessary. The destination channels specified by the `VG_FILTER_CHANNEL_MASK` parameter (see below) are written into the destination image.
 
-## <a name="Channel_Masks"></a> _12.2 Channel Masks_
+<a name="Channel_Masks"></a>
+## _12.2 Channel Masks_
 
-#### <a name="VGImageChannel"></a> _VGImageChannel_
+<a name="VGImageChannel"></a>
+#### _VGImageChannel_
 
 All image filter functions make use of the `VG_FILTER_CHANNEL_MASK` parameter that specifies which destination channels are to be written. The parameter is supplied as a bitwise OR of values from the `VGImageChannel` enumeration. If the destination pixel format is one of `VG_sL_8`, `VG_lL_8` or `VG_BW_1` pixel format, the parameter is ignored. If the destination pixel format does not contain an alpha channel, the `VG_ALPHA` bit is ignored. Bits other than those defined by the `VGImageChannel` enumeration are ignored.
 
@@ -43,11 +48,13 @@ typedef enum {
 } VGImageChannel;
 ```
 
-## <a name="Color_Combination"></a> _12.3 Color Combination_
+<a name="Color_Combination"></a>
+## _12.3 Color Combination_
 
 Color channel values may be combined using the **vgColorMatrix** function, which computes output colors as linear combinations of input colors.
 
-#### <a name="vgColorMatrix"></a> _vgColorMatrix_
+<a name="vgColorMatrix"></a>
+#### _vgColorMatrix_
 
 The **vgColorMatrix** function computes a linear combination of color and alpha values $(R_{src}, G_{src}, B_{src}, \alpha_{src})$ from the normalized source image `src` at each pixel:
 
@@ -68,7 +75,7 @@ $$
   m_{10} & m_{11} & m_{12} & m_{13} \newline
   m_{20} & m_{21} & m_{22} & m_{23} \newline
   m_{30} & m_{31} & m_{32} & m_{33}
-  \end{matrix}  
+  \end{matrix}
 \right] \cdot
 \left[
   \begin{matrix}
@@ -116,7 +123,7 @@ m_{33}\alpha_{src} +
 m_{34}
 $$
 
-The matrix entries are supplied in the `matrix` argument in the order ${ m_{00}, m_{10}, m_{20}, m_{30}, m_{01}, m_{11}, m_{21}, m_{31}, m_{02}, m_{12}, m_{22}, m_{32}, m_{03}, m_{13}, m_{23}, m_{33}, m_{04}, m_{14}, m_{24}, m_{34} }$.
+The matrix entries are supplied in the `matrix` argument in the order $\{ m_{00}, m_{10}, m_{20}, m_{30}, m_{01}, m_{11}, m_{21}, m_{31}, m_{02}, m_{12}, m_{22}, m_{32}, m_{03}, m_{13}, m_{23}, m_{33}, m_{04}, m_{14}, m_{24}, m_{34} \}$.
 
 ```c
 void vgColorMatrix(VGImage dst, VGImage src,
@@ -127,20 +134,19 @@ void vgColorMatrix(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-? if either `dst` or `src` is not a valid image handle, or is not shared with the
-current context
+> -  if either `dst` or `src` is not a valid image handle, or is not shared with the current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either dst or src is currently a rendering target
+> - if either dst or src is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `matrix` is NULL
+> - if `matrix` is NULL
 >
-> ? if `matrix` is not properly aligned
+> - if `matrix` is not properly aligned
 
 ## <a name="Convolution"></a> _12.4 Convolution_
 
@@ -200,26 +206,26 @@ void vgConvolve(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> - if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
 > `VG_MAX_KERNEL_SIZE`
 >
-> ? if `kernel` is NULL
+> - if `kernel` is NULL
 >
-> ? if `kernel` is not properly aligned
+> - if `kernel` is not properly aligned
 >
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
+> - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
 #### <a name="vgSeparableConvolve"></a> _vgSeparableConvolve_
@@ -395,5 +401,3 @@ enumeration
 > ? if `lookupTable` is not properly aligned
 
 <div style="page-break-after: always;"></div>
-
-

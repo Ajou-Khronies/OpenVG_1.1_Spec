@@ -1,16 +1,21 @@
-# 10 Images<a name="chapter10"></a><a name="Images"></a>
+
+<a name="chapter10"></a><a name="Images"></a>
+# 10 Images
 
 Images are rectangular collections of pixels. Image data may be inserted or extracted in avariety of formats with varying bit depths, color spaces, and alpha channel types. Theactual storage format of an image is implementation-dependent, and may be optimized for a given device, but must allow pixels to be read and written loss lessly. Images may be drawn to a drawing surface, used to define paint patterns, or operated on directly by image filter operations.
 
-## _10.1 Image Coordinate Systems_<a name="Image_Coordinate_Systems"></a>
+<a name="Image_Coordinate_Systems"></a>
+## _10.1 Image Coordinate Systems_
 
 An image defines a coordinate system in which pixels are indexed using integer coordinates, with each integer corresponding to a distinct pixel. The lower-left pixel hasa coordinate of $(0, 0)$, the x coordinate increases horizontally from left to right, and the y coordinate increases vertically from bottom to top. Note that this orientation is consistent with the other coordinate systems used in the OpenVG API, but differs from the top-tobottom orientation used by many other imaging systems.
 
 The "energy" of a pixel is located at the pixel center; that is, the pixel with coordinate $(x,y)$ has its energy at the point $(x + ½, y + ½)$. The color at a point not located at a pixel center may be defined by applying a suitable filter to the colors defined at a set of nearby pixel centers.
 
-## _10.2 Image Formats_<a name="Image_Formats"></a>
+<a name="Image_Formats"></a>
+## _10.2 Image Formats_
 
-#### _VGImageFormat_<a name="VGImageFormat"></a>
+<a name="VGImageFormat"></a>
+#### _VGImageFormat_
 The `VGImageFormat` enumeration defines the set of supported pixel formats and colorspaces for images:
 ```c
 typedef enum {
@@ -77,6 +82,7 @@ Table 12 lists the size of a single pixel for each image format, in terms of byt
 
 Formats having linear-light coding (`VG_lRGBX_8888`, `VG_lRGBA_8888`,`VG_lRGBA_8888_PRE`, and `VG_lL8`) are liable to exhibit banding (or contouring)artifacts when viewed with a contrast ratio greater than about 10:1 [POYN03] and are intended mainly for in putting existing linearly-coded imagery. For high-quality imaging, consider using one of the non-linear, perceptually uniform image formats such as `VG_sRGBX_8888`, `VG_sRGBA_8888`, `VG_sRGBA_8888_PRE`, and `VG_sL_8`.
 
+<a name="table11"></a>
 |Symbol|Interperetation|
 |-----|-----|
 |A|Alpha channel|
@@ -89,7 +95,9 @@ Formats having linear-light coding (`VG_lRGBX_8888`, `VG_lRGBA_8888`,`VG_lRGBA_8
 |l|Linear color space|
 |s|Non-linear (sRGB) color space|
 |PRE|Alpha values are premultiplied|
+_Table 11: Symbols Used in Image Format Names_
 
+<a name="table12"></a>
 |Format|Bytes Per Pixel|Bits Per Pixel|
 |-----|-----|----|
 |VG_sRGBX_8888|4|32|
@@ -101,19 +109,19 @@ Formats having linear-light coding (`VG_lRGBX_8888`, `VG_lRGBA_8888`,`VG_lRGBA_8
 |VG_sL_8|1|8|
 |VG_lRGBX_8888|4|32|
 |VG_lRGBA_8888|4|32|
-
-|Format|Bytes Per Pixel|Bits Per Pixel|
-|-----|-----|-----|
 |VG_lRGBA_8888_PRE|4|32|
 |VG_lL_8|1|8|
 |VG_A_1|n/a|1|
 |VG_A_4|n/a|4|
 |VG_A_8|1|8|
 |VG_BW_1|n/a|1|
+_Table 12: Image Format Pixel Sizes_
 
-## _10.3 Creating and Destroying Images_<a name="Creating_and_Destroying_Images"></a>
+<a name="Creating_and_Destroying_Images"></a>
+## _10.3 Creating and Destroying Images_
 
-#### _VGImage_<a name="VGImage"></a>
+<a name="VGImage"></a>
+#### _VGImage_
 
 Images are accessed using opaque handles of type VGImage.
 
@@ -121,7 +129,8 @@ Images are accessed using opaque handles of type VGImage.
 typedef VGHandle VGImage;
 ```
 
-#### _VGImageQuality_<a name="VGImageQuality"></a>
+<a name="VGImageQuality"></a>
+#### _VGImageQuality_
 
 The `VGImageQuality` enumeration defines varying levels of resampling quality to be used when drawing images.
 
@@ -142,7 +151,8 @@ VGImageQuality quality;
 vgSeti(VG_IMAGE_QUALITY, quality);
 ```
 
-#### *VG_MAX_IMAGE_WIDTH*<a name="VG_MAX_IMAGE_WIDTH"></a>
+<a name="VG_MAX_IMAGE_WIDTH"></a>
+#### *VG_MAX_IMAGE_WIDTH*
 
 The `VG_MAX_IMAGE_WIDTH` read-only parameter contains the largest legal valueof the width parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_WIDTH` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
 
@@ -150,7 +160,8 @@ The `VG_MAX_IMAGE_WIDTH` read-only parameter contains the largest legal valueof 
 VGint imageMaxWidth = vgGeti(VG_MAX_IMAGE_WIDTH);
 ```
 
-#### *VG_MAX_IMAGE_HEIGHT*<a name="VG_MAX_IMAGE_HEIGHT"></a>
+<a name="VG_MAX_IMAGE_HEIGHT"></a>
+#### *VG_MAX_IMAGE_HEIGHT*
 
 The `VG_MAX_IMAGE_HEIGHT` read-only parameter contains the largest legal valueof the height parameter to the vgCreateImage and vgCreateMask functions. Allimplementations must define `VG_MAX_IMAGE_HEIGHT` to be an integer no smallerthan 256. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
 
@@ -158,7 +169,8 @@ The `VG_MAX_IMAGE_HEIGHT` read-only parameter contains the largest legal valueof
 VGint imageMaxHeight = vgGeti(VG_MAX_IMAGE_HEIGHT);
 ````
 
-#### *VG_MAX_IMAGE_PIXELS*<a name="VG_MAX_IMAGE_PIXELS"></a>
+<a name="VG_MAX_IMAGE_PIXELS"></a>
+#### *VG_MAX_IMAGE_PIXELS*
 
 The `VG_MAX_IMAGE_PIXELS` read-only parameter contains the largest legal value of the product of the width and height parameters to the vgCreateImage andvgCreateMask functions. All implementations must define `VG_MAX_IMAGE_PIXELS` to be an integer no smaller than 65536. If there is no implementation-defined limit, avalue of VG_MAXINT may be returned. The value may be retrieved by calling vgGeti:
 
@@ -166,7 +178,8 @@ The `VG_MAX_IMAGE_PIXELS` read-only parameter contains the largest legal value o
 VGint imageMaxPixels = vgGeti(VG_MAX_IMAGE_PIXELS);
 ```
 
-#### *VG_MAX_IMAGE_BYTES*<a name="VG_MAX_IMAGE_BYTES"></a>
+<a name="VG_MAX_IMAGE_BYTES"></a>
+#### *VG_MAX_IMAGE_BYTES*
 
 The `VG_MAX_IMAGE_BYTES` read-only parameter contains the largest number of bytes that may make up the image data passed to the vgCreateImage function. All implementations must define `VG_MAX_IMAGE_BYTES` to be an integer no smaller than65536. If there is no implementation-defined limit, a value of `VG_MAXINT` may bereturned. The value may be retrieved by calling vgGeti:
 
@@ -174,7 +187,8 @@ The `VG_MAX_IMAGE_BYTES` read-only parameter contains the largest number of byte
 VGint imageMaxBytes = vgGeti(VG_MAX_IMAGE_BYTES);
 ```
 
-#### *vgCreateImage*<a name="vgCreateImage"></a>
+<a name="vgCreateImage"></a>
+#### *vgCreateImage*
 
 vgCreateImage creates an image with the given width, height, and pixel formatand returns a `VGImage` handle to it. If an error occurs, `VG_INVALID_HANDLE` is returned. All color and alpha channel values are initially set to zero. The formatparameter must contain a value from the `VGImageFormat` enumeration.
 
@@ -201,7 +215,8 @@ VGImage vgCreateImage(VGImageFormat format,
 > `VG_MAX_IMAGE_BYTES`
 > * if `allowedQuality` is not a bitwise OR of values from the `VGImageQuality` enumeration
 
-#### *vgDestroyImage*<a name="vgDestoryImage"></a>
+<a name="vgDestoryImage"></a>
+#### *vgDestroyImage*
 
 The resources associated with an image may be deallocated by callin `vgDestroyImage`. Following the call, the image handle is no longer valid in anycontext that shared it. If the image is currently in use as a rendering target, is the ancestor of another image (see `vgChildImage`), is set as a paint pattern image ona VGPaint object, or is set as a glyph an a VGFont object, its definition remainsavailable to those consumers as long as they remain valid, but the handle may nolonger be used. When those uses cease, the image’s resources will automatically be deallocated.
 
@@ -214,9 +229,11 @@ void vgDestroyImage(VGImage image);
 > `VG_BAD_HANDLE_ERROR`
 > * if image is not a valid image handle, or is not shared with the current context
 
-## *10.4 Querying Images*<a name="Querying_Images"></a>
+<a name="Querying_Images"></a>
+## *10.4 Querying Images*
 
-#### *VGImageParamType*<a name="VGImageParamType"></a>
+<a name="VGImageParamType"></a>
+#### *VGImageParamType*
 
 Values from the `VGImageParamType` enumeration may be used as the paramType argument to `vgGetParameter` to query various features of an image. All of the parameters defined by `VGImageParamType` have integer values and are read-only.
 
@@ -228,7 +245,8 @@ typedef enum {
 } VGImageParamType;
 ```
 
-#### *Image Format*<a name="Image_Formats"></a>
+<a name="Image_Formats"></a>
+#### *Image Format*
 
 The value of the format parameter that was used to define the image may be queriedusing the VG_IMAGE_FORMAT parameter. The returned integral value should becast to the VGImageFormat enumeration:
 
@@ -238,7 +256,8 @@ VGImageFormat imageFormat =
   (VGImageFormat)vgGetParameteri(image, VG_IMAGE_FORMAT);
 ```
 
-#### *Image Width*<a name="Image_Width"></a>
+<a name="Image_Width"></a>
+#### *Image Width*
 
 The value of the width parameter that was used to define the image may be queriedusing the `VG_IMAGE_WIDTH` parameter:
 
@@ -247,7 +266,8 @@ VGImage image;
 VGint imageWidth = vgGetParameteri(image, VG_IMAGE_WIDTH);
 ```
 
-#### *Image Height*<a name="Image_Height"></a>
+<a name="Image_Height"></a>
+#### *Image Height*
 
 The value of the height parameter that was used to define the image may be queriedusing the `VG_IMAGE_HEIGHT` parameter:
 
@@ -256,15 +276,17 @@ VGImage image;
 VGint imageHeight = vgGetParameteri(image, VG_IMAGE_HEIGHT);
 ```
 
-## *10.5 Reading and Writing Image Pixels*<a name="Reading_and_Writing_Image_Pixels"></a>
+<a name="Reading_and_Writing_Image_Pixels"></a>
+## *10.5 Reading and Writing Image Pixels*
 
-#### *vgClearImage*<a name="vgClearImage"></a>
+<a name="vgClearImage"></a>
+#### *vgClearImage*
 
 The `vgClearImage` function fills a given rectangle of an image with the color specifiedby the `VG_CLEAR_COLOR` parameter. The rectangle to be cleared is given by x, y,width, and height, which must define a positive region. The rectangle is clipped to the bounds of the image.
 
 ```c
 void vgClearImage(VGImage image,
-VGint x, VGint y, VGint width, VGint height)
+		VGint x, VGint y, VGint width, VGint height)
 ```
 
 > **_ERRORS_**
@@ -279,7 +301,8 @@ VGint x, VGint y, VGint width, VGint height)
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
-#### *vgImageSubData*<a name="vgImageSubData"></a>
+<a name="vgImageSubData"></a>
+#### *vgImageSubData*
 
 The `vgImageSubData` function reads pixel values from memory, performs format conversion if necessary, and stores the resulting pixels into a rectangular portion of animage.
 
@@ -319,7 +342,8 @@ void vgImageSubData(VGImage image,
 > * if data is NULL
 > * if data is not properly aligned
 
-#### *vgGetImageSubData*<a name="vgGetImageSubData"></a>
+<a name="vgGetImageSubData"></a>
+#### *vgGetImageSubData*
 
 The `vgGetImageSubData` function reads pixel values from a rectangular portion of animage, performs format conversion if necessary, and stores the resulting pixels intomemory.
 
@@ -350,14 +374,16 @@ void vgGetImageSubData(VGImage image,
 > * if data is NULL
 > * if data is not properly aligned
 
-## *10.6 Child Images*<a name="Child_Images"></a>
+<a name="Child_Images"></a>
+## *10.6 Child Images*
 A _child image_ is an image that shares physical storage with a portion of an existing image, known as its _parent_. An image may have any number of children, but each image has only one parent (that may be itself). An _ancestor_ of an image is defined as the image itself, its parent, its parent's parent, etc. By definition, a pair of images are said to be _related_ if and only if they have a common ancestor. Specifically, two images that are children of a common parent are considered to be related even if their respective pixel areas within the parent do not overlap. Changes to an image are immediately reflected in all other images to which it is related.
 
 A child image remains valid even following a call to **vgDestroyImage** on one of its ancestors (other than itself). When the last image of a set of related images is destroyed,the entire storage will be reclaimed. Implementations may use a reference count todetermine when image storage may be reclaimed.
 
 A child image may not be used as a rendering target. A parent image may not be used asa rendering target until all the child images derived from it have been destroyed.
 
-#### _vgChildImage_<a name="vgChildImage"></a>
+<a name="vgChildImage"></a>
+#### _vgChildImage_
 The **vgChildImage** function returns a new `VGImage` handle that refers to a portion of the `parent` image. The region is given by the intersection of the bounds of the parent image with the rectangle beginning at pixel (`x, y`) with dimensions `width` and `height`, which must define a positive region contained entirely within `parent`.
 ```C
 VGImage vgChildImage(VGImage parent,
@@ -381,8 +407,8 @@ VGImage vgChildImage(VGImage parent,
 > * if `x + width` is greater than the parent width
 > * if `y + height` is greater than the parent height
 
-
-#### _vgGetParent_<a name="vgGetParent"></a>
+<a name="vgGetParent"></a>
+#### _vgGetParent_
 The **vgGetParent** function returns the closest valid ancestor (_i.e_., one that has not been the target of a **vgDestroyImage** call) of the given `image`. If `image` has no ancestors, `image` is returned. The following pseudocode sequence illustrates this behavior.
 ```c
 VGImage A = vgCreateImage(...); // Create a new image A
@@ -408,9 +434,11 @@ VGImage vgGetParent(VGImage image)
 > `VG_IMAGE_IN_USE_ERROR`
 > * if `image` is currently a rendering target
 
-## *10.7 Copying Pixels Between Images*<a name="Copying_Pixels_Between_Images"></a>
+<a name="Copying_Pixels_Between_Images"></a>
+## *10.7 Copying Pixels Between Images*
 
-#### *vgCopyImage*<a name="vgCopyImage"></a>
+<a name="vgCopyImage"></a>
+#### *vgCopyImage*
 
 Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
@@ -435,11 +463,13 @@ void vgCopyImage(VGImage dst, VGint dx, VGint dy,
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
-## *10.8 Drawing Images to the Drawing Surface*<a name="Drawing_Images_to_the_Drawing_Surface"></a>
+<a name="Drawing_Images_to_the_Drawing_Surface"></a>
+## *10.8 Drawing Images to the Drawing Surface*
 
 Images may be drawn onto a drawing surface. An affine or projective transformationmay be applied while drawing. The current image and blending modes are used tocontrol how image pixels are combined with the current paint and blended into thedestination. Conversion between the image and destination pixel formats is applied automatically.
 
-#### *VGImageMode*<a name="VGImageMode"></a>
+<a name="VGImageMode"></a>
+#### *VGImageMode*
 
 The `VGImageMode` enumeration is used to select between several styles of imagedrawing, described in the vgDrawImage section below.
 
@@ -458,7 +488,8 @@ VGImageMode drawImageMode;
 vgSeti(VG_IMAGE_MODE, drawImageMode);
 ```
 
-#### *vgDrawImage*<a name="vgDrawImage"></a>
+<a name="vgDrawImage"></a>
+#### *vgDrawImage*
 
 An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + 1/2, py + 1/2) is mapped to the point (Ti)(px + 1/2, py + 1/2). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
 
@@ -488,11 +519,13 @@ void vgDrawImage(VGImage image)
 
 The effects of `vgDrawImage` depend on the current setting of the `VG_IMAGE_MODE` parameter:
 
-#### *VG_DRAW_IMAGE_NORMAL*<a name="VG_DRAW_IMAGE_NORMAL"></a>
+<a name="VG_DRAW_IMAGE_NORMAL"></a>
+#### *VG_DRAW_IMAGE_NORMAL*
 
 When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_NORMAL`, theimage is drawn. If the image contains an alpha channel, the alpha values associated witheach pixel are used as the source alpha values. Otherwise, the source alpha is taken to be1 at each pixel. No paint generation takes place. When a projective transformation isused, this mode is used regardless of the setting of the `VG_IMAGE_MODE` parameter.
 
-#### *VG_DRAW_IMAGE_MULTIPLY*<a name="VG_DRAW_IMAGE_MULTIPLY"></a>
+<a name="VG_DRAW_IMAGE_MULTIPLY"></a>
+#### *VG_DRAW_IMAGE_MULTIPLY*
 
 When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_MULTIPLY`, theimage being drawn is multiplied by the paint color and alpha values. This allows theimage to be drawn translucently (by setting the paint color to R=G=B=1 and A=opacity),or to be modulated in other ways. For example, a gradient paint could be used to create afading effect, or a pattern paint could be used to vary the opacity on a pixel-by-pixelbasis. If the paint color is opaque white (R=G=B=A=1) everywhere, the results areequivalent to those of `VG_DRAW_IMAGE_NORMAL`.
 
@@ -500,7 +533,8 @@ Paint generation (using the `VGPaint` object defined for the `VG_FILL_PATH` pain
 
 Note that the use of a source image having a linear pixel format (e.g., lRGB_888) will result in a brightened output due to the fact that the paint values are not converted froms RGB to linear, yet the results are treated as linear. Therefore the use of a linear sourceimage in this mode is recommended only for special effects.
 
-#### *VG_DRAW_IMAGE_STENCIL*<a name="VG_DRAW_IMAGE_STENCIL"></a>
+<a name="VG_DRAW_IMAGE_STENCIL"></a>
+#### *VG_DRAW_IMAGE_STENCIL*
 
 When the `VG_IMAGE_MODE` parameter is set to `VG_DRAW_IMAGE_STENCIL`, theimage being drawn acts as a stencil through which the current paint is applied. Thisallows an image to take the place of a geometric path definition in some cases, such asdrawing text glyphs. A special set of blending equations allows the red, green, and bluechannels to be blended using distinct alpha values taken from the image. This featureallows stencils to take advantage of sub-pixel effects on LCD displays.
 
@@ -542,7 +576,8 @@ $$$$
 \alpha_{dst} \leftarrow \alpha_{tmp}
 $$
 
-## *10.9 Reading and Writing Drawing Surface Pixels*<a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
+<a name="Reading_and_Writing_Drawing_Surface_Pixels"></a>
+## *10.9 Reading and Writing Drawing Surface Pixels*
 
 Several functions are provided to read and write pixels on the drawing surface directly,without applying transformations, masking, or blending. Table 13 below summarizes the `OpenVG` functions that copy between sources and destinations in application memory,`VGImage` handles, and the drawing surface.
 
@@ -550,6 +585,7 @@ When the source of a pixel copy operation is multisampled, and the destination i
 
 If the destination of a pixel copy operation is multisampled, and the source is eithersingle-sampled or multisampled with a different sample layout, the source value is eithercopied to each sample within the destination pixel, or the implementation may performdithering, i.e., write different values to each destination sample in order to ensure that theaverage value within the destination is as close as possible to the incoming value.
 
+<a name="table13"> </a>
 |Source/Dest|Memory|VGImage|Surface|
 |---|---|---|---|
 |Memory|n/a|vgImageSubData|vgWritePixels|
@@ -557,9 +593,11 @@ If the destination of a pixel copy operation is multisampled, and the source is 
 |Surface|vgReadPixels|vgGetPixels|vgCopyPixels|
 Table 13: Pixel Copy Functions
 
-### *10.9.1 Writing Drawing Surface Pixels*<a name="Writing_Drawing_Surface_Pixels"></a>
+<a name="Writing_Drawing_Surface_Pixels"></a>
+### *10.9.1 Writing Drawing Surface Pixels*
 
-#### *vgSetPixels*<a name="vgSetPixels"></a>
+<a name="vgSetPixels"></a>
+#### *vgSetPixels*
 
 The `vgSetPixels` function copies pixel data from the image src onto the drawingsurface. The image pixel (sx + i, sy + j) is copied to the drawing surface pixel (dx + i,dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source lies outside ofthe bounds of src or whose destination lies outside the bounds of the drawing surfaceare ignored. Pixel format conversion is applied as needed. Scissoring takes placenormally. Transformations, masking, and blending are not applied.
 
@@ -579,7 +617,8 @@ void vgSetPixels(VGint dx, VGint dy,
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
-#### *vgWritePixels*<a name="vgWritePixels"></a>
+<a name="vgWritePixels"></a>
+#### *vgWritePixels*
 
 The vgWritePixels function allows pixel data to be copied to the drawing surfacewithout the creation of a VGImage object. The pixel values to be drawn are taken fromthe data pointer at the time of the vgWritePixels call, so future changes to the data haveno effect. The effects of changes to the data by another thread at the time of the call tovgWritePixels are undefined.
 
@@ -633,16 +672,17 @@ vgSetPixels(dx, dy, image, width, height);
 vgDestroyImage(image);
 ```
 
-### *10.9.2 Reading Drawing Surface Pixels*<a name="Reading_Drawing_Surface_Pixels"></a>
+<a name="Reading_Drawing_Surface_Pixels"></a>
+### *10.9.2 Reading Drawing Surface Pixels*
 
-#### *vgGetPixels*<a name="vgGetPixels"></a>
+<a name="vgGetPixels"></a>
+#### *vgGetPixels*
 
 The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
 
 ```c
 void vgGetPixels(VGImage dst, VGint dx, VGint dy,
-VGint sx, VGint sy,
-VGint width, VGint height)
+		VGint sx, VGint sy, VGint width, VGint height)
 ```
 
 > **_ERRORS_**
@@ -656,20 +696,20 @@ VGint width, VGint height)
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
-#### *vgReadPixels*<a name="vgREadPixels"></a>
+<a name="vgREadPixels"></a>
+#### *vgReadPixels*
 
 The `vgReadPixels` function allows pixel data to be copied from the drawing surface without the creation of a `VGImage` object.
 
-Pixel values are written starting at the address given by the pointer data; adjacentscanlines are separated by dataStride bytes. Negative or zero values ofdataStride are allowed. The region to be read is given by x, y, width, andheight, which must define a positive region.
+Pixel values are written starting at the address given by the pointer data; adjacent scanlines are separated by dataStride bytes. Negative or zero values of `dataStride` are allowed. The region to be read is given by `x, y, width`, and h`eight`, which must define a positive region.
 
-Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointeralignment and the pixel layout in memory is as described in the vgImageSubDatasection.
+Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointeralignment and the pixel layout in memory is as described in the vgImageSubData section.
 
 Pixels whose source lies outside of the bounds of the drawing surface areignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
 
 ```c
 void vgReadPixels(void * data, VGint dataStride,
-    VGImageFormat dataFormat,
-    VGint sx, VGint sy,
+    VGImageFormat dataFormat, VGint sx, VGint sy,
     VGint width, VGint height)
 ```
 
@@ -710,13 +750,15 @@ vgGetImageSubData(image, data, dataStride, dataFormat, width, height);
 vgDestroyImage(image);
 ```
 
-## *10.10 Copying Portions of the Drawing Surface*<a name="Copying_Portions_of_the_Drawing_Surface"></a>
+<a name="Copying_Portions_of_the_Drawing_Surface"></a>
+## *10.10 Copying Portions of the Drawing Surface*
 
-#### *vgCopyPixels*<a name="vgCopyPixels"></a>
+<a name="vgCopyPixels"></a>
+#### *vgCopyPixels*
 
 The `vgCopyPixels` function copies pixels from one region of the drawing surface toanother. Copies between overlapping regions are allowed and always produce consistentresults identical to copying the entire source region to a scratch buffer followed bycopying the scratch buffer into the destination region.
 
-The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 <= i < width$ and $0 <= j < height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
+The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ for $0 \le i \lt width$ and $0 \le j \lt height$. Pixels whose source or destination lies outside of thebounds of the drawing surface are ignored. Transformations, masking, and blending arenot applied. Scissoring is applied to the destination, but does not affect the reading of pixels.
 
 ```c
 void vgCopyPixels(VGint dx, VGint dy,
@@ -730,5 +772,3 @@ void vgCopyPixels(VGint dx, VGint dy,
 > * if width or height is less than or equal to 0
 
 <div style="page-break-after: always;"> </div>
-
-

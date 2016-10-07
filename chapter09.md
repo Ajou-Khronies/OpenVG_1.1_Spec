@@ -1,31 +1,38 @@
-# 9 Paint<a name="chapter09"></a> <a name="Paint"></a>
+
+<a name="chapter09"></a> <a name="Paint"></a>
+# 9 Paint
 Paint defines a color and an alpha value for each pixel being drawn. _Color paint_ defines a constant color for all pixels; _gradient paint_ defines a linear or radial pattern of smoothly varying colors; and _pattern paint_ defines a possibly repeating rectangular pattern of colors based on a source image. It is possible to define new types of paint as extensions.
 
 Paint is defined in its own coordinate system, which is transformed into user coordinates by means of the fill-paint-to-user and stroke-paint-to-user transformations (set using the `VG_MATRIX_FILL_PAINT_TO_USER` and `VG_MATRIX_STROKE_PAINT_TO_USER` matrix modes) depending on whether the current geometry is being filled or stroked.
 
-Given a (fill or stroke) paint-to-user transformation $T_p$ and user-to-surface transformation $T_u$, the paint color and alpha of a pixel to be drawn with surface coordinates $\left( x,y \right)$ is defined by mapping its center point $\left( x+½,y+½\right)$ through the inverse transformation ${ \left( T_u\circ T_p \right)  }^{ -1 }$, resulting in a sample point in the paint coordinate space. This transformation must be evaluated with sufficient accuracy to ensure a deviation from the ideal of no more than 1/8 of a pixel along either axis. The paint value nearest that point may be used (point sampling), or paint values from multiple points surrounding the central sample point may be combined to produce an interpolated paint value. Paint color values are processed in premultiplied alpha format during interpolation. The user-to-surface transformation $T_u$ is taken from the path-user-to-surface transformation when fulfilling a **vgDrawPath** call, from the image-user-to-surface transformation when fulfilling a **vgDrawImage** call, or from the glyph-user-to-surface transformation when fulfilling a **vgDrawGlyph** or **vgDrawGlyphs** call.
+Given a (fill or stroke) paint-to-user transformation $T_p$ and user-to-surface transformation $T_u$, the paint color and alpha of a pixel to be drawn with surface coordinates $\left( x,y \right)$ is defined by mapping its center point $\left( x+1/2,y+1/2\right)$ through the inverse transformation ${ \left( T_u\circ T_p \right)  }^{ -1 }$, resulting in a sample point in the paint coordinate space. This transformation must be evaluated with sufficient accuracy to ensure a deviation from the ideal of no more than 1/8 of a pixel along either axis. The paint value nearest that point may be used (point sampling), or paint values from multiple points surrounding the central sample point may be combined to produce an interpolated paint value. Paint color values are processed in premultiplied alpha format during interpolation. The user-to-surface transformation $T_u$ is taken from the path-user-to-surface transformation when fulfilling a **vgDrawPath** call, from the image-user-to-surface transformation when fulfilling a **vgDrawImage** call, or from the glyph-user-to-surface transformation when fulfilling a **vgDrawGlyph** or **vgDrawGlyphs** call.
 
 If the inverse transformation cannot be computed due to a (near-)singularity, no drawing occurs.
 
-## _9.1 Paint Definitions_<a name="Paint_Definitions"></a>
+<a name="Paint_Definitions"></a>
+## _9.1 Paint Definitions_
 The OpenVG context stores two paint definitions at a time, one to be applied to stroked shapes and one for filled shapes. This allows the interior of a path to be filled using one type of paint and its outline to be stroked with another kind of paint in a single **vgDrawPath** operation. Initially, default values are used.
 
-#### _VGPaint_<a name="VGPaint"></a>
+<a name="VGPaint"></a>
+#### _VGPaint_
 `VGPaint` represents an opaque handle to a paint object. A `VGPaint` object is _live_; changes to a `VGPaint` object (using `vgSetParameter`, or by altering an attached pattern image) attached to a context will immediately affect drawing calls on that context. If a `VGPaint` object is accessed from multiple threads, the application must ensure (using **vgFinish** along with application-level synchronization primitives) that the paint definition is not altered from one context while another context may still be using it for drawing.
 ```c
 typedef VGHandle VGPaint;
 ```
 
-### _9.1.1 Creating and Destroying Paint Objects_<a name="Creating_and_Destroying_Paint_Objects"></a>
+<a name="Creating_and_Destroying_Paint_Objects"></a>
+### _9.1.1 Creating and Destroying Paint Objects_
 
-#### _vgCreatePaint_<a name="vgCreatePaint"></a>
+<a name="vgCreatePaint"></a>
+#### _vgCreatePaint_
 **vgCreatePaint** creates a new paint object that is initialized to a set of default values and returns a `VGPaint` handle to it. If insufficient memory is available to allocate a
 new object, `VG_INVALID_HANDLE` is returned.
 ```c
 VGPaint vgCreatePaint(void)
 ```
 
-#### _vgDestroyPaint_<a name="vgDestroyPaint"></a>
+<a name="vgDestroyPaint"></a>
+#### _vgDestroyPaint_
 The resources associated with a paint object may be deallocated by calling **vgDestroyPaint**. Following the call, the `paint` handle is no longer valid in any of the contexts that shared it. If the paint object is currently active in a drawing context, the context continues to access it until it is replaced or the context is destroyed.
 ```c
 void vgDestroyPaint(VGPaint paint)
@@ -36,9 +43,11 @@ void vgDestroyPaint(VGPaint paint)
 > `VG_BAD_HANDLE_ERROR`
 > * if `paint` is not a valid paint handle, or is not shared with the current context
 
-### _9.1.2 Setting the Current Paint_<a name="Setting_the_Current_Paint"></a>
+<a name="Setting_the_Current_Paint"></a>
+### _9.1.2 Setting the Current Paint_
 
-#### _vgSetPaint_<a name="vgSetPaint"></a>
+<a name="vgSetPaint"></a>
+#### _vgSetPaint_
 Paint definitions are set on the current context using the **vgSetPaint** function. The `paintModes` argument is a bitwise OR of values from the `VGPaintMode` enumeration, determining whether the paint object is to be used for filling (`VG_FILL_PATH`), stroking (`VG_STROKE_PATH`), or both (`VG_FILL_PATH` | `VG_STROKE_PATH`). The current `paint` replaces the previously set paint object, if any, for the given paint mode or modes. If `paint` is equal to `VG_INVALID_HANDLE`, the previously set paint object for the given mode (if present) is removed and the paint settings are restored to their default values.
 ```c
 void vgSetPaint(VGPaint paint, VGbitfield paintModes)
@@ -52,7 +61,8 @@ void vgSetPaint(VGPaint paint, VGbitfield paintModes)
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >* if `paintModes` is not a valid bitwise OR of values from the `VGPaintMode` enumeration
 
-#### _vgGetPaint_<a name="vgGetPaint"></a>
+<a name="vgGetPaint"></a>
+#### _vgGetPaint_
 The **vgGetPaint** function returns the paint object currently set for the given `paintMode`, or `VG_INVALID_HANDLE` if an error occurs or if no paint object is set (_i.e_., the default paint is present) on the given context with the given `paintMode`.
 ```c
 VGPaint vgGetPaint(VGPaintMode paintMode)
@@ -63,10 +73,12 @@ VGPaint vgGetPaint(VGPaintMode paintMode)
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if `paintMode` is not a valid value from the `VGPaintMode` enumeration
 
-### _9.1.3 Setting Paint Parameters_<a name="Setting_Paint_Parameters"></a>
+<a name="Setting_Paint_Parameters"></a>
+### _9.1.3 Setting Paint Parameters_
 Paint functionality is controlled by a number of paint parameters that are stored in each paint object.
 
-#### _VGPaintParamType_<a name="VGPaintParamType"></a>
+<a name="VGPaintParamType"></a>
+#### _VGPaintParamType_
 Values from the `VGPaintParamType` enumeration may be used as the `paramType` argument to **vgSetParameter** and **vgGetParameter** to set and query various features of a paint object:
 
 ```c
@@ -103,7 +115,8 @@ The default values that are used when no paint object is present (_i.e_., in a n
 | `VG_PAINT_PATTERN_TILING_MODE` | `VGTilingMode` | `VG_TILE_FILL` |
 _Table 10: VGPaintParamType Defaults_
 
-#### _VGPaintType_<a name="VGPaintType"></a>
+<a name="VGPaintType"></a>
+#### _VGPaintType_
 The `VGPaintType` enumeration is used to supply values for the `VG_PAINT_TYPE` paint parameter to determine the type of paint to be applied.
 ```c
 typedef enum {
@@ -114,10 +127,12 @@ typedef enum {
 } VGPaintType;
 ```
 
-## _9.2 Color Paint_<a name="Color_Paint"></a>
+<a name="Color_Paint"></a>
+## _9.2 Color Paint_
 Color paint uses a fixed color and alpha for all pixels. An alpha value of 1 produces a fully opaque color. Colors are specified in non-premultiplied sRGBA format.
 
-#### _Setting Color Paint Parameters_<a name="Setting_Color_Paint_Parameters"></a>
+<a name="Setting_Color_Paint_Parameters"></a>
+#### _Setting Color Paint Parameters_
 To enable color paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_COLOR`.
 
 The **vgSetParameterfv** function allows the color and alpha values to be set using the `VG_PAINT_COLOR` paint parameter to values between 0 and 1. Values outside this range are interpreted as the nearest endpoint of the range.
@@ -140,8 +155,11 @@ vgSetParameterfv(myFillPaint, VG_PAINT_COLOR, 4, fill_RGBA);
 /* Stroke with color paint */
 vgSetParameteri(myStrokePaint, VG_PAINT_TYPE, VG_PAINT_TYPE_COLOR);
 vgSetParameterfv(myStrokePaint, VG_PAINT_COLOR, 4, stroke_RGBA);
+
 ```
-#### _vgSetColor_<a name="vgSetColor"></a>
+
+<a name="vgSetColor"></a>
+#### _vgSetColor_
 As a shorthand, the **vgSetColor** function allows the `VG_PAINT_COLOR` parameter of a given `paint` object to be set using a 32-bit non-premultiplied `sRGBA_8888` representation (see Section 10.210.2). The `rgba` parameter is a `VGuint` with 8 bits of red starting at the most significant bit, followed by 8 bits each of green, blue, and alpha. Each color or alpha channel value is conceptually divided by 255.0f to obtain a value between 0 and 1.
 ```c
 void vgSetColor(VGPaint paint, VGuint rgba)
@@ -167,7 +185,8 @@ rgba_f[3] = ( rgba        & 0xff)/255.0f;
 vgSetParameterfv(paint, VG_PAINT_COLOR, 4, rgba_f);
 ```
 
-#### _vgGetColor_<a name="vgGetColor"></a>
+<a name="vgGetColor"></a>
+#### _vgGetColor_
 The current setting of the `VG_PAINT_COLOR` parameter on a given `paint` object may be queried as a 32-bit non-premultiplied `sRGBA_8888` value. Each color channel or alpha value is clamped to the range [0, 1] , multiplied by 255, and rounded to obtain an 8-bit integer; the resulting values are packed into a 32-bit value in the same format as for **vgSetColor**.
 ```c
 VGuint vgGetColor(VGPaint paint)
@@ -204,10 +223,12 @@ alpha = (int)(CLAMP(rgba_f[3])*255.0f + 0.5f);
 rgba = (red << 24) | (green << 16) | (blue << 8) | alpha;
 ```
 
-## _9.3 Gradient Paint_<a name="Gradient_Paint"></a>
+<a name="Gradient_Paint"></a>
+## _9.3 Gradient Paint_
 Gradients are patterns used for filling or stroking. They are defined mathematically in two parts; a scalar-valued _gradient function_ defined at every point in the two-dimensional plane (in paint coordinates), followed by a _color ramp_ mapping.
 
-### _9.3.1 Linear Gradients_<a name="Linear_Gradients"></a>
+<a name="Linear_Gradients"></a>
+### _9.3.1 Linear Gradients_
 Linear gradients define a scalar-valued gradient function based on two points $\left( x0,y0 \right)$ and $\left( x1,y1 \right)$ (in the paint coordinate system) with the following properties:
 * It is equal to 0 at $\left( x0,y0 \right)$
 * It is equal to 1 at $\left( x1,y1 \right)$
@@ -218,9 +239,11 @@ An expression for the gradient function is:
 $$g\left( x,y \right) =\frac { \Delta x\left( x-x0 \right) +\Delta y\left( y-y0 \right)  }{ \Delta { x }^{ 2 }+\Delta { y }^{ 2 } }$$
 where $\Delta x=x1-x0$ and $\Delta y=y1-y0$. If the points $\left( x0,y0 \right)$ and $\left( x1,y1 \right)$ are coincident (and thus $\Delta { x }^{ 2 }+\Delta { y }^{ 2 }=0$), the function is given the value 1 everywhere.
 
-#### _Setting Linear Gradient Parameters_<a name="Setting_Linear_Gradient_Parameters"></a>
+<a name="Setting_Linear_Gradient_Parameters"></a>
+#### _Setting Linear Gradient Parameters_
 To enable linear gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_LINEAR_GRADIENT`.
 The linear gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_LINEAR_GRADIENT`. The gradient values are supplied as a vector of 4 floats in the order { $x0,y0,x1,y1$ }.
+
 ```c
 VGfloat fill_x0, fill_y0, fill_x1, fill_y1;
 VGfloat stroke_x0, stroke_y0, stroke_x1, stroke_y1;
@@ -244,7 +267,8 @@ vgSetParameterfv(myStrokePaint, VG_PAINT_LINEAR_GRADIENT,
                 4, stroke_linear_gradient);
 ```
 
-### _9.3.2 Radial Gradients_<a name="Radial_Gradients"></a>
+<a name="Radial_Gradients"></a>
+### _9.3.2 Radial Gradients_
 Radial gradients define a scalar-valued gradient function based on a _gradient circle_ defined by a _center point_ $\left( cx,cy \right)$, a radius $r$, and a _focal point_ $\left( fx,fy \right)$ that is forced to lie within the circle. All parameters are given in the paint coordinate system.
 
 The computation of the radial gradient function is illustrated in Figure 18. The function is equal to 0 at the focal point and 1 along the circumference of the gradient circle.
@@ -260,10 +284,12 @@ One way to evaluate the gradient function efficiently is to rewrite it in the fo
 $${ g }_{ y }\left( x \right) =\left( Ax+B \right) +\sqrt { C{ x }^{ 2 }+Dx+E }$$
 and to use forward differencing of $Ax+B$ and $C{ x }^{ 2 }+Dx+E$ to evaluate it incrementally along a scanline with several additions and a single square root per pixel.
 
+<a name="figure18"> </a>
 ![figure18](figures/figure18.png)
 _Figure 18: Radial Gradient Function_
 
-#### _Setting Radial Gradient Parameters_<a name="Setting_Radial_Gradient_Parameters"></a>
+<a name="Setting_Radial_Gradient_Parameters"></a>
+#### _Setting Radial Gradient Parameters_
 To enable radial gradient paint, use **vgSetParameteri** to set the paint type to `VG_PAINT_TYPE_RADIAL_GRADIENT`. The radial gradient parameters are set using **vgSetParameterfv** with a `paramType` argument of `VG_PAINT_RADIAL_GRADIENT`. The gradient values are supplied as a vector of 5 floats in the order { $cx,cy,fx,fy,r$ }.
 
 If $\left(fx,fy\right)$ lies outside the circumference of the circle, the intersection of the line from the center to the focal point with the circumference of the circle is used as the focal point in place of the specified point. To avoid a division by 0, the implementation may move the focal point along the line towards the center of the circle by an amount sufficient to avoid numerical instability, provided the new location lies at a distance of at least .99r from the circle center. The following code illustrates the setting of radial gradient parameters:
@@ -286,7 +312,8 @@ vgSetParameterfv(myStrokePaint, VG_PAINT_RADIAL_GRADIENT,
                 5, stroke_radial_gradient);
 ```
 
-### _9.3.3 Color Ramps_<a name="Color_Ramps"></a>
+<a name="Color_Ramps"></a>
+### _9.3.3 Color Ramps_
 Color ramps map the scalar values produced by gradient functions to colors. The application defines the non-premultiplied sRGBA color and alpha value associated with each of a number of values, called _stops_. A stop is defined by an _offset_ between 0 and 1, inclusive, and a color value. Stops must be specified in increasing order; if they are not, the entire sequence is ignored. It is legal to have multiple stops with the same offset value, which will result in a discontinuity in the color ramp, with the first stop with a given offset value defining the right endpoint of one interval and the last stop with the same offset value defining the left endpoint of the next interval. At an offset value equal to that of a stop, the color value is that of the last stop with the given offset. Intermediate stops with the same offset value have no effect. Stops with offsets less than 0 or greater than 1 are ignored.
 
 If no valid stops have been specified (_e.g_., due to an empty input array, out-of-range, or out-of-order stops), a stop at 0 with $\left( R,G,B,\alpha \right)$ color $(0.0, 0.0, 0.0, 1.0)$ (opaque black) and a stop at 1 with color $(1.0, 1.0, 1.0, 1.0)$ (opaque white) are implicitly defined. If at least one valid stop has been specified, but none has been defined with an offset of 0, an implicit stop is added with an offset of 0 and the same color as the first user-defined stop. If at least one valid stop has been specified, but none has been defined with an offset of 1, an implicit stop is added with an offset of 1 and the same color as the last user-defined stop.
@@ -297,13 +324,15 @@ If the paint’s `VG_PAINT_COLOR_RAMP_PREMULTIPLIED` flag is set to `VG_TRUE`, c
 
 Color and alpha values at offset values between the stops are defined by means of linear interpolation between the premultiplied or non-premultiplied color values defined at the nearest stops above and below the given offset value.
 
-#### _VG_MAX_COLOR_RAMP_STOPS_<a name="VG_MAX_COLOR_RAMP_STOPS"></a>
+<a name="VG_MAX_COLOR_RAMP_STOPS"></a>
+#### _VG_MAX_COLOR_RAMP_STOPS_
 The `VG_MAX_COLOR_RAMP_STOPS` parameter contains the maximum number of gradient stops supported by the OpenVG implementation. All implementations must support at least 32 stops. If there is no implementation-defined limit, a value of `VG_MAXINT` may be returned. Implicitly defined stops at offsets 0 and 1 are not counted against this maximum. The value may be retrieved by calling **vgGeti**:
 ```c
 VGint maxStops = vgGeti(VG_MAX_COLOR_RAMP_STOPS);
 ```
 
-#### _VGColorRampSpreadMode_<a name="VGColorRampSpreadMode"></a>
+<a name="VGColorRampSpreadMode"></a>
+#### _VGColorRampSpreadMode_
 The application may only define stops with offsets between 0 and 1. Spread modes define how the given set of stops are repeated or extended in order to define interpolated color values for arbitrary input values outside the [0,1] range. The `VGColorRampSpreadMode` enumeration defines three modes:
 * `VG_COLOR_RAMP_SPREAD_PAD` – extend stops
 * `VG_COLOR_RAMP_SPREAD_REPEAT` – repeat stops
@@ -324,10 +353,12 @@ In repeat mode, the color values defined between 0 and 1 are repeated indefinite
 In reflect mode, the color values defined between 0 and 1 are repeated indefinitely in both directions, but with alternate copies of the range reversed. A gradient value of 1.2 will receive the same color as a gradient value of 0.8, since 0.8 = 1.0 – 0.2 and 1.2 = 1.0 + 0.2. A gradient value of 2.4 will receive the same color as a gradient value of 0.4.
 
 The color ramp pad modes are illustrated schematically in Figure 19.
+<a name="figure19"> </a>
 ![figure19](figures/figure19.png)
 _Figure 19: Color Ramp Pad Modes_
 
-#### _Setting Color Ramp Parameters_<a name="Setting_Color_Ramp_Parameters"></a>
+<a name="Setting_Color_Ramp_Parameters"></a>
+#### _Setting Color Ramp Parameters_
 Color ramp parameters are set using **vgSetParameter**. The `VG_PAINT_COLOR_RAMP_SPREAD_MODE` parameter controls the spread mode using a value from the `VGColorRampSpreadMode` enumeration. The `VG_PAINT_COLOR_RAMP_PREMULTIPLIED` parameter takes a `VGboolean` value and controls whether color and alpha values are interpolated in premultiplied or non-premultiplied form. The `VG_PAINT_COLOR_RAMP_STOPS` parameter takes an array of floating-point values giving the offsets and colors of the stops, in order. Each stop is defined by a floating-point offset value and four floating-point values containing the sRGBA color and alpha value associated with each stop, in the form of a non-premultiplied $\left( R,G,B,\alpha \right)$ quad. The **vgSetParameter** function will generate an error if the number of values submitted is not a multiple of 5 (zero is acceptable). Up to `VG_MAX_COLOR_RAMP_STOPS` 5-tuples may be set. If more than `VG_MAX_COLOR_RAMP_STOPS` 5-tuples are specified, those beyond the first `VG_MAX_COLOR_RAMP_STOPS` are discarded immediately (and will not be returned by **vgGetParameter**).
 
 ```c
@@ -358,8 +389,8 @@ vgSetParameterfv(myStrokePaint, VG_PAINT_COLOR_RAMP_STOPS,
 
 A common set of color ramp settings are used for both linear and radial gradients defined on a given paint object.
 
-
-#### _Formal Definition of Spread Modes_<a name="Formal_Definition_of_Spread_Modes"></a>
+<a name="Formal_Definition_of_Spread_Modes"></a>
+#### _Formal Definition of Spread Modes_
 This section provides a formal definition of the color ramp spread modes.
 
 In the following, assume that a sequence of stops { $S_0,S_1, ... , S_{ N-1 }$ } have been defined by the application, and/or by default or implicit values. The stop $S_i$ is defined to have offset $x_i$ and color $c_i$. The stops are assumed to be ordered by offset but may have duplicate offsets; that is, for all $i<j$, ${ x }_{ i }\le{ x }_{ j }$. To determine the interpolated color value at a given offset value v, determine the smallest $i$ such that ${ x }_{ i+1 }>v$. If $x_i = v$, use the color $c_i$, otherwise perform linear interpolation between the stops $S_i$ and $S_{i+1}$ to produce the color $c_{ i }+\left( c_{ i+1 }-c_{ i } \right) \left( v-x_{ i } \right) /\left( x_{ i+1 }-x_{ i } \right) $.
@@ -369,7 +400,7 @@ In pad mode, values smaller than 0 are assigned the color $c_0$ and values great
 In repeat mode, the offset value v is mapped to a new value $v'$ that is guaranteed to lie between 0 and 1. Following this mapping, the color is defined as for pad mode:
 
 
-$$v'_{repeat} = vâˆ’|v|$$
+$$v'_{repeat} = v-|v|$$
 
 In reflect mode, the offset value v is mapped to a new value vÂ´ that is guaranteed to liebetween 0 and 1. Following this mapping, the color is defined as for pad mode:
 
@@ -381,7 +412,8 @@ v'_{reflect} =
 \end{cases}
 $$
 
-### 9.3.4 Gradient Examples<a name="Gradient_Examples"></a>
+<a name="Gradient_Examples"></a>
+### 9.3.4 Gradient Examples
 
 Figure 20 shows a square from $(0, 0)$ to $(400, 400)$ painted with a set of linear gradients with $(x0, y0) = (100, 100)$, $(x1, y1) = (300, 300)$.
 
@@ -389,19 +421,23 @@ Figure 21 shows the same square painted with radial gradients with centered and 
 
 All the gradients shown in this section utilize a color ramp with stops at offsets 0.0,0.33, 0.66, and 1.0 colored white, red, green, and blue, respectively, as shown in Figure22.
 
+<a name="figure20"> </a>
 ![figure20](figures/figure20.png)
 
 Figure 20: Linear Gradients
 
+<a name="figure21"> </a>
 ![figure21](figures/figure21.png)
 
 Figure 21: Centered and Non-Centered Radial Gradients
 
+<a name="figure22"> </a>
 ![figure22](figures/figure22.png)
 
 Figure 22: Color Ramp used for Gradient Examples
 
-## 9.4 Pattern Paint<a name="Pattern_Paint"></a>
+<a name="Pattern_Paint"></a>
+## 9.4 Pattern Paint
 
 Pattern paint defines a rectangular pattern of colors based on the pixel values of an image. Images are described below in Section 10. Each pixel (x, y) of the pattern imagedefines a point of color at the pixel center (x + 1/2, y + 1/2).
 
@@ -409,7 +445,8 @@ Filtering may be used to construct an interpolated pattern value at the sample p
 
 Interpolation may be performed between multiple pixels of the pattern image to producean antialiased pattern value. The image quality setting at the time of drawing (determinedby the `VG_IMAGE_QUALITY` parameter) is used to control the quality of patterninterpolation. If the image quality is set `toVG_IMAGE_QUALITY_NONANTIALIASED`, nearest-neighbor interpolation (pointsampling) is used. If the image quality is set to `VG_IMAGE_QUALITY_FASTER` or `VG_IMAGE_QUALITY_BETTER`, higher-quality interpolation will be used if available. Interpolation is done in the color space of the image using a premultiplied representation.
 
-#### vgPaintPattern<a name="vgPaintPattern"></a>
+<a name="vgPaintPattern"></a>
+#### vgPaintPattern
 
 The `vgPaintPattern` function replaces any previous pattern image defined on thegiven paint object for the given set of paint modes with a new pattern image. Avalue of `VG_INVALID_HANDLE` for the pattern parameter removes the currentpattern image from the paint object.
 
@@ -430,11 +467,13 @@ void vgPaintPattern(VGPaint paint, VGImage pattern)
 > `VG_IMAGE_IN_USE_ERROR`
 > * if pattern is currently a rendering targe
 
-### 9.4.1 Pattern Tiling<a name="Pattern_Tiling"></a>
+<a name="Pattern_Tiling"></a>
+### 9.4.1 Pattern Tiling
 
 Patterns may be extended (tiled) using one of four possible tiling modes, defined by the `VGTilingMode` enumeration.
 
-#### VGTilingMode<a name="VGTilingMode"></a>
+<a name="VGTilingMode"></a>
+#### VGTilingMode
 
 The `VGTilingMode` enumeration defines possible methods for defining colors forsource pixels that lie outside the bounds of the source image.
 
@@ -492,5 +531,3 @@ vgPaintPattern(myStrokePaint, myStrokePaintPatternImage);
 ```
 
 <div style="page-break-after: always;"> </div>
-
-
