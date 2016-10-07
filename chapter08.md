@@ -1,28 +1,36 @@
-# _8 Paths_<a name="chapter08"></a><a name="Paths"></a>
+
+<a name="chapter08"></a><a name="Paths"></a>
+# _8 Paths_
 Paths are the heart of the OpenVG API. All geometry to be drawn must be defined in terms of one or more paths. Paths are defined by a sequence of _segment commands_ (or _segments_). Each segment command in the standard format may specify a move, a straight line segment, a quadratic or cubic Bézier segment, or an elliptical arc. Extensions may define other segment types.
 
-## _8.1 Moves_<a name="Moves"></a>
+<a name="Moves"></a>
+## _8.1 Moves_
 A path segment may consist of a “move to” segment command that causes the path to jump directly to a given point, starting a new subpath without drawing.
 
-## _8.2 Straight Line Segments_<a name="Straight_Line_Segments"></a>
+<a name="Straight_Line_Segments"></a>
+## _8.2 Straight Line Segments_
 Paths may contain horizontal, vertical, or arbitrary line segment commands. A special “close path” segment command may be used to generate a straight line segment joining the current vertex of a path to the vertex that began the current portion of the path.
 
-## _8.3 Bézier Curves_<a name="Bézier_Curves"></a>
+<a name="Bézier_Curves"></a>
+## _8.3 Bézier Curves_
 Bézier curves are polynomial curves defined using a parametric representation. That is, they are defined as the set of points of the form $(x(t), y(t))$, where $x(t)$ and $y(t)$ are polynomials of t and t varies continuously from 0 to 1. Paths may contain quadratic or cubic Bézier segment commands.
 
-### _8.3.1 Quadratic Bézier Curves_<a name="Quadratic_Bézier_Curves"></a>
+<a name="Quadratic_Bézier_Curves"></a>
+### _8.3.1 Quadratic Bézier Curves_
 A quadratic Bézier segment is defined by three control points, $(x0, y0)$, $(x1, y1)$, and $(x2, y2)$. The curve starts at $(x0, y0)$ and ends at $(x2, y2)$. The shape of the curve is influenced by the placement of the internal control point $(x1, y1)$, but the curve does not usually pass through that point. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_2$ is aligned with and has the same direction as the vector $x_2 – x_1$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
 
-$$x(t)=x_0(1-t)^2+2*x_1*(1-t)*t+x_2*t^2$$
-$$y(t)=y_0(1-t)^2+2*y_1*(1-t)*t+y_2*t^2$$
+$$x(t)=x_0(1-t)^2+2*x_1*(1-t)*t+x_2*t^2\\
+y(t)=y_0(1-t)^2+2*y_1*(1-t)*t+y_2*t^2$$
 
-### _8.3.2 Cubic Bézier Curves_<a name="Cubic_Bézier_Curves"></a>
+<a name="Cubic_Bézier_Curves"></a>
+### _8.3.2 Cubic Bézier Curves_
 Cubic Bézier segments are defined by four control points $(x0, y0)$, $(x1, y1)$, $(x2, y2)$, and $(x3, y3)$. The curve starts at $(x_0, y_0)$ and ends at $(x_3, y_3)$. The shape of the curve is influenced by the placement of the internal control points $(x_1, y_1)$ and $(x_2, y_2)$, but the curve does not usually pass through those points. Assuming non-coincident control points, the tangent of the curve at the initial point $x_0$ is aligned with and has the same direction as the vector $x_1 – x_0$ and the tangent at the final point $x_3$ is aligned with and has the same direction as the vector $x_3 – x_2$. The curve is defined by the set of points $(x(t), y(t))$ as $t$ varies from 0 to 1, where:
 
-$$x(t)=x_0*(1-t)^3+3*x_1*(1-t)^2*t+3*x_2*(1-t)*t^2+x_3*t^3$$
-$$y(t)=y_0*(1-t)^3+3*y_1*(1-t)^2*t+3*y_2*(1-t)*t^2+y_3*t^3$$
+$$x(t)=x_0*(1-t)^3+3*x_1*(1-t)^2*t+3*x_2*(1-t)*t^2+x_3*t^3\\
+y(t)=y_0*(1-t)^3+3*y_1*(1-t)^2*t+3*y_2*(1-t)*t^2+y_3*t^3$$
 
-### _8.3.3 **$G^1$** Smooth Segments_<a name="G1_Smooth_Segments"></a>
+<a name="G1_Smooth_Segments"></a>
+### _8.3.3 **$G^1$** Smooth Segments_
 $G^1$ Smooth quadratic or cubic segments implicitly define their first internal control point in such a manner as to guarantee a continuous tangent direction at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet without a sharp corner. However, the length of the unnormalized tangent vector may experience a discontinuity at the join point.
 
 $G^1$ smoothness at the initial point of a quadratic or cubic segment may be guaranteed by suitable placement of the first internal control point $(x_1, y_1)$ of the following segment. Given a previous quadratic or cubic segment with an internal control point $(px, py)$ and final endpoint $(ox, oy)$, we compute $(x_1, y_1)$ as $(2*ox – px, 2*oy – py)$ (_i.e.,_ the reflection of the point $(px, py)$ about the point $(ox, oy)$). For segments of the same type, this will provide $C^1$ smoothness (see the next section).
@@ -30,7 +38,8 @@ $G^1$ smoothness at the initial point of a quadratic or cubic segment may be gua
 ![figure04](figures/figure04.png)
 _Figure 4: Smooth Curve Construction_
 
-### _8.3.4 **$C^1$** Smooth Segments_<a name="C1_Smooth_Segments"></a>
+<a name="C1_Smooth_Segments"></a>
+### _8.3.4 **$C^1$** Smooth Segments_
 _[ Note: this section is informative only. ]_
 
 $C^1$ smooth quadratic or cubic segments define their first internal control point $(x_1, y_1)$ in such a manner as to guarantee a continuous first derivative at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet with continuous parametric velocity at the join point. This is a stronger condition than $G^1$ continuity.
@@ -46,7 +55,8 @@ $$ (x_1,y_1) = (5*ox-2*px,5*oy-2*py)/3 $$
 * When joining a previous cubic segment to a following quadratic segment:
 $$ (x_1,y_1) = (5*ox-3*px,5*oy-3*py)/2 $$
 
-### _8.3.5 $C^2$ Smooth Segments_ <a name="C2_Smooth_Segments"></a>
+<a name="C2_Smooth_Segments"></a>
+### _8.3.5 $C^2$ Smooth Segments_
 _[ Note: this section is informative only. ]_
 $C^2$ smooth cubic segments implicitly define both of their internal control points $(x_1, y_1)$ and $(x_2, y_2)$ in such a manner as to guarantee continuous first and second derivatives at the join point when they are joined to a preceding quadratic or cubic segment. Geometrically, this ensures that the two segments meet with continuous velocity and acceleration at the join point.
 
@@ -59,13 +69,15 @@ $$ (x_2,y_2) = (8*ox-6*px+qx, 8*oy-6*py+qy)/3 $$
 * When joining a previous cubic segment to a following cubic segment:
 $$ (x_2,y_2) = (4*(ox-px)+qx, 4*(oy-py)+qy) $$
 
-### _8.3.6 Converting Segments From Quadratic to Cubic Form_<a name="Converting_Segments_From _Qudratic_to_Cubic_Form"></a>
+<a name="Converting_Segments_From _Qudratic_to_Cubic_Form"></a>
+### _8.3.6 Converting Segments From Quadratic to Cubic Form_
 _[ Note: This section is informative only. ]_
 
 Given a quadratic Bézier curve with control points $(x_0, y_0)$, $(x_1, y_1)$, and $(x_2, y_2)$, an
 identical cubic Bézier curve may be formed using the control points $(x_0, y_0)$, $(x_0 + 2*x_1, y_0 + 2*y_1)/3, (x_2 + 2*x_1, y_2 + 2*y_1)/3, (x_2, y_2)$.
 
-## _8.4 Elliptical Arcs_<a name="Elliptical_Arcs"></a>
+<a name="Elliptical_Arcs"></a>
+## _8.4 Elliptical Arcs_
 Elliptical arc segments join a pair of points with a section of an ellipse with given horizontal and vertical axes and a rotation angle (in degrees). Given these parameters,there are four possible arcs distinguished by their direction around the ellipse (clockwise or counter-clockwise) and whether they take the smaller or larger path around the ellipse.
 
 Figure 5 below shows the two possible ellipses with horizontal axis $rh$, vertical axis $rv$, and counter-clockwise rotation angle rot (shown as the angle between the vertical line labeled rot and the line labeled $rv$) passing through the points $(x_0, y_0)$ and $(x_1, y_1)$. The four arcs connecting the points are labeled L and S for large and small, and CW and CCW for clockwise and counter-clockwise.
@@ -1224,5 +1236,3 @@ vgDrawPath(VGPath path, VG_FILL_PATH | VG_STROKE_PATH);
 ```
 
 <div style="page-break-after: always;"></div>
-
-

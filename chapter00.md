@@ -412,8 +412,7 @@ Editors
 - [23 Indices](#chapter23)
 	- [Index of Tables](#Index_of_Tables)
 	- [Index of Figures](#Index_of_Figures)
-	- [Alphabetical](#Alphabetical_Index)
+	- [Alphabetical Index](#Alphabetical_Index)
 
 <div style="page-break-after: always;"> </div>
-
 
