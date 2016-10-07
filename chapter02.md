@@ -1,4 +1,5 @@
-# 2 The OpenVG Pipeline <a name="chapter02"></a><a name="The_OpenVG_Pipeline"></a>
+<a name="chapter02"></a><a name="The_OpenVG_Pipeline"></a>
+# 2 The OpenVG Pipeline
 This section defines the OpenVG pipeline mechanism by which primitives are rendered. Implementations are not required to match the ideal pipeline stage-for-stage; they may take any approach to rendering so long as the final results match the results of the ideal pipeline within the tolerances defined by the conformance testing process. The OpenVG pipeline supports both single-sampled and multisampled surfaces (see Section 2.9).
 
 Figure 1 below provides an overview of the OpenVG pipeline, focusing on the various steps involved in drawing a thick, dashed line into a scene using a radial gradient paint.

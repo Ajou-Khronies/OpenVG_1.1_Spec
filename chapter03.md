@@ -1,4 +1,5 @@
-# 3 Constants, Functions and Data Types <a name="chapter03"></a><a name="Constants_Functions_and_Data_Types"></a>
+<a name="chapter03"></a><a name="Constants_Functions_and_Data_Types"></a>
+# 3 Constants, Functions and Data Types
 OpenVG type definitions and function prototypes are found in an `openvg.h` header file, located in a VG subdirectory of a platform-specific header file location. OpenVG makes use of 8-, 16-, and 32-bit data types. A 64-bit data type is not required. If the `khronos_types.h` header file is provided, the primitive data types will be compatible across all Khronos APIs on the same platform.
 
 ## _3.1 Versioning_<a name="Versioning"></a>

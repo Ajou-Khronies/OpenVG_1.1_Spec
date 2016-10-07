@@ -1,9 +1,11 @@
-# 5 Setting API Parameters <a name="chapter05"></a><a name="Setting_API_Parameters"></a>
+<a name="chapter05"></a><a name="Setting_API_Parameters"></a>
+# 5 Setting API Parameters
 API parameters may be set and retrieved using generic _get_ and _set_ functions. The use of generic functions allows for extensibility of the API without the addition of additional functions. Extensions may receive unique identifier values for new parameter types by registering with the Khronos group.
 
 Parameters take two forms: some are set relative to a rendering context, and others are set on a particular `VGHandle`-based object. The former make use of the **vgSet** and **vgGet** functions and the latter make use of the **vgSetParameter** and **vgGetParameter** functions.
 
-## _5.1 Context Parameter Types_ <a name="Context_Parameter_Types"></a>
+<a name="Context_Parameter_Types"></a>
+## _5.1 Context Parameter Types_
 Parameter types that are set on a rendering context are defined in the `VGParamType` enumeration. The datatype and default value associated with each parameter is shown in Table 4.
 
 #### _VGParamType_ <a name="VGParam_Type"></a>

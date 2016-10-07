@@ -1,4 +1,6 @@
-# 1 Introduction <a name="chapter01"></a> <a name="Introduction"></a>
+<a name="chapter01"></a> <a name="Introduction"></a>
+
+# 1 Introduction 
 OpenVG is an application programming interface (API) for hardware-accelerated two-dimensional vector and raster graphics developed under the auspices of the Khronos Group (www.khronos.org). It provides a device-independent and vendor-neutral interface for sophisticated 2D graphical applications, while allowing device manufacturers to provide hardware acceleration where appropriate.
 
 This document defines the C language binding to OpenVG. Other language bindings may be defined by Khronos in the future. We use the term “implementation” to refer to the software and/or hardware that implements OpenVG functionality, and the term “application” to refer to any software that makes use of OpenVG.
@@ -58,3 +60,4 @@ _Table 1: Naming and Typographical Conventions_
 The library name is defined as libOpenVG.z where z is a platform-specific library suffix (_i.e._, `.a, .so, .lib, .dll`, etc.).
 
 <div style="page-break-after: always;"></div>
+

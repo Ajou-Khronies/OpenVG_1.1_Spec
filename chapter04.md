@@ -1,4 +1,5 @@
-# 4 The Drawing Context <a name="Chapter4"></a><a name="The Drawing Context"></a>
+<a name="Chapter4"></a><a name="The Drawing Context"></a>
+# 4 The Drawing Context
 OpenVG functions that perform drawing, or that modify or query drawing state make use of an implicit _drawing context_ (or simply a _context_). A context is created, attached to a drawing surface, and bound to a running application thread outside the scope of the OpenVG API, for example by the Khronos EGL API. OpenVG API calls are executed with respect to the context currently bound to the thread in which they are executed. A call to any OpenVG API function when no drawing context is bound to the current thread has no effect. The drawing context currently bound to a running thread is referred to as the _current context_.
 
 When an image, paint, path, font, or mask handle is defined, it is permanently attached to the context that is current at that time. It is an error to use the handle as an argument to any OpenVG function when a different context is active, unless that context has been designated as a _shared context_ of the original context by the API responsible for context creation (usually EGL).
