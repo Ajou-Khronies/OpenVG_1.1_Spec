@@ -108,3 +108,7 @@ Use **vgSeti** with a parameter type of `VG_BLEND_MODE` to set the blend mode:
 VGBlendMode mode;
 vgSeti(VG_BLEND_MODE, mode);
 ```
+
+<div style="page-break-after: always;"></div>
+
+

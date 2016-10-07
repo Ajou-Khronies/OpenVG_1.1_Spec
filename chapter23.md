@@ -54,4 +54,6 @@ Figure 30: vguArc Parameters - 207
 
 #### Alphabetical Index <a name="Alphabetical_Index"><a>
 Alphabetical Index is ommitted.  Use "find" function on your viewer.
+
 <div style="page-break-after: always;"> </div>
+

@@ -36,4 +36,6 @@ _Table 17 : Query Key Enumeration Types_
 enumeration
 > * if `setting` is not one of the values from the enumeration associated with key
 
+
 <div style="page-break-after: always;"> </div>
+

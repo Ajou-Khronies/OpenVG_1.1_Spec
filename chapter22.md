@@ -104,4 +104,6 @@ Special thanks to Vladimir Levantovsky of Monotype Imaging for the design and sp
 Special thanks to Tero Karras and Jussi RÃ¤sÃ¤nen of NVIDIA; Petri Nordlund, Robert Simpson, and Mika Tuomi of AMD (formerly Bitboys); and Tuomas Lukka, Jarno Paananen, and Sami Tammilehto of the former Bitboys Technology Research Group for creating the reference implementations; and to those who contributed to the conformance test suite: Hwanyong Lee, Junyoung Lee, and Hyunchan Sung of HUONE; TK Chan, Robert Simpson, Valtteri Rantala, Sami Tammilehto, Mika Tuomi, and Miikka Kangasluoma of AMD; Tero Karras, Jussi RÃ¤sÃ¤nen and Kalle Raita of NVIDIA, Vladimir Levantovsky of Monotype Imaging and Toshio Nishidai of TAKUMI
 
 Thanks are also due to the external reviewers who helped to improve the specification.
+
 <div style="page-break-after: always;"> </div>
+

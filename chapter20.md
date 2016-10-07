@@ -26,4 +26,6 @@
 **WOLB90** <a name="WOLB90"></a>Wolberg, G., Digital Image Warping, IEEE Computer Society Press, Washington, D.C., 1990.
 
 **WYSZ00** <a name="WYSZ00"></a>Wyszecki, G. and W. S. Stiles, Color Science: Concepts and Methods, Quantitative Data and Formulae, Wiley-Interscience, New York, 2000.
+
 <div style="page-break-after: always;"> </div>
+

@@ -46,4 +46,6 @@ Changes from version 1.0 to version 1.0.1 (by section number):
 * 18 - remove enumerated values `VG_PATH_DATATYPE_INVALID` and `VG_IMAGE_FORMAT_INVALID`
 
 Version 1.0 ratified August 2005
+
 <div style="page-break-after: always;"> </div>
+

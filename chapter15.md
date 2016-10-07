@@ -66,3 +66,5 @@ Any vendor may define a vendor-specific extension. Each vendor should apply to K
 An OpenVG extension may be deemed a shared extension if two or more vendors agree in good faith to ship an extension, or the Khronos OpenVG working group determines that it is in the best interest of its members that the extension be shared. A shared extension may be adopted (with appropriate naming changes) into a subsequent release of the OpenVG specification.
 
 <div style="page-break-after: always;"> </div>
+
+

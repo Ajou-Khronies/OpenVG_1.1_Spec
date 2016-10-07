@@ -52,3 +52,5 @@ The determination of whether a sample falls inside a geometric primitive when re
 Multisampling may allow for more accurate computation of the coverage across multiple primitives. In particular, for primitives that abut one another, multisampling avoids any possibility of background color “bleeding through,”which may be important for applications such as Adobe Flash players. Adobe Flash player implementations may also require that the samples be resolved using a single-pixel wide box filter; the choice of filter is outside of the scope of this specification, but may be possible using platform APIs such as EGL.
 
 <div style="page-break-after: always;"></div>
+
+
