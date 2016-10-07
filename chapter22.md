@@ -1,4 +1,6 @@
-# 22 Acknowledgments<a name="chapter22"></a><a name="Acknowledgments"> </a>
+
+<a name="chapter22"></a><a name="Acknowledgments"> </a>
+# 22 Acknowledgments
 
 This specification and the accompanying conformance test suite were developed by the
 Khronos OpenVG working group:
@@ -106,4 +108,3 @@ Special thanks to Tero Karras and Jussi RÃ¤sÃ¤nen of NVIDIA; Petri Nordlund,
 Thanks are also due to the external reviewers who helped to improve the specification.
 
 <div style="page-break-after: always;"> </div>
-

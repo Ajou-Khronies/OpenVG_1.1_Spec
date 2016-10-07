@@ -1,5 +1,8 @@
-# 23 Indices<a name="chapter23"><a> <a name="Indices"><a>
-#### Index of Tables<a name="Index_of_Tables"><a>
+<a name="chapter23"><a> <a name="Indices"><a>
+# 23 Indices
+
+<a name="Index_of_Tables"><a>
+#### _Index of Tables_
 Table 1: Naming and Typographical Conventions - 12
 Table 2: Pixel Format Conversions - 23
 Table 3: State Elements of a Context - 29
@@ -20,7 +23,8 @@ Table 17: Query Key Enumeration Types - 192
 Table 18: Center Ellipse Parameters - 211
 Table 19: Endpoint Ellipse Parameters - 211
 
-#### Index of Figures <a name="Index_of_Figures"><a>
+<a name="Index_of_Figures"><a>
+#### _Index of Figures_
 Figure 1: The OpenVG Pipeline - 13
 Figure 2: VGPixelLayout Values - 47
 Figure 3: Coordinates, Transformation, Clipping, and Scissoring - 48
@@ -52,8 +56,8 @@ Figure 28: Round Rectangle Parameters - 204
 Figure 29: VGUArcType Values - 205
 Figure 30: vguArc Parameters - 207
 
-#### Alphabetical Index <a name="Alphabetical_Index"><a>
+<a name="Alphabetical_Index"><a>
+#### _Alphabetical Index_
 Alphabetical Index is ommitted.  Use "find" function on your viewer.
 
 <div style="page-break-after: always;"> </div>
-

@@ -148,11 +148,13 @@ void vgColorMatrix(VGImage dst, VGImage src,
 >
 > - if `matrix` is not properly aligned
 
-## <a name="Convolution"></a> _12.4 Convolution_
+<a name="Convolution"></a>
+## _12.4 Convolution_
 
 The **vgConvolve**, **vgSeparableConvolve**, and vgGaussianBlur functions define destination pixels based on a weighted average of neighboring source pixels, a process known as `convolution`. The set of weights, along with their relative locations, is known as the `convolution kernel`. In the discussion below, width and `height` refer to the dimensions of the source image.
 
-#### <a name="VG_MAX_KERNEL_SIZE"></a> _VG_MAX_KERNEL_SIZE_
+<a name="VG_MAX_KERNEL_SIZE"></a>
+#### _VG_MAX_KERNEL_SIZE_
 
 The `VG_MAX_KERNEL_SIZE` parameter contains the largest legal value of the `width` and `height` parameters to the **vgConvolve** function. All implementations must define `VG_MAX_KERNEL_SIZE` to be an integer no smaller than 7. If there is no implementation-defined limit, a value of `VG_MAXINT` may be returned. The value may be retrieved by calling **vgGeti**:
 
@@ -160,7 +162,8 @@ The `VG_MAX_KERNEL_SIZE` parameter contains the largest legal value of the `widt
 VGint maxKernelSize = vgGeti(VG_MAX_KERNEL_SIZE);
 ```
 
-#### <a name="VG_MAX_SEPARABLE_KERNEL_SIZE"></a> _VG_MAX_SEPARABLE_KERNEL_SIZE_
+<a name="VG_MAX_SEPARABLE_KERNEL_SIZE"></a>
+#### _VG_MAX_SEPARABLE_KERNEL_SIZE_
 
 The `VG_MAX_SEPARABLE_KERNEL_SIZE` parameter contains the largest legal value of the `size` parameter to the **vgSeparableConvolve** function. All implementations must define `VG_MAX_SEPARABLE_KERNEL_SIZE` to be an integer no smaller than 15. If there is no implementation-defined limit, a value of `VG_MAXINT` may be returned. The value may be retrieved by calling **vgGeti**:
 
@@ -168,7 +171,8 @@ The `VG_MAX_SEPARABLE_KERNEL_SIZE` parameter contains the largest legal value of
 VGint maxSeparableKernelSize = vgGeti(VG_MAX_SEPARABLE_KERNEL_SIZE);
 ```
 
-#### <a name="VG_MAX_GAUSSIAN_STD_DEVIATION"></a> _VG_MAX_GAUSSIAN_STD_DEVIATION_
+<a name="VG_MAX_GAUSSIAN_STD_DEVIATION"></a>
+#### _VG_MAX_GAUSSIAN_STD_DEVIATION_
 
 The `VG_MAX_GAUSSIAN_STD_DEVIATION` parameter contains the largest legal value of the `stdDeviationX` and `stdDeviationY` parameters to the **vgGaussianBlur** function. All implementations must define `VG_MAX_GAUSSIAN_STD_DEVIATION` to be an integer no smaller than 16. If there is no implementation-defined limit, a value of `VG_MAXINT` may be returned. The value may be retrieved by calling **vgGeti**:
 
@@ -176,9 +180,10 @@ The `VG_MAX_GAUSSIAN_STD_DEVIATION` parameter contains the largest legal value o
 VGint maxGaussianStdDeviation = vgGeti(VG_MAX_GAUSSIAN_STD_DEVIATION);
 ```
 
-#### <a name="vgConvolve"></a> _vgConvolve_
+<a name="vgConvolve"></a>
+#### _vgConvolve_
 
-The **vgConvolve** function applies a user-supplied convolution kernel to a normalized source image `src`. The dimensions of the kernel are given by `kernelWidth` and `kernelHeight`; the kernel values are specified as `kernelWidth*kernelHeight` `VGshorts` in column-major order. That is, the kernel entry $(i, j)$ is located at position $i*kernelHeight + j$ in the input sequence. The `shiftX` and `shiftY` parameters specify a translation between the source and destination images. The result of the convolution is multiplied by a `scale` factor, and a `bias` is added.
+The **vgConvolve** function applies a user-supplied convolution kernel to a normalized source image `src`. The dimensions of the kernel are given by `kernelWidth` and `kernelHeight`; the kernel values are specified as `kernelWidth * kernelHeight` `VGshorts` in column-major order. That is, the kernel entry $(i, j)$ is located at position $i*kernelHeight + j$ in the input sequence. The `shiftX` and `shiftY` parameters specify a translation between the source and destination images. The result of the convolution is multiplied by a `scale` factor, and a `bias` is added.
 
 The output pixel $(x, y)$ is defined as:
 
@@ -186,7 +191,7 @@ $$
 s(\sum_{0\le i\lt w}\sum_{0\le j\lt h} k_{(w-i-1),(h-j-1)}p(x+i-shiftX,y+j-shiftY))+b,
 $$
 
-where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w?i?1, h?j?1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = w ? 1 and `shiftY` = h - 1. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
+where w = `kernelWidth`, h = `kernelHeight`, ki,j is the kernel element at position $(i, j), s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel index $(w-i-1, h-j-1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution when `shiftX` = $w - 1$ and `shiftY` = $h - 1$. Figure 27 depicts the flipping of the kernel relative to the image pixels for a 3x3 kernel.
 
 The operation is applied to all channels (color and alpha) independently. Version 1.1
 
@@ -200,7 +205,49 @@ void vgConvolve(VGImage dst, VGImage src,
                 VGTilingMode tilingMode)
 ```
 
-<img src="figures/figure27.PNG"/>
+<a name="figure27"></a>
+
+![figure27](figures/figure27.png)
+_Figure 27: Convolution With a Flipped Kernel_
+
+> ERRORS
+>
+> `VG_BAD_HANDLE_ERROR`
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the current context
+> `VG_IMAGE_IN_USE_ERROR`
+> - if either `dst` or `src` is currently a rendering target
+> `VG_ILLEGAL_ARGUMENT_ERROR`
+> - if `src` and `dst` overlap
+> - if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
+> `VG_MAX_KERNEL_SIZE`
+> - if `kernel` is NULL
+> - if `kernel` is not properly aligned
+> - if `tilingMode` is not one of the values from the `VGTilingMode` enumeration
+
+<a name="vgSeparableConvolve"></a>
+#### _vgSeparableConvolve_
+
+The **vgSeparableConvolve** function applies a user-supplied separable convolution kernel to a normalized source image `src`. A separable kernel is a two-dimensional kernel in which each entry $kij$ is equal to a product $kxi * kyj$ of elements from two onedimensional kernels, one horizontal and one vertical.
+
+The lengths of the one-dimensional arrays `kernelX` and `kernelY` are given by `kernelWidth` and `kernelHeight`, respectively; the kernel values are specified as arrays of `VGshorts`. The `shiftX` and `shiftY` parameters specify a translation between the source and destination images. The result of the convolution is multiplied by a `scale` factor, and a `bias` is added.
+
+The output pixel $(x, y)$ is defined as:
+$$
+s(\sum_{0\le i\lt w}\sum_{0\le j\lt h} kx_{(w-i-1)},ky_{(h-j-1)}p(x+i-shiftX,y+j-shiftY))+b,
+$$
+
+where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w-i-1)$ and $(h-j-1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
+
+```c
+void vgSeparableConvolve(VGImage dst, VGImage src,
+                         VGint kernelWidth, VGint kernelHeight,
+                         VGint shiftX, VGint shiftY,
+                         const VGshort * kernelX,
+                         const VGshort * kernelY,
+                         VGfloat scale,
+                         VGfloat bias,
+                         VGTilingMode tilingMode)
+```
 
 > ERRORS
 >
@@ -219,65 +266,17 @@ current context
 >
 > - if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
 >
-> `VG_MAX_KERNEL_SIZE`
+> `VG_MAX_SEPARABLE_KERNEL_SIZE`
 >
-> - if `kernel` is NULL
+> - if `kernelX` or `kernelY` is NULL
 >
-> - if `kernel` is not properly aligned
+> - if `kernelX` or `kernelY` is not properly aligned
 >
 > - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
-#### <a name="vgSeparableConvolve"></a> _vgSeparableConvolve_
-
-The **vgSeparableConvolve** function applies a user-supplied separable convolution kernel to a normalized source image `src`. A separable kernel is a two-dimensional kernel in which each entry $kij$ is equal to a product $kxi * kyj$ of elements from two onedimensional kernels, one horizontal and one vertical.
-
-The lengths of the one-dimensional arrays `kernelX` and `kernelY` are given by `kernelWidth` and `kernelHeight`, respectively; the kernel values are specified as arrays of `VGshorts`. The `shiftX` and `shiftY` parameters specify a translation between the source and destination images. The result of the convolution is multiplied by a `scale` factor, and a `bias` is added.
-
-The output pixel $(x, y)$ is defined as:
-
-
-
-where w = `kernelWidth`, h = `kernelHeight`, $kxi$ is the one-dimensional horizontal kernel element at position $i$, $kyj$ is the one-dimensional vertical kernel element at position $j$, $s$ is the `scale`, b is the bias, and $p(x, y)$ is the source pixel at $(x, y)$, or the result of source edge extension defined by `tilingMode`, which takes a value from the `VGTilingMode` enumeration (see Section 9.4.1). Note that the use of the kernel indices $(w?i?1)$ and $(h?j?1)$ implies that the kernel is rotated 180 degrees relative to the source image in order to conform to the mathematical definition of convolution.
-
-```c
-void vgSeparableConvolve(VGImage dst, VGImage src,
-                         VGint kernelWidth, VGint kernelHeight,
-                         VGint shiftX, VGint shiftY,
-                         const VGshort * kernelX,
-                         const VGshort * kernelY,
-                         VGfloat scale,
-                         VGfloat bias,
-                         VGTilingMode tilingMode)
-```
-
-> ERRORS
->
-> `VG_BAD_HANDLE_ERROR`
->
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
-current context
->
-> `VG_IMAGE_IN_USE_ERROR`
->
-> ? if either `dst` or `src` is currently a rendering target
->
-> `VG_ILLEGAL_ARGUMENT_ERROR`
->
-> ? if `src` and `dst` overlap
->
-> ? if `kernelWidth` or `kernelHeight` is less than or equal to 0 or greater than
->
-> `VG_MAX_SEPARABLE_KERNEL_SIZE`
->
-> ? if `kernelX` or `kernelY` is NULL
->
-> ? if `kernelX` or `kernelY` is not properly aligned
->
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
-enumeration
-
-#### <a name="vgGaussianBlur"></a> _vgGaussianBlur_
+<a name="vgGaussianBlur"></a>
+#### _vgGaussianBlur_
 
 The **vgGaussianBlur** function computes the convolution of a normalized source image `src` with a separable kernel defined in each dimension by the Gaussian function $G(x, s)$:
 
@@ -306,27 +305,26 @@ void vgGaussianBlur(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
-current context
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater
+> - if `stdDeviationX` or `stdDeviationY` is less than or equal to 0 or greater than `VG_MAX_GAUSSIAN_STD_DEVIATION`
 >
-> than `VG_MAX_GAUSSIAN_STD_DEVIATION`
->
-> ? if `tilingMode` is not one of the values from the `VGTilingMode`
+> - if `tilingMode` is not one of the values from the `VGTilingMode`
 enumeration
 
-## <a name="Lookup_Tables"></a> _12.5 Lookup Tables_
+<a name="Lookup_Tables"></a>
+## _12.5 Lookup Tables_
 
-#### <a name="vgLookup"></a> _vgLookup_
+<a name="vgLookup"></a>
+#### _vgLookup_
 
 The **vgLookup** function passes each image channel of the normalized source image `src` through a separate lookup table.
 
@@ -348,20 +346,21 @@ void vgLookup(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the
 current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if any pointer parameter is NULL
+> - if any pointer parameter is NULL
 
-#### <a name="vgLookupSingle"></a> _vgLookupSingle_
+<a name="vgLookupSingle"></a>
+#### _vgLookupSingle_
 
 The **vgLookupSingle** function passes a single image channel of the normalized source image `src`, selected by the `sourceChannel` parameter, through a combined lookup table that produces whole pixel values. Each normalized source channel value is multiplied by 255 and rounded to obtain an 8 bit integral value.
 
@@ -381,23 +380,22 @@ void vgLookupSingle(VGImage dst, VGImage src,
 >
 > `VG_BAD_HANDLE_ERROR`
 >
-> ? if either `dst` or `src` is not a valid image handle, or is not shared with the
-current context
+> - if either `dst` or `src` is not a valid image handle, or is not shared with the current context
 >
 > `VG_IMAGE_IN_USE_ERROR`
 >
-> ? if either `dst` or `src` is currently a rendering target
+> - if either `dst` or `src` is currently a rendering target
 >
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 >
-> ? if `src` and `dst` overlap
+> - if `src` and `dst` overlap
 >
-> ? if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
+> - if `src` is in an RGB pixel format and `sourceChannel` is not one of `VG_RED`,
 `VG_GREEN`, `VG_BLUE` or `VG_ALPHA` from the `VGImageChannel`
 enumeration
 >
-> ? if `lookupTable` is NULL
+> - if `lookupTable` is NULL
 >
-> ? if `lookupTable` is not properly aligned
+> - if `lookupTable` is not properly aligned
 
 <div style="page-break-after: always;"></div>

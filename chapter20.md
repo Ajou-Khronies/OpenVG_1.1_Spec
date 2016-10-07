@@ -1,4 +1,6 @@
-# 20 Bibliography<a name="chapter20"> </a> <a name="Bibliography"> </a>
+
+<a name="chapter20"> </a> <a name="Bibliography"> </a>
+# 20 Bibliography
 **ADOB99** <a name="ADOB99"></a> Adobe Systems Incorporated: PostScript Language Reference Manual (third edition), Addison-Wesley, Reading, MA, 1999.
 
 **ADOB06a** <a name="ADOB06a"></a>Adobe Systems Incorporated: PDF Reference (sixth edition): http://www.adobe.com/devnet/acrobat/pdfs/pdf_reference.pdf
@@ -28,4 +30,3 @@
 **WYSZ00** <a name="WYSZ00"></a>Wyszecki, G. and W. S. Stiles, Color Science: Concepts and Methods, Quantitative Data and Formulae, Wiley-Interscience, New York, 2000.
 
 <div style="page-break-after: always;"> </div>
-

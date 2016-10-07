@@ -1,8 +1,10 @@
-# 18 Appendix A: Mathematics of Ellipses
+
 <a name ="chapter18"> </a> <a name ="Mathematics_of_Ellipses"> </a>
+# 18 Appendix A: Mathematics of Ellipses
 The following sections are informative only. It contains mathematics pertaining to the representation of ellipses that may be of use to implementers. Some of the material is adapted from [[SVGF04](#SVGF04)]
-## 18.1 The Center Parameterization
+
 <a name ="The_Center_Parameterization"> </a>
+## _18.1 The Center Parameterization_
 A common parameterization of an ellipse is in terms of the ellipse center point $(cx, cy)$, horizontal and vertical radii $rh$ and $rv$, rotation angle $ϕ$, and starting and ending angles $θ_1$ and $θ_2$ between 0 and 360 degrees. The parameters are listed in Table 18.
 
 The elliptical arc may be evaluated in terms of an angular parameter θ that ranges from $θ_1$ to $θ_2$:
@@ -14,6 +16,7 @@ $$
 \left[ \begin{matrix} x \\ y \\ 1 \end{matrix} \right] \quad =\quad \left[ \begin{matrix} rh\cos { \phi  }  & -rv\sin { \phi  }  & cx \\ rh\sin { \phi  }  & -rv\cos { \phi  }  & cy \\ 0 & 0 & 1 \end{matrix} \right] \cdot \left[ \begin{matrix} \cos { \theta  }  \\ \sin { \theta  }  \end{matrix} \right]
 $$
 
+<a name="table18"> </a>
 |     |     |
 | --- | --- |
 | $(cx, cy)$  | The Center point of the ellipse
@@ -23,10 +26,11 @@ $$
 | $\theta_2$ | Angle of final point (as measured on the unscaled circle)
 _Table 18: Center Ellipse Parameters_
 
-## 18.2 The Endpoint Parameterization
+## _18.2 The Endpoint Parameterization_
 <a name ="The_Endpoint_Parameterization"> </a>
 OpenVG paths use the endpoint parameterization of elliptical arcs as defined in SVG. An elliptical arc segment is defined in terms of its endpoints $(x0, y0), (x1, y1)$, radii $rh$ and $rv$, rotation angle $ϕ$, large arc flag $f_A$, and sweep flag $f_S$. These parameters are listed in Table 19.
 
+<a name="table19"> </a>
 |     |     |
 | --- | --- |
 | $(x0, y0)$  | The initial endpoint of the arc
@@ -37,8 +41,8 @@ OpenVG paths use the endpoint parameterization of elliptical arcs as defined in 
 | $f_S$ | Sweep flag: 1 if the arc is to be traversed in the counter-clockwise direction, 0 otherwise
 _Table 19: Endpoint Ellipse Parameters_
 
-## 18.3 Converting from Center to Endpoint Parameterization
 <a name ="Converting_from_Center_to_Endpoint_Parameterization"> </a>
+## 18.3 _Converting from Center to Endpoint Parameterization_
 Conversion from a center parameterization to an endpoint parameterization simply requires evaluation the initial and final endpoints of the arc, and determining the values of the large arc and sweep flags:
 
 <!--???? there is Error in the equation x1-> x0, x2-> x1--->
@@ -51,8 +55,8 @@ f_{ S }=\begin{cases} 1 & if\quad \theta _{ 2 }-\theta _{ 1 }\quad >\quad 0\\ 0 
 \end{matrix}
 $$
 
-## 18.4 Converting from Endpoint to Center Parameterization
 <a name ="Converting_from_Endpoint_to_Center_Parameterization"> </a>
+## _18.4 Converting from Endpoint to Center Parameterization_
 Given an endpoint representation of an ellipse as the set of parameters $(x_0, y_0), (x_1, y_1), rh, rv, ϕ, f_S,$ and $f_A$, we wish to determine the center point $(cx, cy)$ and the initial and final angles $θ_1$ and $θ_2$.
 
 An ellipse with center point $(cx, cy)$, radii rh and rv, and rotation angle rot satisfies the implicit equation $(x')^2 + (y')2 = 1$, where $x' = ((x – cx)*cos(rot) + (y – cy)*sin(rot))/rh$ and $y' = (-(x – cx)*sin(rot)$ $+ (y – cy)*cos(rot))/rv$. The transformation from $(x, y)$ to $(x', y')$ simply maps the desired ellipse into a unit circle centered at the origin.
@@ -64,7 +68,7 @@ The center points of the two unit circles that pass through points $(x_0, y_0)$ 
 
 The angles $θ_1$ and $θ_2$ may be found by finding the slope of the endpoints on the circle and computing arctangents. The following code illustrates the process of computing the ellipse centers. The findUnitCircles function is called by findEllipses following inverse transformation of the original ellipse parameters.
 
-```C
+```c
 #include <math.h>
 
 #ifndef M_PI
@@ -95,7 +99,7 @@ findUnitCircles(double x0, double y0, double x1, double y1,
 }
 ```
 
-```C
+```c
 /* Given: Ellipse parameters rh, rv, rot (in degrees),
  * endpoints (x0, y0) and (x1, y1)
  * Return: TRUE if a solution exists, FALSE otherwise
@@ -133,7 +137,8 @@ findEllipses(double rh, double rv, double rot,
 }
 ```
 
-## 18.5 Implicit Representation of an Ellipse<a name="Implicit_Representation_of_an_Ellipse"> </a>
+<a name="Implicit_Representation_of_an_Ellipse"> </a>
+## _18.5 Implicit Representation of an Ellipse_
 An ellipse (or any conic section) may be written in the implicit form:
 $$
 A x^2 + B x y + C y^2 + D x + E y + F = 0
@@ -183,7 +188,8 @@ $$
 rh  = \frac{1}{\sqrt{A'}}, \quad rv  = \frac{1}{\sqrt{C'}}
 $$
 
-## 18.6 Transformation of Ellipses<a name="Transformation of Ellipses"> </a>
+<a name="Transformation of Ellipses"> </a>
+## _18.6 Transformation of Ellipses_
 As previously noted, an ellipse may be viewed as the result of a scale, rotation, and translation applied to the unit circle:
 $$
 \left [ \begin{matrix} x \\ y \\ 1 \end{matrix} \right ] =
@@ -231,5 +237,3 @@ The center, rotation angle, and radii of the ellipse may be determined using the
 In practice, it may be simpler to represent a transformed ellipse as the affine transformation mapping an arc of the unit circle into it. The ellipse may be rendered by concatenating its transform with the current transform and rendering the circular arc. It may be transformed by simply concatenating the transforms.
 
 <div style="page-break-after: always;"> </div>
-
-

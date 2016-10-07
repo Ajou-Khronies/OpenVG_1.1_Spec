@@ -1,4 +1,6 @@
-# 21 Document History<a name="chapter21"> </a> <a name="Document_History"> </a>
+
+<a name="chapter21"> </a> <a name="Document_History"> </a>
+# 21 Document History
 Version 1.1 ratified December 2008
 
 Changes from version 1.0.1 to version 1.1 (by section number):
@@ -48,4 +50,3 @@ Changes from version 1.0 to version 1.0.1 (by section number):
 Version 1.0 ratified August 2005
 
 <div style="page-break-after: always;"> </div>
-
