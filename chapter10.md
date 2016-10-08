@@ -1,4 +1,3 @@
-
 <a name="chapter10"></a><a name="Images"></a>
 # 10 Images
 
@@ -310,9 +309,9 @@ Pixel values are read starting at the address given by the pointer data; adjacen
 
 Pixel values in memory are formatted according to the dataFormat parameter, whichmust contain a value from the `VGImageFormat` enumeration. The data pointer mustbe aligned according to the number of bytes of the pixel format specified by dataFormat, unless dataFormat is equal to VG_BW_1, VG_A_1, or VG_A_4, in which case 1 byte alignment is sufficient. Each pixel is converted into the format ofthe destination image as it is written.
 
-If dataFormat is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 i < width and 0, j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native  16-bit integral datatype.
+If `dataFormat` is not equal to `VG_BW_1`, `VG_A_1`, or `VG_A_4`, the destination imagepixel (x + i, y + j) for 0 i < width and 0, j < height is taken from the N bytes ofmemory starting at data + j*dataStride + i*N, where N is the number of bytes per pixelgiven in Table 12. For multi-byte pixels, the bits are arranged in the same order used tostore native multi-byte primitive datatypes. For example, a 16-bit pixel would be writtento memory in the same format as when writing through a pointer with a native  16-bit integral datatype.
 
-If dataFormat is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of the destination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered to be at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms of bytes, not bits.
+If `dataFormat` is equal to VG_BW_1 or VG_A_1, pixel (x + i, y + j) of the destination image is taken from the bit at position (i % 8) within the byte at data +j *dataStride + floor(i/8) where the least significant bit (LSB) of a byte is considered to be at position 0 and the most significant bit (MSB) is at position 7. Each scanline mustbe padded to a multiple of 8 bits. Note that dataStride is always given in terms of bytes, not bits.
 
 If dataFormat is equal to VG_A_4, pixel (x + i, y + j) of the destination image istaken from the 4 bits from position (4*(i % 2)) to (4*(i % 2) + 3) within the byte at data+ j*dataStride + floor(i/2). Each scanline must be padded to a multiple of 8 bits.
 
@@ -384,11 +383,14 @@ A child image may not be used as a rendering target. A parent image may not be u
 
 <a name="vgChildImage"></a>
 #### _vgChildImage_
+
 The **vgChildImage** function returns a new `VGImage` handle that refers to a portion of the `parent` image. The region is given by the intersection of the bounds of the parent image with the rectangle beginning at pixel (`x, y`) with dimensions `width` and `height`, which must define a positive region contained entirely within `parent`.
+
 ```C
 VGImage vgChildImage(VGImage parent,
 		     VGint x, VGint y, VGint width, VGint height)
 ```
+
 > **_ERRORS_**
 >
 > `VG_BAD_HANDLE_ERROR`
@@ -410,6 +412,7 @@ VGImage vgChildImage(VGImage parent,
 <a name="vgGetParent"></a>
 #### _vgGetParent_
 The **vgGetParent** function returns the closest valid ancestor (_i.e_., one that has not been the target of a **vgDestroyImage** call) of the given `image`. If `image` has no ancestors, `image` is returned. The following pseudocode sequence illustrates this behavior.
+
 ```c
 VGImage A = vgCreateImage(...); // Create a new image A
 VGImage B = vgChildImage(A, ...); // Make B a child of A
@@ -440,7 +443,7 @@ VGImage vgGetParent(VGImage image)
 <a name="vgCopyImage"></a>
 #### *vgCopyImage*
 
-Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel (sx + i, sy + j) is copied to the destination image pixel(dx + i, dy + j), for 0 <= i < width and 0 <= j < height. Pixels whose source ordestination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
+Pixels may be copied between images using the `vgCopyImage` function. The sourceimage pixel $(sx + i, sy + j)$ is copied to the destination image pixel $(dx + i, dy + j)$, for $0 <= i < width$ and $0 <= j < height$. Pixels whose source or destination lie outside of the bounds of the respective image are ignored. Pixelformat conversion is applied as needed.
 
 If the dither flag is equal to `VG_TRUE`, an implementation-dependent ditheringalgorithm may be applied. This may be useful when copying into a destinationimage with a smaller color bit depth than that of the source image. Implementations should choose an algorithm that will provide good resultswhen the output images are displayed as successive frames in an animation.
 
@@ -491,15 +494,15 @@ vgSeti(VG_IMAGE_MODE, drawImageMode);
 <a name="vgDrawImage"></a>
 #### *vgDrawImage*
 
-An image may be drawn to the current drawing surface using the `vgDrawImage` function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + 1/2, py + 1/2) is mapped to the point (Ti)(px + 1/2, py + 1/2). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
+An image may be drawn to the current drawing surface using the **vgDrawImage** function. The current image-user-to-surface transformation Ti is applied to the image, sothat the image pixel centered at (px + 1/2, py + 1/2) is mapped to the point (Ti)(px + 1/2, py + 1/2). In practice, backwards mapping may be used. That is, a sample located at (x, y) inthe surface coordinate system is colored according to an interpolated image pixel valueat the point (Ti)-1(x, y) in the image coordinate system. If Ti is non-invertible (or nearlyso, within the limits of numerical accuracy), no drawing occurs.
 
 Interpolation is done in the color space of the image. Image color values are processed inpremultiplied alpha format during interpolation. Color channel values are clamped to therange [0, alpha] before interpolation.
 
-When a projective transformation is used (i.e., the bottom row of the image-user-tosurface transformation contains values [ w0 w1 w2 ] different from [ 0 0 1 ]), each cornerpoint (x, y) of the image must result in a positive value of d = (x*w0 + y*w1 + w2), or elsenothing is drawn. This rule prevents degeneracies due to transformed image pointspassing through infinity, which occurs when d passes through 0. By requiring d to bepositive at the corners, it is guaranteed to be positive at all interior points as well.
+When a projective transformation is used (i.e., the bottom row of the image-user-tosurface transformation contains values $[ w0 w1 w2 ]$ different from $[ 0 0 1 ]$), each cornerpoint $(x, y)$ of the image must result in a positive value of $d = (x*w0 + y*w1 + w2)$, or elsenothing is drawn. This rule prevents degeneracies due to transformed image points passing through infinity, which occurs when d passes through 0. By requiring d to bepositive at the corners, it is guaranteed to be positive at all interior points as well.
 
 When a projective transformation is used, the value of the `VG_IMAGE_MODE` parameteris ignored and the behavior of `VG_DRAW_IMAGE_NORMAL` is substituted. This avoidsthe need to generate paint pixels in perspective.
 
-The set of pixels affected consists of the quadrilateral with vertices (Ti)(0, 0), (Ti)(w, 0),(Ti)(w, h), and (Ti)(0, h) (where w and h are respectively the width and height of theimage), plus a boundary of up to 1/2 pixels for filtering purposes.
+The set of pixels affected consists of the quadrilateral with vertices $(T_i)(0, 0)$, $(T_i)(w, 0)$,$(T_i)(w, h)$, and $(T_i)(0, h)$ (where w and h are respectively the width and height of the image), plus a boundary of up to 1/2 pixels for filtering purposes.
 
 Clipping, masking, and scissoring are applied in the same manner as with `vgDrawPath`.To limit drawing to a subregion of the image, create a child image using `vgChildImage`.
 
@@ -554,7 +557,7 @@ $$$$
 a_{dst} \leftarrow a_{tmp}
 $$
 
-For example, if Porter-Duff "Src **over** Dst" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
+For example, if Porter-Duff "Src **over** Dst" blending is enabled (see Section 13.3), the destination alpha and color values are computed as:
 
 $$
 a_{tmp} = a_{image}*a_{paint}+a_{dst}*(1-a_{image}*a_{paint})
@@ -678,7 +681,7 @@ vgDestroyImage(image);
 <a name="vgGetPixels"></a>
 #### *vgGetPixels*
 
-The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel (sx + i, sy + j) is copied to pixel (dx + i, dy + j) ofthe image dst, for 0 â‰¤ i < width and 0 â‰¤ j < height. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
+The vgGetPixels function retrieves pixel data from the drawing surface into the imagedst. The drawing surface pixel $(sx + i, sy + j)$ is copied to pixel $(dx + i, dy + j)$ ofthe image dst, for $0 <= i < width$ and $0 <= j < height$. Pixels whose source liesoutside of the bounds of the drawing surface or whose destination lies outside the boundsof dst are ignored. Pixel format conversion is applied as needed. The scissoring regiondoes not affect the reading of pixels.
 
 ```c
 void vgGetPixels(VGImage dst, VGint dx, VGint dy,
@@ -696,7 +699,7 @@ void vgGetPixels(VGImage dst, VGint dx, VGint dy,
 > `VG_ILLEGAL_ARGUMENT_ERROR`
 > * if width or height is less than or equal to 0
 
-<a name="vgREadPixels"></a>
+<a name="vgReadPixels"></a>
 #### *vgReadPixels*
 
 The `vgReadPixels` function allows pixel data to be copied from the drawing surface without the creation of a `VGImage` object.
